@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Rowad Service Dashboard</title>
+    <title>Rowad Calls Dashboard</title>
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
     <style>
         :root {
@@ -16,10 +16,6 @@
             --text-main: #2d2d2d;
             --text-light: #666666;
             --border: #e0e0e0;
-            
-            /* Tags */
-            --tag-warranty-bg: #e6f4ea;
-            --tag-warranty-text: #1e7e34;
         }
 
         body { font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; background: var(--bg); margin: 0; color: var(--text-main); }
@@ -44,13 +40,20 @@
         input, select { padding: 12px; border: 1px solid var(--border); border-radius: 8px; font-size: 14px; width: 100%; box-sizing: border-box; outline: none; transition: 0.2s; }
         input:focus, select:focus { border-color: var(--accent); box-shadow: 0 0 0 2px rgba(191, 161, 95, 0.2); }
         
-        /* Tags */
-        .tag { display: inline-flex; align-items: center; padding: 2px 8px; border-radius: 12px; font-size: 11px; font-weight: 600; margin-right: 4px; margin-bottom: 2px; }
-        .tag-Surfacide { background: #e3f2fd; color: #0d47a1; }
-        .tag-AccuFIT { background: #f3e5f5; color: #4a148c; }
-        .tag-Warranty { background: var(--tag-warranty-bg); color: var(--tag-warranty-text); border: 1px solid #c8e6c9; }
-        .tag-VIP { background: #fff3cd; color: #856404; }
-        .tag-generic { background: #eee; color: #333; }
+        /* Tags - Unified Neutral Style */
+        .tag { 
+            display: inline-flex; 
+            align-items: center; 
+            padding: 4px 10px; 
+            border-radius: 12px; 
+            font-size: 11px; 
+            font-weight: 600; 
+            margin-right: 4px; 
+            margin-bottom: 2px;
+            background: #eee; 
+            color: #444; 
+            border: 1px solid #ddd;
+        }
 
         /* Views */
         .hidden { display: none !important; }
@@ -75,17 +78,15 @@
         .sat-Satisfied { background: #28a745; box-shadow: 0 0 5px #28a745; }
         .sat-Neutral { background: #ffc107; }
         .sat-Unsatisfied { background: #dc3545; }
-        .sat-High { background: #28a745; } /* Legacy support */
-        .sat-Medium { background: #ffc107; } /* Legacy support */
-        .sat-Low { background: #dc3545; } /* Legacy support */
+        .sat-High { background: #28a745; }
+        .sat-Medium { background: #ffc107; }
+        .sat-Low { background: #dc3545; }
         
         /* Buttons */
         .btn-edit { background: var(--accent); color: white; border: none; padding: 6px 14px; border-radius: 6px; cursor: pointer; font-size: 13px; font-weight: 600; }
         .btn-edit:hover { background: var(--accent-dark); }
         
-        /* ----------------------- */
-        /* NEW MODAL DESIGN STYLES */
-        /* ----------------------- */
+        /* MODAL */
         .modal-overlay { position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.6); display: none; justify-content: center; align-items: center; z-index: 1000; backdrop-filter: blur(2px); }
         
         .modal-card {
@@ -99,21 +100,15 @@
             position: relative;
         }
 
-        .modal-header {
-            display: flex;
-            justify-content: space-between;
-            align-items: flex-start;
-            margin-bottom: 25px;
-        }
-
+        .modal-header { display: flex; justify-content: space-between; align-items: flex-start; margin-bottom: 25px; }
         .header-content { display: flex; flex-direction: column; gap: 8px; }
-        
         .modal-title { color: #0f172a; font-size: 24px; font-weight: 700; margin: 0; }
 
         .warranty-tag {
-            display: none; /* Hidden by default, JS toggles it */
-            background-color: var(--tag-warranty-bg);
-            color: var(--tag-warranty-text);
+            display: none; 
+            background-color: #eee; /* Neutral as requested */
+            color: #333;
+            border: 1px solid #ccc;
             font-size: 12px;
             font-weight: 700;
             padding: 4px 10px;
@@ -128,86 +123,23 @@
         .form-group { margin-bottom: 20px; }
         .form-label { display: block; color: var(--text-light); font-weight: 600; font-size: 14px; margin-bottom: 8px; }
 
-        /* Contact Box Logic */
-        .contact-box {
-            background-color: #fcfcfc;
-            border: 1px solid var(--border);
-            border-radius: 8px;
-            padding: 12px 16px;
-            position: relative;
-            transition: border-color 0.2s;
-        }
+        .contact-box { background-color: #fcfcfc; border: 1px solid var(--border); border-radius: 8px; padding: 12px 16px; position: relative; transition: border-color 0.2s; }
         .contact-box:focus-within { border-color: var(--accent); }
 
-        .contact-name-input {
-            border: none;
-            background: transparent;
-            font-size: 16px;
-            color: var(--text-main);
-            width: 90%;
-            outline: none;
-            font-weight: 500;
-            font-family: inherit;
-        }
-
-        .contact-phone {
-            display: flex;
-            align-items: center;
-            color: #0f172a;
-            font-weight: 700;
-            margin-top: 4px;
-            font-size: 18px;
-        }
-
+        .contact-name-input { border: none; background: transparent; font-size: 16px; color: var(--text-main); width: 90%; outline: none; font-weight: 500; font-family: inherit; }
+        .contact-phone { display: flex; align-items: center; color: #0f172a; font-weight: 700; margin-top: 4px; font-size: 18px; }
         .phone-icon { margin-right: 8px; color: #0f172a; font-size: 14px; }
         
-        .edit-icon-btn {
-            position: absolute;
-            right: 15px;
-            top: 50%;
-            transform: translateY(-50%);
-            color: var(--accent);
-            cursor: pointer;
-            background: none; border: none; font-size: 16px;
-        }
+        .edit-icon-btn { position: absolute; right: 15px; top: 50%; transform: translateY(-50%); color: var(--accent); cursor: pointer; background: none; border: none; font-size: 16px; }
 
-        .form-select, .form-textarea {
-            width: 100%;
-            padding: 10px 12px;
-            border: 1px solid var(--border);
-            border-radius: 6px;
-            font-size: 15px;
-            color: var(--text-main);
-            box-sizing: border-box;
-            outline: none;
-            background-color: #fff;
-            font-family: inherit;
-        }
-
-        .form-select:focus, .form-textarea:focus {
-            border-color: var(--accent);
-            box-shadow: 0 0 0 2px rgba(191, 161, 95, 0.2);
-        }
-
+        .form-select, .form-textarea { width: 100%; padding: 10px 12px; border: 1px solid var(--border); border-radius: 6px; font-size: 15px; color: var(--text-main); box-sizing: border-box; outline: none; background-color: #fff; font-family: inherit; }
+        .form-select:focus, .form-textarea:focus { border-color: var(--accent); box-shadow: 0 0 0 2px rgba(191, 161, 95, 0.2); }
         .form-textarea { resize: vertical; min-height: 80px; }
 
-        .btn-save {
-            width: 100%;
-            background-color: var(--accent);
-            color: white;
-            border: none;
-            padding: 14px;
-            font-size: 16px;
-            font-weight: 600;
-            border-radius: 8px;
-            cursor: pointer;
-            transition: background-color 0.2s;
-            margin-top: 10px;
-        }
+        .btn-save { width: 100%; background-color: var(--accent); color: white; border: none; padding: 14px; font-size: 16px; font-weight: 600; border-radius: 8px; cursor: pointer; transition: background-color 0.2s; margin-top: 10px; }
         .btn-save:hover { background-color: var(--accent-dark); }
         .btn-save:disabled { background-color: #ccc; cursor: not-allowed; }
 
-        /* Mobile */
         @media (max-width: 768px) {
             .controls { flex-direction: column; }
             .data-table { display: none; } 
@@ -223,7 +155,7 @@
             <div style="border: 2px solid var(--accent); padding: 2px 8px; border-radius: 4px; display:inline-block;">
                 <span style="color:var(--accent); font-weight:bold;">ر</span>
             </div>
-             Rowad Services
+             Rowad Calls Dashboard
         </div>
         <div class="view-toggles">
             <button class="view-btn active" onclick="switchView('table')"><i class="fa-solid fa-table"></i> Table</button>
@@ -265,8 +197,7 @@
                 <tr>
                     <th style="width: 30%">Hospital</th>
                     <th>Location</th>
-                    <th>Satisfaction</th>
-                    <th>Tags / Devices</th>
+                    <th>Tags / Devices</th> <th>Satisfaction</th>
                     <th>Call Status</th>
                     <th>Actions</th>
                 </tr>
@@ -296,7 +227,6 @@
                         <span id="displayPhone">0542583962</span>
                     </div>
                     <input type="hidden" id="editContactMobile">
-                    
                     <button class="edit-icon-btn" onclick="promptPhoneUpdate()">
                         <i class="fa-solid fa-pen"></i>
                     </button>
@@ -316,6 +246,7 @@
             <div class="form-group">
                 <label class="form-label">Current Call Status</label>
                 <select class="form-select" id="editCallStatus">
+                    <option value="-">-</option>
                     <option value="No Answer">No Answer</option>
                     <option value="Call Later">Call Later</option>
                     <option value="Called">Called</option>
@@ -338,7 +269,6 @@
         let db = [];
         let currentEditName = "";
 
-        // Start
         window.onload = fetchData;
 
         async function fetchData() {
@@ -363,7 +293,7 @@
                         mobile: row['Contact Mobile Number'] || '',
                         
                         satisfaction: row['Satisfaction'] || '-',
-                        contractStatus: row['ContractStatus'] || 'No Answer', // Mapping DB ContractStatus to Call Status
+                        contractStatus: row['ContractStatus'] || '-', // Default to "-" if empty
                         tags: combinedTags,
                         notes: row['Notes'] || ''
                     };
@@ -378,7 +308,6 @@
             }
         }
 
-        // --- Cascading Filter Logic ---
         function initFilters() {
             const directions = [...new Set(db.map(item => item.direction))].sort();
             const select = document.getElementById('filterDirection');
@@ -449,18 +378,15 @@
 
                 let satHtml = '-';
                 if(item.satisfaction && item.satisfaction !== '-' && item.satisfaction !== 'Unknown') {
-                    // Map legacy High/Medium/Low to Satisfied colors if needed
                     let displayClass = item.satisfaction;
                     if(item.satisfaction === 'High') displayClass = 'Satisfied';
                     if(item.satisfaction === 'Medium') displayClass = 'Neutral';
                     if(item.satisfaction === 'Low') displayClass = 'Unsatisfied';
-                    
                     satHtml = `<span class="sat-dot sat-${displayClass}"></span> ${item.satisfaction}`;
                 }
 
-                // Call Status Styling
-                let statusHtml = '';
-                if(item.contractStatus) {
+                let statusHtml = '-';
+                if(item.contractStatus && item.contractStatus !== '-') {
                     let color = '#2c3e50';
                     if(item.contractStatus === 'Called') color = '#28a745';
                     if(item.contractStatus === 'No Answer') color = '#dc3545';
@@ -470,12 +396,8 @@
 
                 let tagsHtml = '';
                 item.tags.forEach(t => {
-                    let cls = 'tag-generic';
-                    if(t === 'Surfacide') cls = 'tag-Surfacide';
-                    if(t === 'AccuFIT') cls = 'tag-AccuFIT';
-                    if(t.toLowerCase().includes('warranty')) cls = 'tag-Warranty';
-                    if(t === 'VIP') cls = 'tag-VIP';
-                    tagsHtml += `<span class="tag ${cls}">${t}</span>`;
+                    // All tags now use the generic .tag class without extra coloring
+                    tagsHtml += `<span class="tag">${t}</span>`;
                 });
 
                 const tr = `
@@ -485,8 +407,7 @@
                             <span style="font-size:12px; color:#888">${item.contact}</span>
                         </td>
                         <td>${item.region} / ${item.city}</td>
-                        <td>${satHtml}</td>
-                        <td>${tagsHtml}</td>
+                        <td>${tagsHtml}</td> <td>${satHtml}</td>
                         <td>${statusHtml}</td>
                         <td><button class="btn-edit" onclick="openEdit('${item.name.replace(/'/g, "\\'")}')"><i class="fa-solid fa-pen"></i> Edit</button></td>
                     </tr>
@@ -516,7 +437,6 @@
             });
         }
 
-        // --- Logic Hook: Saving Data ---
         async function saveChanges() {
             const btn = document.getElementById('saveBtn');
             const originalText = btn.textContent;
@@ -526,7 +446,7 @@
             const item = db.find(x => x.name === currentEditName);
             
             const newSat = document.getElementById('editSat').value;
-            const newCallStatus = document.getElementById('editCallStatus').value; // Using Call Status instead of Contract Status
+            const newCallStatus = document.getElementById('editCallStatus').value;
             const newNotes = document.getElementById('editNotes').value;
             const newContactName = document.getElementById('editContactName').value;
             const newContactMobile = document.getElementById('editContactMobile').value;
@@ -534,7 +454,7 @@
             const payload = {
                 hospitalName: item.name, 
                 satisfaction: newSat,
-                contractStatus: newCallStatus, // Sending "Call Status" to the "ContractStatus" column in DB
+                contractStatus: newCallStatus, 
                 notes: newNotes,
                 contactName: newContactName,
                 contactMobile: newContactMobile
@@ -548,14 +468,12 @@
                     body: JSON.stringify(payload)
                 });
                 
-                // Update Local Data
                 item.satisfaction = newSat;
                 item.contractStatus = newCallStatus;
                 item.notes = newNotes;
                 item.contact = newContactName;
                 item.mobile = newContactMobile;
                 
-                // alert("Saved successfully!");
                 closeModal();
                 render(); 
 
@@ -589,10 +507,8 @@
             currentEditName = name;
             const item = db.find(x => x.name === name);
             
-            // 1. Title
             document.getElementById('modalTitle').innerText = item.name;
 
-            // 2. Warranty Tag (Logic: check if any tag string contains "warranty")
             const isWarranty = item.tags.some(tag => tag.toLowerCase().includes('warranty'));
             const warrantyBadge = document.getElementById('warrantyBadge');
             if(isWarranty) {
@@ -601,7 +517,6 @@
                 warrantyBadge.style.display = 'none';
             }
 
-            // 3. Contact Info
             document.getElementById('editContactName').value = item.contact || "";
             
             const phoneDisplay = document.getElementById('displayPhone');
@@ -610,16 +525,14 @@
             phoneDisplay.innerText = item.mobile || "No Number";
             phoneInput.value = item.mobile || "";
 
-            // 4. Dropdowns
-            // Handle "-" default
             document.getElementById('editSat').value = (item.satisfaction === '-' || !item.satisfaction) ? '-' : item.satisfaction;
-            document.getElementById('editCallStatus').value = item.contractStatus || "No Answer";
+            // Handle Default "-" for Call Status
+            document.getElementById('editCallStatus').value = (item.contractStatus === '-' || !item.contractStatus) ? '-' : item.contractStatus;
             document.getElementById('editNotes').value = item.notes;
 
             document.getElementById('editModal').style.display = 'flex';
         }
 
-        // Logic to update phone number via prompt to keep UI clean
         function promptPhoneUpdate() {
             const hiddenInput = document.getElementById('editContactMobile');
             const display = document.getElementById('displayPhone');
@@ -631,7 +544,6 @@
                 hiddenInput.value = newPhone;
                 display.innerText = newPhone || "No Number";
             }
-            // Optional: Focus the name input after updating phone
             document.getElementById('editContactName').focus();
         }
 
