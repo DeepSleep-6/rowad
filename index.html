@@ -29,20 +29,16 @@
         .loading { text-align: center; padding: 40px; color: var(--text-light); font-size: 18px; }
 
         /* Controls */
-        .controls { display: flex; gap: 15px; margin-bottom: 20px; flex-wrap: wrap; }
-        .search-box { flex: 2; min-width: 250px; }
-        .filter-box { flex: 1; min-width: 150px; }
-        
+        .controls { display: grid; grid-template-columns: 2fr 1fr 1fr; gap: 15px; margin-bottom: 20px; }
         input, select { padding: 12px; border: 1px solid var(--border); border-radius: 8px; font-size: 14px; width: 100%; box-sizing: border-box; }
         
         /* Tags */
         .tag { display: inline-flex; align-items: center; padding: 2px 8px; border-radius: 12px; font-size: 11px; font-weight: 600; margin-right: 4px; margin-bottom: 2px; }
-        .tag-Surfacide { background: #e3f2fd; color: #0d47a1; }
-        .tag-AccuFIT { background: #f3e5f5; color: #4a148c; }
-        .tag-Warranty { background: #e8f5e9; color: #1b5e20; border: 1px solid #c8e6c9; }
-        .tag-VIP { background: #fff3cd; color: #856404; }
-        .tag-Expired { background: #ffebee; color: #c62828; }
-        .tag-generic { background: #eee; color: #333; }
+        .tag-surfacide { background: #e3f2fd; color: #0d47a1; }
+        .tag-accufit { background: #f3e5f5; color: #4a148c; }
+        .tag-warranty { background: #e8f5e9; color: #1b5e20; border: 1px solid #c8e6c9; }
+        .tag-vip { background: #fff3cd; color: #856404; }
+        .tag-expired { background: #ffebee; color: #c62828; }
 
         /* Views */
         .hidden { display: none !important; }
@@ -62,9 +58,10 @@
 
         /* Satisfaction Dots */
         .sat-dot { height: 10px; width: 10px; border-radius: 50%; display: inline-block; margin-right: 5px; }
-        .sat-High { background: #28a745; box-shadow: 0 0 5px #28a745; }
-        .sat-Medium { background: #ffc107; }
-        .sat-Low { background: #dc3545; }
+        .sat-high { background: #28a745; box-shadow: 0 0 5px #28a745; }
+        .sat-medium { background: #ffc107; }
+        .sat-low { background: #dc3545; }
+        .sat-unknown { background: #e2e8f0; }
         
         /* Buttons */
         .btn-edit { background: var(--secondary); color: white; border: none; padding: 6px 12px; border-radius: 6px; cursor: pointer; font-size: 13px; }
@@ -74,13 +71,16 @@
         .modal-overlay { position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.5); display: none; justify-content: center; align-items: center; z-index: 1000; }
         .modal { background: white; padding: 30px; border-radius: 16px; width: 500px; max-width: 90%; box-shadow: 0 10px 30px rgba(0,0,0,0.2); }
         .modal-header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 20px; }
+        .tag-selector { display: flex; gap: 8px; flex-wrap: wrap; margin: 10px 0; }
+        .tag-option { padding: 6px 12px; border: 1px solid var(--border); border-radius: 20px; cursor: pointer; font-size: 13px; user-select: none; }
+        .tag-option.selected { background: var(--primary); color: white; border-color: var(--primary); }
         .form-group { margin-bottom: 15px; }
         .form-group label { display: block; margin-bottom: 5px; font-size: 13px; color: var(--text-light); font-weight: 600; }
         textarea { width: 100%; padding: 10px; border-radius: 8px; border: 1px solid var(--border); }
 
         /* Mobile */
         @media (max-width: 768px) {
-            .controls { flex-direction: column; }
+            .controls { grid-template-columns: 1fr; }
             .data-table { display: none; } 
             .grid-view { display: grid !important; }
             .view-toggles { display: none; }
@@ -101,27 +101,16 @@
 
     <div class="container">
         <div class="controls">
-            <div class="search-box">
-                <input type="text" id="search" placeholder="Search Hospital or Contact..." onkeyup="render()">
-            </div>
-            
-            <div class="filter-box">
-                <select id="filterDirection" onchange="updateRegionOptions()">
-                    <option value="All">All Directions</option>
-                    </select>
-            </div>
-            
-            <div class="filter-box hidden" id="boxRegion">
-                <select id="filterRegion" onchange="updateCityOptions()">
-                    <option value="All">All Regions</option>
-                </select>
-            </div>
-
-            <div class="filter-box hidden" id="boxCity">
-                <select id="filterCity" onchange="render()">
-                    <option value="All">All Cities</option>
-                </select>
-            </div>
+            <input type="text" id="search" placeholder="Search Hospital..." onkeyup="render()">
+            <select id="filterRegion" onchange="render()">
+                <option value="All">All Regions</option>
+            </select>
+            <select id="filterSat" onchange="render()">
+                <option value="All">All Satisfaction</option>
+                <option value="High">High (Happy)</option>
+                <option value="Medium">Medium (Neutral)</option>
+                <option value="Low">Low (Unhappy)</option>
+            </select>
         </div>
 
         <div id="loading" class="loading">
@@ -131,8 +120,8 @@
         <table class="data-table hidden" id="tableView">
             <thead>
                 <tr>
-                    <th style="width: 30%">Hospital</th>
-                    <th>Location</th>
+                    <th style="width: 25%">Hospital</th>
+                    <th>Region</th>
                     <th>Satisfaction</th>
                     <th>Tags / Devices</th>
                     <th>Contract Status</th>
@@ -155,7 +144,7 @@
             <div class="form-group">
                 <label>Customer Satisfaction</label>
                 <select id="editSat">
-                    <option value="">Unknown</option>
+                    <option value="">Select...</option>
                     <option value="High">High (Happy)</option>
                     <option value="Medium">Medium (Neutral)</option>
                     <option value="Low">Low (Unhappy)</option>
@@ -165,11 +154,30 @@
             <div class="form-group">
                 <label>Contract Status</label>
                 <select id="editStatus">
-                    <option value="">Unknown</option>
+                    <option value="">Select...</option>
                     <option value="Active">Contract Active</option>
                     <option value="Expired">Expired - Needs Renewal</option>
                     <option value="Pending">Renewal Pending</option>
                 </select>
+            </div>
+
+            <div class="form-group">
+                <label>Sales Lead Status (Legacy)</label>
+                <select id="editSalesStatus">
+                    <option value="Pending">Pending</option>
+                    <option value="Interested">Interested</option>
+                    <option value="Not Interested">Not Interested</option>
+                </select>
+            </div>
+
+            <div class="form-group">
+                <label>Tags (Select all that apply)</label>
+                <div class="tag-selector">
+                    <div class="tag-option" onclick="toggleTag(this)" data-tag="Surfacide">Surfacide</div>
+                    <div class="tag-option" onclick="toggleTag(this)" data-tag="AccuFIT">AccuFIT</div>
+                    <div class="tag-option" onclick="toggleTag(this)" data-tag="Under Warranty">Under Warranty</div>
+                    <div class="tag-option" onclick="toggleTag(this)" data-tag="VIP">VIP Client</div>
+                </div>
             </div>
 
             <div class="form-group">
@@ -183,7 +191,6 @@
 
     <script>
         // *** CONFIGURATION ***
-        // Use your previously deployed Web App URL here
         const SCRIPT_URL = "https://script.google.com/macros/s/AKfycbwGOMphPx4DRkwKMm91i4ejJ5BsReQNDMLLX9x122UozWRJo1HqIWJa4axRhzELDS8lnA/exec";
         
         let db = [];
@@ -197,98 +204,42 @@
                 const response = await fetch(SCRIPT_URL);
                 const data = await response.json();
                 
-                db = data.map(row => {
-                    // Auto-generate tags from 'Device' column
-                    let autoTags = [];
-                    const device = row['Device'] || '';
-                    if (device.includes('Surfacide') || device === 'Both') autoTags.push('Surfacide');
-                    if (device.includes('AccuFIT') || device === 'Both') autoTags.push('AccuFIT');
+                // Map Google Sheet Data to App Format
+                db = data.map(row => ({
+                    name: row['Hospital Name'],
+                    region: row['Region'],
+                    contact: row['Contact'] || 'N/A',
                     
-                    // Manual tags from 'Tags' column
-                    let manualTags = row['Tags'] ? row['Tags'].split(',').map(s => s.trim()) : [];
+                    // Sales Status (Original)
+                    salesStatus: row['Status'] || 'Pending',
                     
-                    // Combine unique tags
-                    let combinedTags = [...new Set([...autoTags, ...manualTags])];
+                    // NEW COLUMNS (Make sure these headers exist in Sheet)
+                    satisfaction: row['Satisfaction'] || 'Unknown',
+                    contractStatus: row['ContractStatus'] || 'Unknown',
+                    tags: row['Tags'] ? row['Tags'].split(',').map(s => s.trim()) : [],
+                    notes: row['Notes'] || ''
+                }));
 
-                    return {
-                        name: row['Hospital Name'],
-                        direction: row['Direction'] || 'Unknown',
-                        region: row['Region'] || 'Unknown',
-                        city: row['City'] || 'Unknown',
-                        contact: row['Contact'] || 'N/A',
-                        
-                        // New Fields
-                        satisfaction: row['Satisfaction'] || '',
-                        contractStatus: row['ContractStatus'] || '',
-                        tags: combinedTags,
-                        notes: row['Notes'] || ''
-                    };
-                });
-
-                initFilters();
+                populateRegions();
                 document.getElementById('loading').style.display = 'none';
-                switchView('table');
+                switchView('table'); // Default View
                 render();
             } catch (error) {
                 document.getElementById('loading').innerHTML = `<span style="color:red">Error: ${error.message}</span>`;
             }
         }
 
-        // --- Cascading Filter Logic ---
-        function initFilters() {
-            const directions = [...new Set(db.map(item => item.direction))].sort();
-            const select = document.getElementById('filterDirection');
-            // Reset
-            select.innerHTML = '<option value="All">All Directions</option>';
-            directions.forEach(d => {
-                if(d) select.add(new Option(d, d));
-            });
-        }
-
-        function updateRegionOptions() {
-            const dir = document.getElementById('filterDirection').value;
-            const regionBox = document.getElementById('boxRegion');
-            const cityBox = document.getElementById('boxCity');
-            
-            if (dir === 'All') {
-                regionBox.classList.add('hidden');
-                cityBox.classList.add('hidden');
-                document.getElementById('filterRegion').value = 'All';
-                document.getElementById('filterCity').value = 'All';
-                render();
-                return;
-            }
-
-            // Filter regions belonging to this direction
-            const regions = [...new Set(db.filter(x => x.direction === dir).map(x => x.region))].sort();
+        function populateRegions() {
+            const regions = [...new Set(db.map(item => item.region))].sort();
             const select = document.getElementById('filterRegion');
-            select.innerHTML = '<option value="All">All Regions</option>';
-            regions.forEach(r => select.add(new Option(r, r)));
-            
-            regionBox.classList.remove('hidden');
-            cityBox.classList.add('hidden'); // Hide city until region is picked
-            render();
-        }
-
-        function updateCityOptions() {
-            const region = document.getElementById('filterRegion').value;
-            const cityBox = document.getElementById('boxCity');
-
-            if (region === 'All') {
-                cityBox.classList.add('hidden');
-                document.getElementById('filterCity').value = 'All';
-                render();
-                return;
-            }
-
-            // Filter cities belonging to this region
-            const cities = [...new Set(db.filter(x => x.region === region).map(x => x.city))].sort();
-            const select = document.getElementById('filterCity');
-            select.innerHTML = '<option value="All">All Cities</option>';
-            cities.forEach(c => select.add(new Option(c, c)));
-
-            cityBox.classList.remove('hidden');
-            render();
+            regions.forEach(r => {
+                if(r) {
+                    const opt = document.createElement('option');
+                    opt.value = r;
+                    opt.textContent = r;
+                    select.appendChild(opt);
+                }
+            });
         }
 
         function render() {
@@ -298,42 +249,33 @@
             cardGrid.innerHTML = '';
 
             const search = document.getElementById('search').value.toLowerCase();
-            const filterDir = document.getElementById('filterDirection').value;
-            const filterReg = document.getElementById('filterRegion').value;
-            const filterCity = document.getElementById('filterCity').value;
+            const regionFilter = document.getElementById('filterRegion').value;
+            const satFilter = document.getElementById('filterSat').value;
 
             db.forEach(item => {
                 // Filters
                 if (!item.name.toLowerCase().includes(search) && !item.contact.toLowerCase().includes(search)) return;
-                if (filterDir !== 'All' && item.direction !== filterDir) return;
-                if (filterReg !== 'All' && item.region !== filterReg) return;
-                if (filterCity !== 'All' && item.city !== filterCity) return;
+                if (regionFilter !== 'All' && item.region !== regionFilter) return;
+                if (satFilter !== 'All' && item.satisfaction !== satFilter) return;
 
                 // Visual Helpers
-                // Hide Satisfaction if blank/Unknown
-                let satHtml = '';
-                if(item.satisfaction && item.satisfaction !== 'Unknown') {
-                    satHtml = `<span class="sat-dot sat-${item.satisfaction}"></span> ${item.satisfaction}`;
-                }
+                let satColor = 'sat-unknown';
+                if(item.satisfaction === 'High') satColor = 'sat-high';
+                if(item.satisfaction === 'Medium') satColor = 'sat-medium';
+                if(item.satisfaction === 'Low') satColor = 'sat-low';
 
-                // Hide Status if blank/Unknown
-                let statusHtml = '';
-                if(item.contractStatus && item.contractStatus !== 'Unknown') {
-                    let color = '#2c3e50';
-                    if(item.contractStatus === 'Active') color = '#28a745';
-                    if(item.contractStatus === 'Expired') color = '#dc3545';
-                    if(item.contractStatus === 'Pending') color = '#ffc107';
-                    statusHtml = `<span style="font-weight:bold; color: ${color}">${item.contractStatus}</span>`;
-                }
+                let statusColor = '#2c3e50';
+                if(item.contractStatus === 'Active') statusColor = '#28a745';
+                if(item.contractStatus === 'Expired') statusColor = '#dc3545';
+                if(item.contractStatus === 'Pending') statusColor = '#ffc107';
 
                 // Tags HTML
                 let tagsHtml = '';
                 item.tags.forEach(t => {
-                    let cls = 'tag-generic';
-                    if(t === 'Surfacide') cls = 'tag-Surfacide';
-                    if(t === 'AccuFIT') cls = 'tag-AccuFIT';
-                    if(t.toLowerCase().includes('warranty')) cls = 'tag-Warranty';
-                    if(t === 'VIP') cls = 'tag-VIP';
+                    let cls = 'tag-surfacide'; // default blue
+                    if(t === 'AccuFIT') cls = 'tag-accufit';
+                    if(t === 'Under Warranty') cls = 'tag-warranty';
+                    if(t === 'VIP') cls = 'tag-vip';
                     tagsHtml += `<span class="tag ${cls}">${t}</span>`;
                 });
 
@@ -344,10 +286,10 @@
                             <strong>${item.name}</strong><br>
                             <span style="font-size:12px; color:#888">${item.contact}</span>
                         </td>
-                        <td>${item.region} / ${item.city}</td>
-                        <td>${satHtml}</td>
+                        <td>${item.region}</td>
+                        <td><span class="sat-dot ${satColor}"></span> ${item.satisfaction}</td>
                         <td>${tagsHtml}</td>
-                        <td>${statusHtml}</td>
+                        <td><span style="font-weight:bold; color: ${statusColor}">${item.contractStatus}</span></td>
                         <td><button class="btn-edit" onclick="openEdit('${item.name.replace(/'/g, "\\'")}')"><i class="fa-solid fa-pen"></i> Edit</button></td>
                     </tr>
                 `;
@@ -362,17 +304,24 @@
                         </div>
                         <div style="margin-bottom:10px;">${tagsHtml}</div>
                         <div class="card-row">
-                            <span class="label">Location</span>
-                            <span>${item.city}</span>
+                            <span class="label">Region</span>
+                            <span>${item.region}</span>
                         </div>
-                        ${satHtml ? `<div class="card-row"><span class="label">Satisfaction</span><span>${satHtml}</span></div>` : ''}
-                        ${statusHtml ? `<div class="card-row"><span class="label">Contract</span><span>${statusHtml}</span></div>` : ''}
+                        <div class="card-row">
+                            <span class="label">Satisfaction</span>
+                            <span><span class="sat-dot ${satColor}"></span> ${item.satisfaction}</span>
+                        </div>
+                        <div class="card-row">
+                            <span class="label">Contract</span>
+                            <span style="font-weight:bold; color: ${statusColor}">${item.contractStatus}</span>
+                        </div>
                     </div>
                 `;
                 cardGrid.innerHTML += card;
             });
         }
 
+        // --- Logic Hook: Saving Data ---
         async function saveChanges() {
             const btn = document.getElementById('saveBtn');
             const originalText = btn.textContent;
@@ -381,16 +330,24 @@
 
             const item = db.find(x => x.name === currentEditName);
             
+            // Gather Data
             const newSat = document.getElementById('editSat').value;
             const newStatus = document.getElementById('editStatus').value;
+            const newSalesStatus = document.getElementById('editSalesStatus').value;
             const newNotes = document.getElementById('editNotes').value;
             
-            // NOTE: We do not send 'tags' back because you said website doesn't add/delete them.
+            const selectedTags = [];
+            document.querySelectorAll('.tag-option.selected').forEach(opt => {
+                selectedTags.push(opt.getAttribute('data-tag'));
+            });
+            const tagsString = selectedTags.join(", ");
 
             const payload = {
                 hospitalName: item.name, 
                 satisfaction: newSat,
                 contractStatus: newStatus,
+                status: newSalesStatus, // Old 'Status' column
+                tags: tagsString,
                 notes: newNotes
             };
 
@@ -402,10 +359,12 @@
                     body: JSON.stringify(payload)
                 });
                 
-                // Update Local Data
+                // Optimistic UI Update
                 item.satisfaction = newSat;
                 item.contractStatus = newStatus;
+                item.salesStatus = newSalesStatus;
                 item.notes = newNotes;
+                item.tags = selectedTags; 
                 
                 alert("Saved successfully!");
                 closeModal();
@@ -419,6 +378,7 @@
             }
         }
 
+        // --- Helper Functions ---
         function switchView(view) {
             const table = document.getElementById('tableView');
             const grid = document.getElementById('cardView');
@@ -442,15 +402,30 @@
             const item = db.find(x => x.name === name);
             
             document.getElementById('modalTitle').innerText = item.name;
-            document.getElementById('editSat').value = item.satisfaction || "";
-            document.getElementById('editStatus').value = item.contractStatus || "";
+            document.getElementById('editSat').value = item.satisfaction;
+            document.getElementById('editStatus').value = item.contractStatus;
+            document.getElementById('editSalesStatus').value = item.salesStatus;
             document.getElementById('editNotes').value = item.notes;
             
+            const tagOptions = document.querySelectorAll('.tag-option');
+            tagOptions.forEach(opt => {
+                const tagVal = opt.getAttribute('data-tag');
+                if(item.tags.includes(tagVal)) {
+                    opt.classList.add('selected');
+                } else {
+                    opt.classList.remove('selected');
+                }
+            });
+
             document.getElementById('editModal').style.display = 'flex';
         }
 
         function closeModal() {
             document.getElementById('editModal').style.display = 'none';
+        }
+
+        function toggleTag(el) {
+            el.classList.toggle('selected');
         }
     </script>
 </body>
