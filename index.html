@@ -7,80 +7,81 @@
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
     <style>
         :root {
-            --primary: #003366; /* Rowad Dark Blue */
-            --secondary: #00a8e8; /* Medical Cyan */
+            --primary: #003366; 
+            --secondary: #00a8e8; 
             --bg: #f4f7f6;
             --surface: #ffffff;
             --text-main: #2c3e50;
             --text-light: #7f8c8d;
             --border: #e2e8f0;
-            --success: #28a745;
-            --warning: #ffc107;
         }
 
         body { font-family: 'Segoe UI', Roboto, Helvetica, Arial, sans-serif; background: var(--bg); margin: 0; color: var(--text-main); }
         
-        /* --- Layout --- */
+        /* Layout */
         .top-bar { background: var(--surface); padding: 15px 30px; box-shadow: 0 2px 10px rgba(0,0,0,0.05); display: flex; justify-content: space-between; align-items: center; position: sticky; top: 0; z-index: 100; }
         .logo { font-size: 24px; font-weight: 800; color: var(--primary); display: flex; align-items: center; gap: 10px; }
         .view-toggles { display: flex; gap: 5px; background: #eee; padding: 4px; border-radius: 8px; }
         .view-btn { border: none; background: none; padding: 8px 12px; cursor: pointer; border-radius: 6px; color: var(--text-light); transition: 0.2s; }
-        .view-btn.active { background: white; color: var(--primary); shadow: 0 1px 3px rgba(0,0,0,0.1); font-weight: bold; }
+        .view-btn.active { background: white; color: var(--primary); font-weight: bold; box-shadow: 0 1px 3px rgba(0,0,0,0.1); }
 
         .container { max-width: 1400px; margin: 20px auto; padding: 0 20px; }
+        .loading { text-align: center; padding: 40px; color: var(--text-light); font-size: 18px; }
 
-        /* --- Filters --- */
+        /* Controls */
         .controls { display: grid; grid-template-columns: 2fr 1fr 1fr; gap: 15px; margin-bottom: 20px; }
         input, select { padding: 12px; border: 1px solid var(--border); border-radius: 8px; font-size: 14px; width: 100%; box-sizing: border-box; }
         
-        /* --- Tag System --- */
+        /* Tags */
         .tag { display: inline-flex; align-items: center; padding: 2px 8px; border-radius: 12px; font-size: 11px; font-weight: 600; margin-right: 4px; margin-bottom: 2px; }
         .tag-surfacide { background: #e3f2fd; color: #0d47a1; }
         .tag-accufit { background: #f3e5f5; color: #4a148c; }
         .tag-warranty { background: #e8f5e9; color: #1b5e20; border: 1px solid #c8e6c9; }
+        .tag-vip { background: #fff3cd; color: #856404; }
         .tag-expired { background: #ffebee; color: #c62828; }
 
-        /* --- Views --- */
+        /* Views */
         .hidden { display: none !important; }
-
-        /* Table View */
+        
+        /* Table */
         .data-table { width: 100%; border-collapse: collapse; background: var(--surface); border-radius: 12px; overflow: hidden; box-shadow: 0 2px 5px rgba(0,0,0,0.05); }
         .data-table th { text-align: left; padding: 15px; background: #f8f9fa; color: var(--text-light); font-weight: 600; font-size: 13px; text-transform: uppercase; border-bottom: 2px solid var(--border); }
         .data-table td { padding: 15px; border-bottom: 1px solid var(--border); vertical-align: middle; }
         .data-table tr:hover { background-color: #f8faff; }
         
-        /* Card View */
+        /* Grid */
         .grid-view { display: grid; grid-template-columns: repeat(auto-fill, minmax(300px, 1fr)); gap: 20px; }
-        .card { background: var(--surface); padding: 20px; border-radius: 12px; border: 1px solid var(--border); box-shadow: 0 2px 5px rgba(0,0,0,0.05); position: relative; }
+        .card { background: var(--surface); padding: 20px; border-radius: 12px; border: 1px solid var(--border); box-shadow: 0 2px 5px rgba(0,0,0,0.05); }
         .card h3 { margin: 0 0 10px 0; font-size: 18px; color: var(--primary); }
         .card-row { display: flex; justify-content: space-between; margin-bottom: 8px; font-size: 14px; }
         .label { color: var(--text-light); font-size: 12px; }
 
-        /* --- Satisfaction Indicators --- */
+        /* Satisfaction Dots */
         .sat-dot { height: 10px; width: 10px; border-radius: 50%; display: inline-block; margin-right: 5px; }
         .sat-high { background: #28a745; box-shadow: 0 0 5px #28a745; }
         .sat-medium { background: #ffc107; }
         .sat-low { background: #dc3545; }
+        .sat-unknown { background: #e2e8f0; }
         
-        /* --- Action Button --- */
+        /* Buttons */
         .btn-edit { background: var(--secondary); color: white; border: none; padding: 6px 12px; border-radius: 6px; cursor: pointer; font-size: 13px; }
         .btn-edit:hover { opacity: 0.9; }
 
-        /* --- Modal --- */
-        .modal-overlay { position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.5); display: flex; justify-content: center; align-items: center; z-index: 1000; display: none; }
+        /* Modal */
+        .modal-overlay { position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.5); display: none; justify-content: center; align-items: center; z-index: 1000; }
         .modal { background: white; padding: 30px; border-radius: 16px; width: 500px; max-width: 90%; box-shadow: 0 10px 30px rgba(0,0,0,0.2); }
         .modal-header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 20px; }
         .tag-selector { display: flex; gap: 8px; flex-wrap: wrap; margin: 10px 0; }
         .tag-option { padding: 6px 12px; border: 1px solid var(--border); border-radius: 20px; cursor: pointer; font-size: 13px; user-select: none; }
         .tag-option.selected { background: var(--primary); color: white; border-color: var(--primary); }
-        
         .form-group { margin-bottom: 15px; }
         .form-group label { display: block; margin-bottom: 5px; font-size: 13px; color: var(--text-light); font-weight: 600; }
+        textarea { width: 100%; padding: 10px; border-radius: 8px; border: 1px solid var(--border); }
 
-        /* Mobile Adjustments */
+        /* Mobile */
         @media (max-width: 768px) {
             .controls { grid-template-columns: 1fr; }
-            .data-table { display: none; } /* Force card view on mobile */
+            .data-table { display: none; } 
             .grid-view { display: grid !important; }
             .view-toggles { display: none; }
         }
@@ -100,11 +101,11 @@
 
     <div class="container">
         <div class="controls">
-            <input type="text" id="search" placeholder="Search Hospital, City, or Contact..." onkeyup="filterData()">
-            <select id="filterRegion" onchange="filterData()">
+            <input type="text" id="search" placeholder="Search Hospital..." onkeyup="render()">
+            <select id="filterRegion" onchange="render()">
                 <option value="All">All Regions</option>
             </select>
-            <select id="filterSat" onchange="filterData()">
+            <select id="filterSat" onchange="render()">
                 <option value="All">All Satisfaction</option>
                 <option value="High">High (Happy)</option>
                 <option value="Medium">Medium (Neutral)</option>
@@ -112,23 +113,25 @@
             </select>
         </div>
 
-        <table class="data-table" id="tableView">
+        <div id="loading" class="loading">
+            <i class="fa-solid fa-circle-notch fa-spin"></i> Loading Database...
+        </div>
+
+        <table class="data-table hidden" id="tableView">
             <thead>
                 <tr>
                     <th style="width: 25%">Hospital</th>
                     <th>Region</th>
                     <th>Satisfaction</th>
-                    <th>Tags & Devices</th>
+                    <th>Tags / Devices</th>
                     <th>Contract Status</th>
                     <th>Actions</th>
                 </tr>
             </thead>
-            <tbody id="tableBody">
-                </tbody>
+            <tbody id="tableBody"></tbody>
         </table>
 
-        <div class="grid-view hidden" id="cardView">
-            </div>
+        <div class="grid-view hidden" id="cardView"></div>
     </div>
 
     <div class="modal-overlay" id="editModal">
@@ -141,7 +144,7 @@
             <div class="form-group">
                 <label>Customer Satisfaction</label>
                 <select id="editSat">
-                    <option value="Unknown">Unknown</option>
+                    <option value="">Select...</option>
                     <option value="High">High (Happy)</option>
                     <option value="Medium">Medium (Neutral)</option>
                     <option value="Low">Low (Unhappy)</option>
@@ -151,9 +154,19 @@
             <div class="form-group">
                 <label>Contract Status</label>
                 <select id="editStatus">
+                    <option value="">Select...</option>
                     <option value="Active">Contract Active</option>
                     <option value="Expired">Expired - Needs Renewal</option>
                     <option value="Pending">Renewal Pending</option>
+                </select>
+            </div>
+
+            <div class="form-group">
+                <label>Sales Lead Status (Legacy)</label>
+                <select id="editSalesStatus">
+                    <option value="Pending">Pending</option>
+                    <option value="Interested">Interested</option>
+                    <option value="Not Interested">Not Interested</option>
                 </select>
             </div>
 
@@ -172,24 +185,63 @@
                 <textarea id="editNotes" rows="3"></textarea>
             </div>
 
-            <button onclick="saveChanges()" style="width:100%; background:var(--primary); color:white; padding:12px; border:none; border-radius:8px; font-weight:bold; cursor:pointer;">Save Updates</button>
+            <button id="saveBtn" onclick="saveChanges()" style="width:100%; background:var(--primary); color:white; padding:12px; border:none; border-radius:8px; font-weight:bold; cursor:pointer;">Save Updates</button>
         </div>
     </div>
 
     <script>
-        // --- Mock Data (Replaces CSV for Prototype) ---
-        // Ideally, this comes from your Google Script
-        let db = [
-            { id: 1, name: "King Fahad Hospital", region: "Al Baha", device: "Both", satisfaction: "High", status: "Active", tags: ["Surfacide", "AccuFIT", "VIP"], contact: "Tamer Ata" },
-            { id: 2, name: "Al Aqiq General Hospital", region: "Al Baha", device: "AccuFIT", satisfaction: "Medium", status: "Expired", tags: ["AccuFIT"], contact: "N/A" },
-            { id: 3, name: "Maternity And Children Hospital", region: "Al Jouf", device: "Surfacide", satisfaction: "Unknown", status: "Active", tags: ["Surfacide", "Under Warranty"], contact: "Riyadh" }
-        ];
+        // *** CONFIGURATION ***
+        const SCRIPT_URL = "https://script.google.com/macros/s/AKfycbwGOMphPx4DRkwKMm91i4ejJ5BsReQNDMLLX9x122UozWRJo1HqIWJa4axRhzELDS8lnA/exec";
+        
+        let db = [];
+        let currentEditName = "";
 
-        // --- Init ---
-        let currentEditId = null;
-        render();
+        // Start
+        window.onload = fetchData;
 
-        // --- Render Functions ---
+        async function fetchData() {
+            try {
+                const response = await fetch(SCRIPT_URL);
+                const data = await response.json();
+                
+                // Map Google Sheet Data to App Format
+                db = data.map(row => ({
+                    name: row['Hospital Name'],
+                    region: row['Region'],
+                    contact: row['Contact'] || 'N/A',
+                    
+                    // Sales Status (Original)
+                    salesStatus: row['Status'] || 'Pending',
+                    
+                    // NEW COLUMNS (Make sure these headers exist in Sheet)
+                    satisfaction: row['Satisfaction'] || 'Unknown',
+                    contractStatus: row['ContractStatus'] || 'Unknown',
+                    tags: row['Tags'] ? row['Tags'].split(',').map(s => s.trim()) : [],
+                    notes: row['Notes'] || ''
+                }));
+
+                populateRegions();
+                document.getElementById('loading').style.display = 'none';
+                switchView('table'); // Default View
+                render();
+            } catch (error) {
+                document.getElementById('loading').innerHTML = `<span style="color:red">Error: ${error.message}</span>`;
+            }
+        }
+
+        function populateRegions() {
+            const regions = [...new Set(db.map(item => item.region))].sort();
+            const select = document.getElementById('filterRegion');
+            regions.forEach(r => {
+                if(r) {
+                    const opt = document.createElement('option');
+                    opt.value = r;
+                    opt.textContent = r;
+                    select.appendChild(opt);
+                }
+            });
+        }
+
         function render() {
             const tbody = document.getElementById('tableBody');
             const cardGrid = document.getElementById('cardView');
@@ -197,31 +249,33 @@
             cardGrid.innerHTML = '';
 
             const search = document.getElementById('search').value.toLowerCase();
-            const region = document.getElementById('filterRegion').value;
+            const regionFilter = document.getElementById('filterRegion').value;
             const satFilter = document.getElementById('filterSat').value;
 
-            // Populate Regions Dropdown (Unique)
-            const regions = [...new Set(db.map(x => x.region))];
-            // (Skipped full implementation of dropdown population to save space, but logic is standard)
-
             db.forEach(item => {
-                // Filtering Logic
+                // Filters
                 if (!item.name.toLowerCase().includes(search) && !item.contact.toLowerCase().includes(search)) return;
-                if (region !== 'All' && item.region !== region) return;
+                if (regionFilter !== 'All' && item.region !== regionFilter) return;
                 if (satFilter !== 'All' && item.satisfaction !== satFilter) return;
 
-                // Determine Sat Color
-                let satColor = 'sat-medium';
+                // Visual Helpers
+                let satColor = 'sat-unknown';
                 if(item.satisfaction === 'High') satColor = 'sat-high';
+                if(item.satisfaction === 'Medium') satColor = 'sat-medium';
                 if(item.satisfaction === 'Low') satColor = 'sat-low';
 
-                // Generate Tags HTML
+                let statusColor = '#2c3e50';
+                if(item.contractStatus === 'Active') statusColor = '#28a745';
+                if(item.contractStatus === 'Expired') statusColor = '#dc3545';
+                if(item.contractStatus === 'Pending') statusColor = '#ffc107';
+
+                // Tags HTML
                 let tagsHtml = '';
                 item.tags.forEach(t => {
-                    let cls = 'tag-surfacide';
+                    let cls = 'tag-surfacide'; // default blue
                     if(t === 'AccuFIT') cls = 'tag-accufit';
                     if(t === 'Under Warranty') cls = 'tag-warranty';
-                    if(t === 'Expired') cls = 'tag-expired'; // Visual cue
+                    if(t === 'VIP') cls = 'tag-vip';
                     tagsHtml += `<span class="tag ${cls}">${t}</span>`;
                 });
 
@@ -235,8 +289,8 @@
                         <td>${item.region}</td>
                         <td><span class="sat-dot ${satColor}"></span> ${item.satisfaction}</td>
                         <td>${tagsHtml}</td>
-                        <td><span style="font-weight:bold; color: ${item.status === 'Expired' ? '#d32f2f' : '#2e7d32'}">${item.status}</span></td>
-                        <td><button class="btn-edit" onclick="openEdit(${item.id})"><i class="fa-solid fa-pen"></i> Edit</button></td>
+                        <td><span style="font-weight:bold; color: ${statusColor}">${item.contractStatus}</span></td>
+                        <td><button class="btn-edit" onclick="openEdit('${item.name.replace(/'/g, "\\'")}')"><i class="fa-solid fa-pen"></i> Edit</button></td>
                     </tr>
                 `;
                 tbody.innerHTML += tr;
@@ -244,12 +298,11 @@
                 // 2. Card
                 const card = `
                     <div class="card">
-                        <div style="display:flex; justify-content:space-between;">
+                        <div style="display:flex; justify-content:space-between; align-items:flex-start">
                             <h3>${item.name}</h3>
-                            <button class="btn-edit" onclick="openEdit(${item.id})"><i class="fa-solid fa-pen"></i></button>
+                            <button class="btn-edit" onclick="openEdit('${item.name.replace(/'/g, "\\'")}')"><i class="fa-solid fa-pen"></i></button>
                         </div>
                         <div style="margin-bottom:10px;">${tagsHtml}</div>
-                        
                         <div class="card-row">
                             <span class="label">Region</span>
                             <span>${item.region}</span>
@@ -259,8 +312,8 @@
                             <span><span class="sat-dot ${satColor}"></span> ${item.satisfaction}</span>
                         </div>
                         <div class="card-row">
-                            <span class="label">Status</span>
-                            <span style="font-weight:bold; color: ${item.status === 'Expired' ? '#d32f2f' : '#2e7d32'}">${item.status}</span>
+                            <span class="label">Contract</span>
+                            <span style="font-weight:bold; color: ${statusColor}">${item.contractStatus}</span>
                         </div>
                     </div>
                 `;
@@ -268,7 +321,64 @@
             });
         }
 
-        // --- View Switching ---
+        // --- Logic Hook: Saving Data ---
+        async function saveChanges() {
+            const btn = document.getElementById('saveBtn');
+            const originalText = btn.textContent;
+            btn.textContent = "Saving...";
+            btn.disabled = true;
+
+            const item = db.find(x => x.name === currentEditName);
+            
+            // Gather Data
+            const newSat = document.getElementById('editSat').value;
+            const newStatus = document.getElementById('editStatus').value;
+            const newSalesStatus = document.getElementById('editSalesStatus').value;
+            const newNotes = document.getElementById('editNotes').value;
+            
+            const selectedTags = [];
+            document.querySelectorAll('.tag-option.selected').forEach(opt => {
+                selectedTags.push(opt.getAttribute('data-tag'));
+            });
+            const tagsString = selectedTags.join(", ");
+
+            const payload = {
+                hospitalName: item.name, 
+                satisfaction: newSat,
+                contractStatus: newStatus,
+                status: newSalesStatus, // Old 'Status' column
+                tags: tagsString,
+                notes: newNotes
+            };
+
+            try {
+                await fetch(SCRIPT_URL, {
+                    method: 'POST',
+                    mode: 'no-cors',
+                    headers: { 'Content-Type': 'text/plain' },
+                    body: JSON.stringify(payload)
+                });
+                
+                // Optimistic UI Update
+                item.satisfaction = newSat;
+                item.contractStatus = newStatus;
+                item.salesStatus = newSalesStatus;
+                item.notes = newNotes;
+                item.tags = selectedTags; 
+                
+                alert("Saved successfully!");
+                closeModal();
+                render(); 
+
+            } catch (error) {
+                alert("Error saving: " + error);
+            } finally {
+                btn.textContent = originalText;
+                btn.disabled = false;
+            }
+        }
+
+        // --- Helper Functions ---
         function switchView(view) {
             const table = document.getElementById('tableView');
             const grid = document.getElementById('cardView');
@@ -287,20 +397,20 @@
             }
         }
 
-        function filterData() { render(); }
-
-        // --- Modal Logic ---
-        function openEdit(id) {
-            const item = db.find(x => x.id === id);
-            currentEditId = id;
+        function openEdit(name) {
+            currentEditName = name;
+            const item = db.find(x => x.name === name);
+            
             document.getElementById('modalTitle').innerText = item.name;
             document.getElementById('editSat').value = item.satisfaction;
-            document.getElementById('editStatus').value = item.status;
+            document.getElementById('editStatus').value = item.contractStatus;
+            document.getElementById('editSalesStatus').value = item.salesStatus;
+            document.getElementById('editNotes').value = item.notes;
             
-            // Set Tags
             const tagOptions = document.querySelectorAll('.tag-option');
             tagOptions.forEach(opt => {
-                if(item.tags.includes(opt.getAttribute('data-tag'))) {
+                const tagVal = opt.getAttribute('data-tag');
+                if(item.tags.includes(tagVal)) {
                     opt.classList.add('selected');
                 } else {
                     opt.classList.remove('selected');
@@ -316,25 +426,6 @@
 
         function toggleTag(el) {
             el.classList.toggle('selected');
-        }
-
-        function saveChanges() {
-            const item = db.find(x => x.id === currentEditId);
-            
-            // Get selected tags
-            const selectedTags = [];
-            document.querySelectorAll('.tag-option.selected').forEach(opt => {
-                selectedTags.push(opt.getAttribute('data-tag'));
-            });
-
-            item.satisfaction = document.getElementById('editSat').value;
-            item.status = document.getElementById('editStatus').value;
-            item.tags = selectedTags;
-
-            // Here you would add the FETCH call to Google Script to save real data
-            
-            closeModal();
-            render();
         }
     </script>
 </body>
