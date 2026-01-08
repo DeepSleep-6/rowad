@@ -1,169 +1,204 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-<style>
-    :root {
-        /* Rowad Medical Services Palette based on logo */
-        --rowad-gold: #bfa15f; 
-        --rowad-gold-dark: #a3884d;
-        --rowad-text-main: #2d2d2d;
-        --rowad-text-muted: #666666;
-        --bg-color: #f4f4f4;
-        --card-bg: #ffffff;
-        --border-color: #e0e0e0;
-    }
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Edit Contact - Rowad Medical Services</title>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
+    <style>
+        :root {
+            /* Rowad Medical Services Palette */
+            --rowad-gold: #bfa15f; 
+            --rowad-gold-dark: #a3884d;
+            --rowad-text-main: #2d2d2d;
+            --rowad-text-muted: #666666;
+            --bg-color: #f4f4f4;
+            --card-bg: #ffffff;
+            --border-color: #e0e0e0;
+            
+            /* Tag Colors */
+            --tag-bg: #e6f4ea;
+            --tag-text: #1e7e34;
+        }
 
-    body {
-        font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
-        background-color: var(--bg-color);
-        display: flex;
-        justify-content: center;
-        align-items: center;
-        height: 100vh;
-        margin: 0;
-    }
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background-color: var(--bg-color);
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            height: 100vh;
+            margin: 0;
+        }
 
-    .modal-card {
-        background-color: var(--card-bg);
-        width: 100%;
-        max-width: 500px;
-        padding: 30px;
-        border-radius: 12px;
-        box-shadow: 0 4px 20px rgba(0, 0, 0, 0.08);
-        position: relative;
-        border-top: 5px solid var(--rowad-gold); /* Brand Accent */
-    }
+        .modal-card {
+            background-color: var(--card-bg);
+            width: 100%;
+            max-width: 500px;
+            padding: 30px;
+            border-radius: 12px;
+            box-shadow: 0 4px 20px rgba(0, 0, 0, 0.08);
+            border-top: 5px solid var(--rowad-gold);
+            position: relative;
+        }
 
-    .modal-header {
-        display: flex;
-        justify-content: space-between;
-        align-items: center;
-        margin-bottom: 25px;
-    }
+        .modal-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: flex-start;
+            margin-bottom: 25px;
+        }
 
-    .modal-title {
-        color: #0f172a; /* Dark distinct blue-black for header */
-        font-size: 24px;
-        font-weight: 700;
-        margin: 0;
-    }
+        .header-content {
+            display: flex;
+            flex-direction: column;
+            gap: 8px;
+        }
 
-    .close-btn {
-        background: none;
-        border: none;
-        font-size: 24px;
-        cursor: pointer;
-        color: var(--rowad-text-muted);
-    }
+        .modal-title {
+            color: #0f172a;
+            font-size: 24px;
+            font-weight: 700;
+            margin: 0;
+        }
 
-    .form-group {
-        margin-bottom: 20px;
-    }
+        /* Warranty Badge Style */
+        .warranty-tag {
+            display: inline-block;
+            background-color: var(--tag-bg);
+            color: var(--tag-text);
+            font-size: 12px;
+            font-weight: 700;
+            padding: 4px 10px;
+            border-radius: 20px;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+            align-self: flex-start;
+        }
 
-    .label {
-        display: block;
-        color: var(--rowad-text-muted);
-        font-weight: 600;
-        font-size: 14px;
-        margin-bottom: 8px;
-    }
+        .close-btn {
+            background: none;
+            border: none;
+            font-size: 24px;
+            cursor: pointer;
+            color: var(--rowad-text-muted);
+            padding: 0;
+            line-height: 1;
+        }
 
-    /* Primary Contact Box Style */
-    .contact-box {
-        background-color: #fcfcfc;
-        border: 1px solid var(--border-color);
-        border-radius: 8px;
-        padding: 12px 16px;
-        position: relative;
-        transition: border-color 0.2s;
-    }
-    
-    .contact-box:focus-within {
-        border-color: var(--rowad-gold);
-    }
+        .form-group {
+            margin-bottom: 20px;
+        }
 
-    .contact-name-input {
-        border: none;
-        background: transparent;
-        font-size: 16px;
-        color: var(--rowad-text-main);
-        width: 90%;
-        outline: none;
-        font-weight: 500;
-    }
+        .label {
+            display: block;
+            color: var(--rowad-text-muted);
+            font-weight: 600;
+            font-size: 14px;
+            margin-bottom: 8px;
+        }
 
-    .contact-phone {
-        display: flex;
-        align-items: center;
-        color: #0f172a; /* Darker for readability */
-        font-weight: 700;
-        margin-top: 4px;
-        font-size: 18px;
-    }
+        /* Primary Contact Box */
+        .contact-box {
+            background-color: #fcfcfc;
+            border: 1px solid var(--border-color);
+            border-radius: 8px;
+            padding: 12px 16px;
+            position: relative;
+            transition: border-color 0.2s;
+        }
+        
+        .contact-box:focus-within {
+            border-color: var(--rowad-gold);
+        }
 
-    .phone-icon {
-        margin-right: 8px;
-        color: #0f172a;
-    }
+        .contact-name-input {
+            border: none;
+            background: transparent;
+            font-size: 16px;
+            color: var(--rowad-text-main);
+            width: 90%;
+            outline: none;
+            font-weight: 500;
+            font-family: inherit;
+        }
 
-    .edit-icon {
-        position: absolute;
-        right: 15px;
-        top: 50%;
-        transform: translateY(-50%);
-        color: var(--rowad-gold);
-        cursor: pointer;
-    }
+        .contact-phone {
+            display: flex;
+            align-items: center;
+            color: #0f172a;
+            font-weight: 700;
+            margin-top: 4px;
+            font-size: 18px;
+        }
 
-    /* Dropdowns and Inputs */
-    .form-select, .form-textarea {
-        width: 100%;
-        padding: 10px 12px;
-        border: 1px solid var(--border-color);
-        border-radius: 6px;
-        font-size: 15px;
-        color: var(--rowad-text-main);
-        box-sizing: border-box; /* Fixes padding width issues */
-        outline: none;
-    }
+        .phone-icon {
+            margin-right: 8px;
+            color: #0f172a;
+            font-size: 14px;
+        }
 
-    .form-select:focus, .form-textarea:focus {
-        border-color: var(--rowad-gold);
-        box-shadow: 0 0 0 2px rgba(191, 161, 95, 0.2);
-    }
+        .edit-icon {
+            position: absolute;
+            right: 15px;
+            top: 50%;
+            transform: translateY(-50%);
+            color: var(--rowad-gold);
+            cursor: pointer;
+        }
 
-    .form-textarea {
-        resize: vertical;
-        min-height: 80px;
-    }
+        /* Inputs & Selects */
+        .form-select, .form-textarea {
+            width: 100%;
+            padding: 10px 12px;
+            border: 1px solid var(--border-color);
+            border-radius: 6px;
+            font-size: 15px;
+            color: var(--rowad-text-main);
+            box-sizing: border-box;
+            outline: none;
+            font-family: inherit;
+            background-color: #fff;
+        }
 
-    /* Button */
-    .btn-save {
-        width: 100%;
-        background-color: var(--rowad-gold); /* Rowad Gold */
-        color: white;
-        border: none;
-        padding: 14px;
-        font-size: 16px;
-        font-weight: 600;
-        border-radius: 8px;
-        cursor: pointer;
-        transition: background-color 0.2s;
-        margin-top: 10px;
-    }
+        .form-select:focus, .form-textarea:focus, .contact-name-input:focus {
+            border-color: var(--rowad-gold);
+            box-shadow: 0 0 0 2px rgba(191, 161, 95, 0.2);
+        }
 
-    .btn-save:hover {
-        background-color: var(--rowad-gold-dark);
-    }
+        .form-textarea {
+            resize: vertical;
+            min-height: 80px;
+        }
 
-</style>
-<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
+        /* Button */
+        .btn-save {
+            width: 100%;
+            background-color: var(--rowad-gold);
+            color: white;
+            border: none;
+            padding: 14px;
+            font-size: 16px;
+            font-weight: 600;
+            border-radius: 8px;
+            cursor: pointer;
+            transition: background-color 0.2s;
+            margin-top: 10px;
+        }
+
+        .btn-save:hover {
+            background-color: var(--rowad-gold-dark);
+        }
+    </style>
 </head>
 <body>
 
 <div class="modal-card">
     <div class="modal-header">
-        <h2 class="modal-title">King Fahad Hospital</h2>
+        <div class="header-content">
+            <h2 class="modal-title">King Fahad Hospital</h2>
+            <span class="warranty-tag">Under Warranty</span>
+        </div>
         <button class="close-btn">&times;</button>
     </div>
 
@@ -181,21 +216,19 @@
     <div class="form-group">
         <label class="label">Customer Satisfaction</label>
         <select class="form-select">
-            <option value="unknown" selected>-</option>
-            <option value="high">High</option>
-            <option value="medium">Medium</option>
-            <option value="low">Low</option>
+            <option value="-" selected>-</option>
+            <option value="Satisfied">Satisfied</option>
+            <option value="Neutral">Neutral</option>
+            <option value="Unsatisfied">Unsatisfied</option>
         </select>
     </div>
 
     <div class="form-group">
         <label class="label">Current Call Status</label>
         <select class="form-select">
-            <option value="no-answer" selected>No Answer</option>
-            <option value="busy">Busy</option>
-            <option value="wrong-number">Wrong Number</option>
-            <option value="connected">Connected / Answered</option>
-            <option value="callback">Requested Callback</option>
+            <option value="No Answer">No Answer</option>
+            <option value="Call Later">Call Later</option>
+            <option value="Called">Called</option>
         </select>
     </div>
 
