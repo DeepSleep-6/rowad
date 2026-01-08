@@ -1,0 +1,189 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Rowad Hospital CRM</title>
+    <style>
+        body { font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif; background: #f0f2f5; margin: 0; padding: 20px; }
+        .login-screen { display: flex; flex-direction: column; align-items: center; justify-content: center; height: 100vh; }
+        .container { max-width: 600px; margin: 0 auto; display: none; } 
+        
+        input, select, button, textarea { width: 100%; padding: 12px; margin-bottom: 10px; border-radius: 8px; border: 1px solid #ddd; box-sizing: border-box; font-size: 16px; }
+        button { background: #007bff; color: white; border: none; font-weight: bold; cursor: pointer; }
+        button:hover { background: #0056b3; }
+        
+        .filters { display: flex; gap: 10px; margin-bottom: 20px; }
+        .card { background: white; padding: 15px; border-radius: 12px; box-shadow: 0 2px 5px rgba(0,0,0,0.1); margin-bottom: 15px; }
+        .card h3 { margin: 0 0 5px 0; color: #333; }
+        .badge { display: inline-block; padding: 4px 8px; border-radius: 4px; font-size: 12px; background: #eee; margin-right: 5px; }
+        .details { margin: 10px 0; font-size: 14px; color: #666; }
+        
+        .edit-area { border-top: 1px solid #eee; padding-top: 10px; margin-top: 10px; }
+        .save-btn { background: #28a745; margin-top: 10px; }
+        .loading { text-align: center; color: #666; margin-top: 20px; }
+    </style>
+</head>
+<body>
+
+    <div id="loginScreen" class="login-screen">
+        <h2>Rowad Access</h2>
+        <input type="password" id="pinInput" placeholder="Enter PIN" style="max-width: 200px; text-align: center;">
+        <button onclick="checkPin()" style="max-width: 200px;">Enter</button>
+        <p id="loginError" style="color: red; display: none;">Incorrect PIN</p>
+    </div>
+
+    <div id="app" class="container">
+        <div class="filters">
+            <input type="text" id="searchInput" placeholder="Search Hospital..." onkeyup="renderList()">
+            <select id="regionFilter" onchange="renderList()">
+                <option value="All">All Regions</option>
+            </select>
+        </div>
+        <div id="hospitalList"></div>
+    </div>
+
+    <script>
+        // *** CONFIGURATION ***
+        const SCRIPT_URL = "https://script.google.com/macros/s/AKfycbwGOMphPx4DRkwKMm91i4ejJ5BsReQNDMLLX9x122UozWRJo1HqIWJa4axRhzELDS8lnA/exec"; 
+        const ACCESS_PIN = "1234"; // Simple access code
+
+        let allData = [];
+
+        function checkPin() {
+            const input = document.getElementById('pinInput').value;
+            if (input === ACCESS_PIN) {
+                document.getElementById('loginScreen').style.display = 'none';
+                document.getElementById('app').style.display = 'block';
+                fetchData();
+            } else {
+                document.getElementById('loginError').style.display = 'block';
+            }
+        }
+
+        async function fetchData() {
+            document.getElementById('hospitalList').innerHTML = '<div class="loading">Loading database...</div>';
+            try {
+                const response = await fetch(SCRIPT_URL);
+                allData = await response.json();
+                populateRegions();
+                renderList();
+            } catch (error) {
+                document.getElementById('hospitalList').innerHTML = '<div class="loading" style="color:red">Error loading data. <br>Ensure Google Sheet has correct headers.</div>';
+                console.error(error);
+            }
+        }
+
+        function populateRegions() {
+            const regions = [...new Set(allData.map(item => item.Region))].sort();
+            const select = document.getElementById('regionFilter');
+            regions.forEach(r => {
+                if(r) {
+                    const opt = document.createElement('option');
+                    opt.value = r;
+                    opt.textContent = r;
+                    select.appendChild(opt);
+                }
+            });
+        }
+
+        function renderList() {
+            const search = document.getElementById('searchInput').value.toLowerCase();
+            const region = document.getElementById('regionFilter').value;
+            const container = document.getElementById('hospitalList');
+            container.innerHTML = '';
+
+            const filtered = allData.filter(item => {
+                const matchesSearch = (item['Hospital Name'] && item['Hospital Name'].toLowerCase().includes(search));
+                const matchesRegion = region === 'All' || item.Region === region;
+                return matchesSearch && matchesRegion;
+            });
+
+            filtered.forEach(item => {
+                const card = document.createElement('div');
+                card.className = 'card';
+                
+                // Determine color based on Status
+                let statusColor = '#f9f9f9'; 
+                if(item.Status === 'Interested') statusColor = '#d4edda'; // Greenish
+                if(item.Status === 'Pending') statusColor = '#fff3cd'; // Yellowish
+                if(item.Status === 'Not Interested') statusColor = '#f8d7da'; // Reddish
+
+                card.innerHTML = `
+                    <h3>${item['Hospital Name']}</h3>
+                    <div>
+                        <span class="badge">${item.Region}</span>
+                        <span class="badge">${item.Device}</span>
+                    </div>
+                    <div class="details">
+                        <strong>Contact:</strong> ${item.Contact || 'N/A'}<br>
+                        <strong>Mobile:</strong> <a href="tel:${item['Contact Mobile Number']}">${item['Contact Mobile Number'] || 'N/A'}</a>
+                    </div>
+                    <div class="edit-area" style="background-color: ${statusColor}">
+                        <label>Status:</label>
+                        <select id="status-${item['Hospital Name']}">
+                            <option value="">Select...</option>
+                            <option value="Pending" ${item.Status === 'Pending' ? 'selected' : ''}>Pending</option>
+                            <option value="Interested" ${item.Status === 'Interested' ? 'selected' : ''}>Interested</option>
+                            <option value="Not Interested" ${item.Status === 'Not Interested' ? 'selected' : ''}>Not Interested</option>
+                            <option value="No Answer" ${item.Status === 'No Answer' ? 'selected' : ''}>No Answer</option>
+                        </select>
+                        
+                        <label>Notes:</label>
+                        <textarea id="notes-${item['Hospital Name']}" rows="2">${item.Notes || ''}</textarea>
+                        
+                        <label>Follow Up:</label>
+                        <input type="date" id="date-${item['Hospital Name']}" value="${item.FollowUp ? item.FollowUp.split('T')[0] : ''}">
+                        
+                        <button class="save-btn" onclick="saveData(this, '${item['Hospital Name']}')">Save</button>
+                    </div>
+                `;
+                container.appendChild(card);
+            });
+        }
+
+        async function saveData(btn, hospitalName) {
+            const status = document.getElementById(`status-${hospitalName}`).value;
+            const notes = document.getElementById(`notes-${hospitalName}`).value;
+            const followUp = document.getElementById(`date-${hospitalName}`).value;
+            
+            // UI Feedback
+            const originalText = btn.textContent;
+            btn.textContent = "Saving...";
+            btn.disabled = true;
+
+            const payload = {
+                hospitalName: hospitalName,
+                status: status,
+                notes: notes,
+                followUp: followUp
+            };
+
+            try {
+                await fetch(SCRIPT_URL, {
+                    method: 'POST',
+                    mode: 'no-cors',
+                    headers: { 'Content-Type': 'text/plain' },
+                    body: JSON.stringify(payload)
+                });
+                
+                // Update local data so we don't need to refresh
+                const row = allData.find(r => r['Hospital Name'] === hospitalName);
+                if(row) {
+                    row.Status = status;
+                    row.Notes = notes;
+                    row.FollowUp = followUp;
+                }
+                
+                alert("Saved!");
+                renderList(); 
+            } catch (error) {
+                alert("Error saving: " + error);
+            } finally {
+                btn.textContent = originalText;
+                btn.disabled = false;
+            }
+        }
+    </script>
+</body>
+</html>
