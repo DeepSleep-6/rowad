@@ -8,7 +8,6 @@
     <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
     <style>
         :root {
-            /* Rowad Palette */
             --primary: #2d2d2d; 
             --accent: #bfa15f; 
             --accent-dark: #a3884d;
@@ -34,8 +33,7 @@
         .view-btn.active { background: white; color: var(--accent-dark); font-weight: bold; box-shadow: 0 1px 3px rgba(0,0,0,0.1); }
 
         .container { max-width: 1400px; margin: 30px auto; padding: 0 20px; min-height: 80vh; } 
-        .loading { text-align: center; padding: 40px; color: var(--text-light); font-size: 18px; }
-
+        
         /* Controls */
         .controls { display: flex; gap: 15px; margin-bottom: 25px; flex-wrap: wrap; }
         .search-box { flex: 2; min-width: 250px; }
@@ -45,26 +43,15 @@
         input:focus, select:focus { border-color: var(--accent); box-shadow: 0 0 0 2px rgba(191, 161, 95, 0.2); }
         
         /* Tags */
-        .tag { 
-            display: inline-flex; 
-            align-items: center; 
-            padding: 4px 10px; 
-            border-radius: 12px; 
-            font-size: 11px; 
-            font-weight: 600; 
-            margin-right: 4px; 
-            margin-bottom: 2px;
-            background: #eee; 
-            color: #444; 
-            border: 1px solid #ddd;
-        }
+        .tag { display: inline-flex; align-items: center; padding: 4px 10px; border-radius: 12px; font-size: 11px; font-weight: 600; margin-right: 4px; margin-bottom: 2px; background: #eee; color: #444; border: 1px solid #ddd; }
 
         /* Views */
         .hidden { display: none !important; }
         
         /* Table */
         .data-table { width: 100%; border-collapse: separate; border-spacing: 0; background: var(--surface); border-radius: 12px; overflow: hidden; box-shadow: 0 4px 15px rgba(0,0,0,0.03); }
-        .data-table th { text-align: left; padding: 18px 15px; background: #fafafa; color: var(--text-light); font-weight: 700; font-size: 13px; text-transform: uppercase; border-bottom: 2px solid var(--border); }
+        .data-table th { text-align: left; padding: 18px 15px; background: #fafafa; color: var(--text-light); font-weight: 700; font-size: 13px; text-transform: uppercase; border-bottom: 2px solid var(--border); cursor: pointer; user-select: none; transition: background 0.2s; }
+        .data-table th:hover { background: #f0f0f0; color: var(--text-main); }
         .data-table td { padding: 15px; border-bottom: 1px solid var(--border); vertical-align: middle; }
         .data-table tr:last-child td { border-bottom: none; }
         
@@ -76,16 +63,7 @@
         /* Grid */
         .grid-view { display: grid; grid-template-columns: repeat(auto-fill, minmax(300px, 1fr)); gap: 20px; }
         
-        .card { 
-            background: var(--surface); 
-            padding: 20px; 
-            border-radius: 12px; 
-            border: 1px solid var(--border); 
-            box-shadow: 0 4px 15px rgba(0,0,0,0.03); 
-            transition: transform 0.2s, box-shadow 0.2s; 
-            cursor: pointer; 
-            position: relative;
-        }
+        .card { background: var(--surface); padding: 20px; border-radius: 12px; border: 1px solid var(--border); box-shadow: 0 4px 15px rgba(0,0,0,0.03); transition: transform 0.2s, box-shadow 0.2s; cursor: pointer; position: relative; }
         .card:hover { transform: translateY(-3px); border-color: var(--accent); box-shadow: 0 8px 25px rgba(0,0,0,0.08); }
         .card h3 { margin: 0 0 10px 0; font-size: 18px; color: var(--text-main); }
         .card-row { display: flex; justify-content: space-between; margin-bottom: 8px; font-size: 14px; }
@@ -96,97 +74,60 @@
         .card-dead { opacity: 0.6; background-color: #f9f9f9; filter: grayscale(1); border-style: dashed; }
         .card-dead:hover { opacity: 0.8; }
 
-        /* Satisfaction Dots */
+        /* Status & Last Updated */
         .sat-dot { height: 10px; width: 10px; border-radius: 50%; display: inline-block; margin-right: 5px; }
         .sat-Satisfied { background: #28a745; box-shadow: 0 0 5px #28a745; }
         .sat-Neutral { background: #ffc107; }
         .sat-Unsatisfied { background: #dc3545; }
         
+        .last-updated { font-size: 10px; color: #999; margin-top: 4px; display: block; font-style: italic; }
+
         /* Buttons */
         .btn-edit { background: var(--accent); color: white; border: none; padding: 6px 14px; border-radius: 6px; cursor: pointer; font-size: 13px; font-weight: 600; }
         .btn-edit:hover { background: var(--accent-dark); }
         
-        .footer-credit {
-            text-align: center;
-            padding: 30px 0;
-            color: #aaa;
-            font-size: 12px;
-            font-weight: 500;
-            margin-top: 40px;
-            border-top: 1px solid #eee;
-        }
+        .footer-credit { text-align: center; padding: 30px 0; color: #aaa; font-size: 12px; font-weight: 500; margin-top: 40px; border-top: 1px solid #eee; }
 
         /* Charts Area */
-        .charts-container {
-            display: grid;
-            grid-template-columns: repeat(auto-fit, minmax(400px, 1fr));
-            gap: 30px;
-            margin-bottom: 30px;
+        .charts-container { display: grid; grid-template-columns: repeat(auto-fit, minmax(400px, 1fr)); gap: 30px; margin-bottom: 30px; }
+        .chart-box { background: white; padding: 20px; border-radius: 12px; border: 1px solid var(--border); box-shadow: 0 4px 15px rgba(0,0,0,0.03); height: 350px; }
+
+        /* SKELETON LOADING ANIMATION */
+        @keyframes shimmer { 0% { background-position: -1000px 0; } 100% { background-position: 1000px 0; } }
+        
+        .skeleton { 
+            animation: shimmer 2s infinite linear;
+            background: linear-gradient(to right, #f6f7f8 4%, #edeef1 25%, #f6f7f8 36%);
+            background-size: 1000px 100%;
+            border-radius: 4px;
         }
-        .chart-box {
-            background: white;
-            padding: 20px;
-            border-radius: 12px;
-            border: 1px solid var(--border);
-            box-shadow: 0 4px 15px rgba(0,0,0,0.03);
-            height: 350px;
-        }
+        .skeleton-text { height: 16px; margin-bottom: 8px; width: 70%; }
+        .skeleton-title { height: 24px; margin-bottom: 15px; width: 50%; }
+        .skeleton-card { height: 200px; cursor: default; }
 
         /* MODAL */
         .modal-overlay { position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.6); display: none; justify-content: center; align-items: center; z-index: 1000; backdrop-filter: blur(2px); }
-        
-        .modal-card {
-            background-color: var(--surface);
-            width: 100%;
-            max-width: 500px;
-            padding: 30px;
-            border-radius: 12px;
-            box-shadow: 0 10px 40px rgba(0,0,0,0.15);
-            border-top: 5px solid var(--accent);
-            position: relative;
-        }
-
+        .modal-card { background-color: var(--surface); width: 100%; max-width: 500px; padding: 30px; border-radius: 12px; box-shadow: 0 10px 40px rgba(0,0,0,0.15); border-top: 5px solid var(--accent); position: relative; }
         .modal-header { display: flex; justify-content: space-between; align-items: flex-start; margin-bottom: 25px; }
         .header-content { display: flex; flex-direction: column; gap: 8px; }
         .modal-title { color: #0f172a; font-size: 24px; font-weight: 700; margin: 0; }
         .modal-location { font-size: 14px; color: #777; font-weight: 500; display:flex; align-items:center; gap:6px; }
-
         .bmet-info { font-size: 13px; color: #555; display: flex; align-items: center; gap: 6px; background: #f0f0f0; padding: 4px 10px; border-radius: 4px; align-self: flex-start;}
-
-        .warranty-tag {
-            display: none; 
-            background-color: #eee; 
-            color: #333;
-            border: 1px solid #ccc;
-            font-size: 12px;
-            font-weight: 700;
-            padding: 4px 10px;
-            border-radius: 20px;
-            text-transform: uppercase;
-            letter-spacing: 0.5px;
-            align-self: flex-start;
-        }
-
+        .warranty-tag { display: none; background-color: #eee; color: #333; border: 1px solid #ccc; font-size: 12px; font-weight: 700; padding: 4px 10px; border-radius: 20px; text-transform: uppercase; letter-spacing: 0.5px; align-self: flex-start; }
         .close-btn { background: none; border: none; font-size: 24px; cursor: pointer; color: var(--text-light); padding: 0; line-height: 1; }
-
         .form-group { margin-bottom: 20px; }
         .form-label { display: block; color: var(--text-light); font-weight: 600; font-size: 14px; margin-bottom: 8px; }
-
         .contact-box { background-color: #fcfcfc; border: 1px solid var(--border); border-radius: 8px; padding: 12px 16px; position: relative; transition: border-color 0.2s; }
         .contact-box:focus-within { border-color: var(--accent); }
-
         .contact-name-input { border: none; background: transparent; font-size: 16px; color: var(--text-main); width: 90%; outline: none; font-weight: 500; font-family: inherit; }
         .contact-phone { display: flex; align-items: center; color: #0f172a; font-weight: 700; margin-top: 4px; font-size: 18px; }
         .contact-phone a { color: inherit; text-decoration: none; border-bottom: 1px dotted #ccc; }
         .contact-phone a:hover { border-bottom: 1px solid var(--accent); }
         .phone-icon { margin-right: 8px; color: #0f172a; font-size: 14px; }
-        
         .edit-icon-btn { position: absolute; right: 15px; top: 50%; transform: translateY(-50%); color: var(--accent); cursor: pointer; background: none; border: none; font-size: 16px; }
-
         .form-select, .form-textarea { width: 100%; padding: 10px 12px; border: 1px solid var(--border); border-radius: 6px; font-size: 15px; color: var(--text-main); box-sizing: border-box; outline: none; background-color: #fff; font-family: inherit; }
         .form-select:focus, .form-textarea:focus { border-color: var(--accent); box-shadow: 0 0 0 2px rgba(191, 161, 95, 0.2); }
         .form-textarea { resize: vertical; min-height: 80px; }
-
         .btn-save { width: 100%; background-color: var(--accent); color: white; border: none; padding: 14px; font-size: 16px; font-weight: 600; border-radius: 8px; cursor: pointer; transition: background-color 0.2s; margin-top: 10px; }
         .btn-save:hover { background-color: var(--accent-dark); }
         .btn-save:disabled { background-color: #ccc; cursor: not-allowed; }
@@ -240,17 +181,14 @@
             </div>
         </div>
 
-        <div id="loading" class="loading">
-            <i class="fa-solid fa-circle-notch fa-spin" style="color:var(--accent)"></i> Loading Database...
-        </div>
-
         <table class="data-table hidden" id="tableView">
             <thead>
                 <tr>
-                    <th style="width: 30%">Hospital</th>
-                    <th>Location</th>
-                    <th>Tags / Devices</th> <th>Satisfaction</th>
-                    <th>Call Status</th>
+                    <th onclick="sortBy('name')" style="width: 30%">Hospital <i class="fa-solid fa-sort"></i></th>
+                    <th onclick="sortBy('location')">Location <i class="fa-solid fa-sort"></i></th>
+                    <th>Tags / Devices</th> 
+                    <th onclick="sortBy('satisfaction')">Satisfaction <i class="fa-solid fa-sort"></i></th>
+                    <th onclick="sortBy('contractStatus')">Call Status <i class="fa-solid fa-sort"></i></th>
                     <th>Actions</th>
                 </tr>
             </thead>
@@ -342,14 +280,36 @@
     </div>
 
     <script>
-        const SCRIPT_URL = "https://script.google.com/macros/s/AKfycbwhvbSEdhK56SFd-OoGIeS85lgkiX9bcXz5eR7ihi3wSqT7C4uSWMGHvJeD220d4xrAuw/exec";
+        const SCRIPT_URL = "https://script.google.com/macros/s/AKfycbwNF2dhhpJkxxuvNjg5Hvd2JD-T0cNYNREZF6P1-yY0swHjDphfn8jmPKhXBZsQe22GLA/exec";
         
         let db = [];
         let currentEditId = -1;
         let chartsInitialized = false;
         let chartInstances = {};
 
-        window.onload = fetchData;
+        // Sort State
+        let currentSort = { key: 'contractStatus', asc: true };
+
+        window.onload = function() {
+            renderSkeleton(); // Show skeleton immediately
+            fetchData();
+        };
+
+        function renderSkeleton() {
+            const grid = document.getElementById('cardView');
+            grid.classList.remove('hidden');
+            grid.innerHTML = '';
+            // Create 8 dummy cards
+            for(let i=0; i<8; i++) {
+                grid.innerHTML += `
+                    <div class="card skeleton-card">
+                        <div class="skeleton skeleton-title"></div>
+                        <div class="skeleton skeleton-text"></div>
+                        <div class="skeleton skeleton-text" style="width:40%"></div>
+                    </div>
+                `;
+            }
+        }
 
         async function fetchData() {
             try {
@@ -363,6 +323,10 @@
                     if (device.includes('AccuFIT') || device === 'Both') autoTags.push('AccuFIT');
                     let manualTags = row['Tags'] ? row['Tags'].split(',').map(s => s.trim()) : [];
                     let combinedTags = [...new Set([...autoTags, ...manualTags])];
+                    
+                    // Parse Last Updated
+                    let updatedDate = row['Last Updated'] ? new Date(row['Last Updated']) : null;
+                    let dateStr = updatedDate ? updatedDate.toLocaleDateString() : '';
 
                     return {
                         id: index,
@@ -370,6 +334,7 @@
                         direction: row['Direction'] || 'Unknown',
                         region: row['Region'] || 'Unknown',
                         city: row['City'] || 'Unknown',
+                        location: (row['Region'] || '') + (row['City'] || ''), // For sorting
                         contact: row['Contact'] || '',
                         mobile: row['Contact Mobile Number'] || '',
                         bmetUser: row['BMET User'] || '', 
@@ -377,16 +342,16 @@
                         satisfaction: row['Satisfaction'] || '-',
                         contractStatus: row['ContractStatus'] || '-', 
                         tags: combinedTags,
-                        notes: row['Notes'] || ''
+                        notes: row['Notes'] || '',
+                        lastUpdated: dateStr
                     };
                 });
 
                 initFilters();
-                document.getElementById('loading').style.display = 'none';
                 switchView('table');
                 render();
             } catch (error) {
-                document.getElementById('loading').innerHTML = `<span style="color:red">Error: ${error.message}</span>`;
+                document.getElementById('cardView').innerHTML = `<div style="text-align:center; color:red; padding:40px;">Error: ${error.message}</div>`;
             }
         }
 
@@ -451,6 +416,16 @@
             return 2;
         }
 
+        function sortBy(key) {
+            if (currentSort.key === key) {
+                currentSort.asc = !currentSort.asc;
+            } else {
+                currentSort.key = key;
+                currentSort.asc = true;
+            }
+            render();
+        }
+
         function render() {
             const tbody = document.getElementById('tableBody');
             const cardGrid = document.getElementById('cardView');
@@ -471,8 +446,23 @@
                 return true;
             });
 
+            // Sorting Logic
             filtered.sort((a, b) => {
-                return getSortWeight(a.contractStatus) - getSortWeight(b.contractStatus);
+                let valA = a[currentSort.key];
+                let valB = b[currentSort.key];
+
+                if (currentSort.key === 'contractStatus') {
+                    valA = getSortWeight(valA);
+                    valB = getSortWeight(valB);
+                } else {
+                    // Case insensitive string sort
+                    valA = valA ? valA.toString().toLowerCase() : '';
+                    valB = valB ? valB.toString().toLowerCase() : '';
+                }
+
+                if (valA < valB) return currentSort.asc ? -1 : 1;
+                if (valA > valB) return currentSort.asc ? 1 : -1;
+                return 0;
             });
 
             filtered.forEach(item => {
@@ -516,6 +506,9 @@
                 });
 
                 const bmetHtml = item.bmetUser ? `<div style="font-size:11px; color:#2c3e50; margin-top:4px;"><i class="fa-solid fa-user-gear"></i> ${item.bmetUser}</div>` : '';
+                
+                // Last Updated HTML
+                const updatedHtml = item.lastUpdated ? `<span class="last-updated">Updated: ${item.lastUpdated}</span>` : '';
 
                 const tr = `
                     <tr class="${rowClass}">
@@ -526,7 +519,10 @@
                         </td>
                         <td>${item.region} / ${item.city}</td>
                         <td>${tagsHtml}</td> <td>${satHtml}</td>
-                        <td>${statusHtml}</td>
+                        <td>
+                            ${statusHtml}
+                            ${updatedHtml}
+                        </td>
                         <td><button class="btn-edit" onclick="openEdit(${item.id})"><i class="fa-solid fa-pen"></i></button></td>
                     </tr>
                 `;
@@ -555,6 +551,9 @@
                         <div class="card-row">
                              <span class="label">Status</span><span>${statusHtml}</span>
                         </div>
+                        <div style="text-align:right; margin-top:8px;">
+                            ${updatedHtml}
+                        </div>
                     </div>
                 `;
                 cardGrid.innerHTML += card;
@@ -571,17 +570,14 @@
             const regionCounts = {};
 
             db.forEach(item => {
-                // Satisfaction
                 if(item.satisfaction === 'High' || item.satisfaction === 'Satisfied') satCounts["Satisfied"]++;
                 else if(item.satisfaction === 'Medium' || item.satisfaction === 'Neutral') satCounts["Neutral"]++;
                 else if(item.satisfaction === 'Low' || item.satisfaction === 'Unsatisfied') satCounts["Unsatisfied"]++;
                 else satCounts["Unknown"]++;
 
-                // Status
                 const s = (item.contractStatus === '-' || !item.contractStatus) ? 'No Status' : item.contractStatus;
                 statusCounts[s] = (statusCounts[s] || 0) + 1;
 
-                // Region
                 const r = item.region || 'Unknown';
                 regionCounts[r] = (regionCounts[r] || 0) + 1;
             });
@@ -591,7 +587,6 @@
                 main: '#bfa15f'
             };
 
-            // 1. Satisfaction Chart
             const ctxSat = document.getElementById('satChart').getContext('2d');
             if(chartInstances.sat) chartInstances.sat.destroy();
             chartInstances.sat = new Chart(ctxSat, {
@@ -606,7 +601,6 @@
                 options: { responsive: true, maintainAspectRatio: false, plugins: { title: { display: true, text: 'Customer Satisfaction' } } }
             });
 
-            // 2. Status Chart
             const ctxStatus = document.getElementById('statusChart').getContext('2d');
             if(chartInstances.status) chartInstances.status.destroy();
             chartInstances.status = new Chart(ctxStatus, {
@@ -622,7 +616,6 @@
                 options: { responsive: true, maintainAspectRatio: false, plugins: { title: { display: true, text: 'Call Outcome Status' } } }
             });
 
-            // 3. Region Chart
             const ctxRegion = document.getElementById('regionChart').getContext('2d');
             if(chartInstances.region) chartInstances.region.destroy();
             chartInstances.region = new Chart(ctxRegion, {
@@ -693,6 +686,10 @@
                 item.contact = newContactName;
                 item.mobile = newContactMobile;
                 
+                // Update timestamp locally
+                const now = new Date();
+                item.lastUpdated = now.toLocaleDateString();
+
                 closeModal();
                 render(); 
                 alert("Saved successfully.");
@@ -737,7 +734,6 @@
         }
 
         function openEdit(id) {
-            // Password logic removed
             currentEditId = id; 
             const item = db[id]; 
             
@@ -805,7 +801,7 @@
                 return;
             }
 
-            const headers = ["Hospital Name", "Direction", "Region", "City", "Contact Name", "Contact Mobile", "BMET User", "Satisfaction", "Contract Status", "Tags", "Notes"];
+            const headers = ["Hospital Name", "Direction", "Region", "City", "Contact Name", "Contact Mobile", "BMET User", "Satisfaction", "Contract Status", "Last Updated", "Tags", "Notes"];
             
             const csvRows = db.map(item => {
                 const row = [
@@ -818,6 +814,7 @@
                     item.bmetUser,
                     item.satisfaction,
                     item.contractStatus,
+                    item.lastUpdated,
                     item.tags.join("; "),
                     item.notes.replace(/(\r\n|\n|\r)/gm, " ")
                 ];
