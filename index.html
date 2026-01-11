@@ -63,8 +63,13 @@
         .data-table th { text-align: left; padding: 18px 15px; background: #fafafa; color: var(--text-light); font-weight: 700; font-size: 13px; text-transform: uppercase; border-bottom: 2px solid var(--border); }
         .data-table td { padding: 15px; border-bottom: 1px solid var(--border); vertical-align: middle; }
         .data-table tr:last-child td { border-bottom: none; }
-        .data-table tr:hover { background-color: #fafafa; }
         
+        /* Table Row Visual States */
+        .row-renewed { background-color: #f0fff4; color: #155724; }
+        .row-renewed:hover { background-color: #e3f9e9 !important; }
+        .row-dead { opacity: 0.6; background-color: #f9f9f9; filter: grayscale(1); }
+        .row-dead:hover { opacity: 0.8; }
+
         /* Grid */
         .grid-view { display: grid; grid-template-columns: repeat(auto-fill, minmax(300px, 1fr)); gap: 20px; }
         .card { background: var(--surface); padding: 20px; border-radius: 12px; border: 1px solid var(--border); box-shadow: 0 4px 15px rgba(0,0,0,0.03); transition: transform 0.2s; }
@@ -72,6 +77,12 @@
         .card h3 { margin: 0 0 10px 0; font-size: 18px; color: var(--text-main); }
         .card-row { display: flex; justify-content: space-between; margin-bottom: 8px; font-size: 14px; }
         .label { color: var(--text-light); font-size: 12px; }
+
+        /* Card Visual States */
+        .card-renewed { background-color: #f0fff4; border-color: #28a745; box-shadow: 0 4px 15px rgba(40, 167, 69, 0.1); }
+        .card-renewed h3 { color: #155724; }
+        .card-dead { opacity: 0.6; background-color: #f9f9f9; filter: grayscale(1); border-style: dashed; }
+        .card-dead:hover { opacity: 0.8; }
 
         /* Satisfaction Dots */
         .sat-dot { height: 10px; width: 10px; border-radius: 50%; display: inline-block; margin-right: 5px; }
@@ -361,6 +372,17 @@
             render();
         }
 
+        function getSortWeight(status) {
+            // Lower number = Higher priority (Top of list)
+            if (status === 'Call Later') return 1;
+            if (status === 'Quote Requested') return 1; // Prioritize hot leads same as urgent calls
+            if (status === 'No Answer') return 2;
+            if (status === '-' || !status) return 2; // Default pile
+            if (status === 'Renewed') return 3; // Bottom
+            if (status === 'Not Interested') return 4; // Very Bottom
+            return 2;
+        }
+
         function render() {
             const tbody = document.getElementById('tableBody');
             const cardGrid = document.getElementById('cardView');
@@ -372,12 +394,22 @@
             const filterReg = document.getElementById('filterRegion').value;
             const filterCity = document.getElementById('filterCity').value;
 
-            db.forEach(item => {
-                if (!item.name.toLowerCase().includes(search) && !item.contact.toLowerCase().includes(search)) return;
-                if (filterDir !== 'All' && item.direction !== filterDir) return;
-                if (filterReg !== 'All' && item.region !== filterReg) return;
-                if (filterCity !== 'All' && item.city !== filterCity) return;
+            // 1. FILTER
+            let filtered = db.filter(item => {
+                if (!item.name.toLowerCase().includes(search) && !item.contact.toLowerCase().includes(search)) return false;
+                if (filterDir !== 'All' && item.direction !== filterDir) return false;
+                if (filterReg !== 'All' && item.region !== filterReg) return false;
+                if (filterCity !== 'All' && item.city !== filterCity) return false;
+                return true;
+            });
 
+            // 2. SORT based on Status Weight
+            filtered.sort((a, b) => {
+                return getSortWeight(a.contractStatus) - getSortWeight(b.contractStatus);
+            });
+
+            // 3. RENDER
+            filtered.forEach(item => {
                 let satHtml = '-';
                 if(item.satisfaction && item.satisfaction !== '-' && item.satisfaction !== 'Unknown') {
                     let displayClass = item.satisfaction;
@@ -388,16 +420,26 @@
                 }
 
                 let statusHtml = '-';
+                let rowClass = '';
+                let cardClass = '';
+
                 if(item.contractStatus && item.contractStatus !== '-') {
-                    let color = '#2c3e50'; // Default dark grey
+                    let color = '#2c3e50'; 
                     let bg = 'transparent';
                     
-                    // Sales Funnel Colors
-                    if(item.contractStatus === 'Renewed') { color = '#155724'; bg = '#d4edda'; } // Green
-                    if(item.contractStatus === 'Quote Requested') { color = '#0c5460'; bg = '#d1ecf1'; } // Blue
-                    if(item.contractStatus === 'Call Later') { color = '#856404'; bg = '#fff3cd'; } // Yellow/Orange
-                    if(item.contractStatus === 'No Answer') { color = '#721c24'; bg = '#f8d7da'; } // Red
-                    if(item.contractStatus === 'Not Interested') { color = '#383d41'; bg = '#e2e3e5'; } // Grey
+                    if(item.contractStatus === 'Renewed') { 
+                        color = '#155724'; bg = '#d4edda'; 
+                        rowClass = 'row-renewed';
+                        cardClass = 'card-renewed';
+                    }
+                    if(item.contractStatus === 'Quote Requested') { color = '#0c5460'; bg = '#d1ecf1'; }
+                    if(item.contractStatus === 'Call Later') { color = '#856404'; bg = '#fff3cd'; }
+                    if(item.contractStatus === 'No Answer') { color = '#721c24'; bg = '#f8d7da'; }
+                    if(item.contractStatus === 'Not Interested') { 
+                        color = '#383d41'; bg = '#e2e3e5'; 
+                        rowClass = 'row-dead';
+                        cardClass = 'card-dead';
+                    }
                     
                     statusHtml = `<span style="font-weight:700; color: ${color}; background:${bg}; padding: 4px 8px; border-radius: 4px; font-size:11px;">${item.contractStatus}</span>`;
                 }
@@ -408,7 +450,7 @@
                 });
 
                 const tr = `
-                    <tr>
+                    <tr class="${rowClass}">
                         <td>
                             <strong>${item.name}</strong><br>
                             <span style="font-size:12px; color:#888">${item.contact}</span>
@@ -422,7 +464,7 @@
                 tbody.innerHTML += tr;
 
                 const card = `
-                    <div class="card">
+                    <div class="card ${cardClass}">
                         <div style="display:flex; justify-content:space-between; align-items:flex-start">
                             <h3>${item.name}</h3>
                             <button class="btn-edit" onclick="openEdit('${item.name.replace(/'/g, "\\'")}')"><i class="fa-solid fa-pen"></i></button>
