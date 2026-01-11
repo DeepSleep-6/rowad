@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Rowad Calls Dashboard</title>
+    <title>Calls Dashboard</title>
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
     <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
     <style>
@@ -24,8 +24,10 @@
         /* Layout */
         .top-bar { background: var(--surface); padding: 15px 30px; box-shadow: 0 4px 20px rgba(0, 0, 0, 0.05); display: flex; justify-content: space-between; align-items: center; position: sticky; top: 0; z-index: 100; border-bottom: 3px solid var(--accent); }
         
-        .logo { display: flex; align-items: center; gap: 10px; font-size: 24px; font-weight: 800; color: var(--text-main); }
-        .logo img { height: 40px; width: auto; } 
+        /* UPDATED: Logo Styling for Horizontal SVG */
+        .logo-container { display: flex; align-items: center; gap: 15px; }
+        .logo-img { height: 45px; width: auto; } /* Adjusted height for horizontal logo */
+        .page-title { font-size: 20px; font-weight: 700; color: var(--text-main); padding-left: 15px; border-left: 2px solid #eee; }
 
         .view-toggles { display: flex; gap: 5px; background: #eee; padding: 4px; border-radius: 8px; }
         .view-btn { border: none; background: none; padding: 8px 12px; cursor: pointer; border-radius: 6px; color: var(--text-light); transition: 0.2s; font-size: 14px; display: flex; align-items: center; gap: 6px; }
@@ -115,7 +117,7 @@
             border-top: 1px solid #eee;
         }
 
-        /* NEW: Charts Area */
+        /* Charts Area */
         .charts-container {
             display: grid;
             grid-template-columns: repeat(auto-fit, minmax(400px, 1fr));
@@ -202,9 +204,9 @@
 <body>
 
     <div class="top-bar">
-        <div class="logo">
-            <img src="Logo Rowad.png" alt="Rowad Logo" onerror="this.style.display='none'; this.parentElement.innerText='Rowad Calls'">
-             Rowad Calls Dashboard
+        <div class="logo-container">
+            <img src="https://alrowad-ksa.com/wp-content/uploads/2022/10/Rowad-Medical-Services_Horizontal_Logo.svg" alt="Rowad Logo" class="logo-img">
+            <span class="page-title">Calls Dashboard</span>
         </div>
         <div class="view-toggles">
             <button class="view-btn active" onclick="switchView('table')"><i class="fa-solid fa-table"></i> Table</button>
@@ -341,7 +343,7 @@
     </div>
 
     <script>
-        const SCRIPT_URL = "https://script.google.com/macros/s/AKfycbwNF2dhhpJkxxuvNjg5Hvd2JD-T0cNYNREZF6P1-yY0swHjDphfn8jmPKhXBZsQe22GLA/exec";
+        const SCRIPT_URL = "https://script.google.com/macros/s/AKfycbwhvbSEdhK56SFd-OoGIeS85lgkiX9bcXz5eR7ihi3wSqT7C4uSWMGHvJeD220d4xrAuw/exec";
         
         let db = [];
         let currentEditId = -1;
@@ -559,14 +561,12 @@
                 cardGrid.innerHTML += card;
             });
             
-            // Re-render charts if they are visible
             if(!document.getElementById('chartsView').classList.contains('hidden')) {
                 renderCharts();
             }
         }
 
         function renderCharts() {
-            // Data Prep
             const satCounts = { "Satisfied": 0, "Neutral": 0, "Unsatisfied": 0, "Unknown": 0 };
             const statusCounts = {};
             const regionCounts = {};
@@ -718,7 +718,7 @@
             table.classList.add('hidden');
             grid.classList.add('hidden');
             charts.classList.add('hidden');
-            controls.classList.remove('hidden'); // Show controls by default
+            controls.classList.remove('hidden'); 
             
             // Remove active class
             btns.forEach(b => b.classList.remove('active'));
@@ -732,7 +732,7 @@
             } else if(view === 'charts') {
                 charts.classList.remove('hidden');
                 btns[2].classList.add('active');
-                controls.classList.add('hidden'); // Hide filters for charts
+                controls.classList.add('hidden'); 
                 renderCharts();
             }
         }
