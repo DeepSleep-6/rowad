@@ -24,9 +24,8 @@
         /* Layout */
         .top-bar { background: var(--surface); padding: 15px 30px; box-shadow: 0 4px 20px rgba(0, 0, 0, 0.05); display: flex; justify-content: space-between; align-items: center; position: sticky; top: 0; z-index: 100; border-bottom: 3px solid var(--accent); }
         
-        /* UPDATED: Logo Styling for Horizontal SVG */
         .logo-container { display: flex; align-items: center; gap: 15px; }
-        .logo-img { height: 45px; width: auto; } /* Adjusted height for horizontal logo */
+        .logo-img { height: 45px; width: auto; } 
         .page-title { font-size: 20px; font-weight: 700; color: var(--text-main); padding-left: 15px; border-left: 2px solid #eee; }
 
         .view-toggles { display: flex; gap: 5px; background: #eee; padding: 4px; border-radius: 8px; }
@@ -738,12 +737,7 @@
         }
 
         function openEdit(id) {
-            const password = prompt("Please enter the admin password to edit:");
-            if(password !== "1234") {
-                alert("Incorrect password.");
-                return;
-            }
-
+            // Password logic removed
             currentEditId = id; 
             const item = db[id]; 
             
