@@ -8,178 +8,106 @@
     <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
     <style>
         :root {
-            --primary: #2d2d2d; 
-            --accent: #bfa15f; 
-            --accent-dark: #a3884d;
-            --bg: #f4f4f4;
-            --surface: #ffffff;
-            --text-main: #2d2d2d;
-            --text-light: #666666;
-            --border: #e0e0e0;
-            --success-bg: #f0fff4; --success-text: #155724;
-            --dead-bg: #f9f9f9; --dead-text: #383d41;
+            --primary: #2d2d2d; --accent: #bfa15f; --accent-dark: #a3884d;
+            --bg: #f4f4f4; --surface: #ffffff; --text: #2d2d2d; --text-light: #666;
+            --border: #e0e0e0; --success-bg: #f0fff4; --success-text: #155724;
         }
-
-        body { font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; background: var(--bg); margin: 0; color: var(--text-main); }
+        body { font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; background: var(--bg); margin: 0; color: var(--text); }
         
-        /* --- Layout & Navigation --- */
-        .top-bar { background: var(--surface); padding: 15px 30px; box-shadow: 0 4px 20px rgba(0, 0, 0, 0.05); display: flex; justify-content: space-between; align-items: center; position: sticky; top: 0; z-index: 100; border-bottom: 3px solid var(--accent); }
-        .logo-container { display: flex; align-items: center; gap: 15px; }
+        /* --- UTILITIES (Optimization #3) --- */
+        .flex { display: flex; } .flex-col { flex-direction: column; } .grid { display: grid; }
+        .items-center { align-items: center; } .justify-between { justify-content: space-between; }
+        .gap-2 { gap: 8px; } .gap-4 { gap: 16px; } .w-full { width: 100%; } .hidden { display: none !important; }
+        .p-4 { padding: 16px; } .rounded { border-radius: 8px; }
+        
+        /* --- COMPONENTS --- */
+        .top-bar { background: var(--surface); padding: 15px 30px; box-shadow: 0 4px 20px rgba(0,0,0,0.05); border-bottom: 3px solid var(--accent); position: sticky; top: 0; z-index: 100; }
         .logo-img { height: 45px; width: auto; } 
-        .page-title { font-size: 20px; font-weight: 700; color: var(--text-main); padding-left: 15px; border-left: 2px solid #eee; }
-
-        .view-toggles { display: flex; gap: 5px; background: #eee; padding: 4px; border-radius: 8px; }
-        .view-btn { border: none; background: none; padding: 8px 12px; cursor: pointer; border-radius: 6px; color: var(--text-light); transition: 0.2s; font-size: 14px; display: flex; align-items: center; gap: 6px; }
+        .page-title { font-size: 20px; font-weight: 700; padding-left: 15px; border-left: 2px solid #eee; margin-left: 15px; }
+        
+        /* Inputs & Buttons */
+        .view-btn { border: none; background: #eee; padding: 8px 12px; cursor: pointer; border-radius: 6px; color: var(--text-light); transition: 0.2s; }
         .view-btn:hover { background: #ddd; }
         .view-btn.active { background: white; color: var(--accent-dark); font-weight: bold; box-shadow: 0 1px 3px rgba(0,0,0,0.1); }
-
-        .container { max-width: 1400px; margin: 30px auto; padding: 0 20px; min-height: 80vh; } 
         
-        /* --- Controls & Inputs --- */
-        .controls { display: flex; gap: 15px; margin-bottom: 25px; flex-wrap: wrap; }
-        .search-box { flex: 2; min-width: 250px; }
-        .filter-box { flex: 1; min-width: 150px; }
+        input, select, textarea { padding: 12px; border: 1px solid var(--border); border-radius: 8px; width: 100%; box-sizing: border-box; outline: none; background: #fff; font-family: inherit; }
+        input:focus, select:focus, textarea:focus { border-color: var(--accent); box-shadow: 0 0 0 2px rgba(191,161,95,0.2); }
+        .btn-action { background: var(--accent); color: white; border: none; padding: 6px 14px; border-radius: 6px; cursor: pointer; font-weight: 600; }
+        .btn-save { width: 100%; padding: 14px; margin-top: 10px; background: var(--accent); color: white; border: none; border-radius: 8px; cursor: pointer; font-size: 16px; font-weight: 600; }
         
-        input, select, textarea { padding: 12px; border: 1px solid var(--border); border-radius: 8px; font-size: 14px; width: 100%; box-sizing: border-box; outline: none; transition: 0.2s; background-color: #fff; font-family: inherit; }
-        input:focus, select:focus, textarea:focus { border-color: var(--accent); box-shadow: 0 0 0 2px rgba(191, 161, 95, 0.2); }
-        input:disabled, select:disabled, textarea:disabled, button:disabled { background-color: #e9ecef; cursor: not-allowed; opacity: 0.7; }
+        /* Layouts */
+        .container { max-width: 1400px; margin: 30px auto; padding: 0 20px; min-height: 80vh; }
+        .controls { flex-wrap: wrap; margin-bottom: 25px; }
+        .search-box { flex: 2; min-width: 250px; } .filter-box { flex: 1; min-width: 150px; }
         
-        /* --- Utilities --- */
-        .hidden { display: none !important; }
-        .tag { display: inline-flex; align-items: center; padding: 4px 10px; border-radius: 12px; font-size: 11px; font-weight: 600; margin-right: 4px; margin-bottom: 2px; background: #eee; color: #444; border: 1px solid #ddd; }
-        .last-updated { font-size: 10px; color: #999; margin-top: 4px; display: block; font-style: italic; }
+        /* Table */
+        .data-table { width: 100%; border-collapse: separate; border-spacing: 0; background: var(--surface); border-radius: 12px; overflow: hidden; box-shadow: 0 4px 15px rgba(0,0,0,0.03); }
+        .data-table th { text-align: left; padding: 18px 15px; background: #fafafa; color: var(--text-light); font-weight: 700; text-transform: uppercase; border-bottom: 2px solid var(--border); cursor: pointer; }
+        .data-table td { padding: 15px; border-bottom: 1px solid var(--border); }
+        
+        /* Cards & Status */
+        .grid-view { grid-template-columns: repeat(auto-fill, minmax(300px, 1fr)); gap: 20px; }
+        .card { background: var(--surface); padding: 20px; border: 1px solid var(--border); transition: transform 0.2s; cursor: pointer; }
+        .card:hover { transform: translateY(-3px); border-color: var(--accent); box-shadow: 0 8px 25px rgba(0,0,0,0.08); }
+        
+        .tag { padding: 4px 10px; border-radius: 12px; font-size: 11px; background: #eee; border: 1px solid #ddd; display: inline-block; margin: 0 4px 2px 0; }
+        .status-badge { font-weight: 700; padding: 4px 8px; border-radius: 4px; font-size: 11px; }
+        .row-renewed, .card-renewed { background-color: var(--success-bg); }
+        .row-dead, .card-dead { opacity: 0.6; background-color: #f9f9f9; filter: grayscale(1); }
+        .sat-dot { height: 10px; width: 10px; border-radius: 50%; display: inline-block; margin-right: 5px; }
+        
+        /* Misc */
+        .loading-container { text-align: center; padding: 60px 0; color: var(--text-light); }
+        .spinner { width: 40px; height: 40px; border: 4px solid #e0e0e0; border-top-color: var(--accent); border-radius: 50%; animation: spin 1s linear infinite; margin: 0 auto 15px; }
+        .charts-container { grid-template-columns: repeat(auto-fit, minmax(400px, 1fr)); margin-bottom: 30px; }
+        .chart-box { background: white; padding: 20px; border: 1px solid var(--border); height: 350px; }
+        @keyframes spin { to { transform: rotate(360deg); } }
         .no-results { text-align: center; padding: 40px; color: var(--text-light); font-style: italic; grid-column: 1 / -1; }
 
-        /* --- Loading Spinner --- */
-        .loading-container { display: flex; flex-direction: column; align-items: center; justify-content: center; padding: 60px 0; color: var(--text-light); }
-        .spinner { width: 50px; height: 50px; border: 4px solid #e0e0e0; border-top: 4px solid var(--accent); border-radius: 50%; animation: spin 1s linear infinite; margin-bottom: 15px; }
-        @keyframes spin { 0% { transform: rotate(0deg); } 100% { transform: rotate(360deg); } }
-
-        /* --- Table View --- */
-        .data-table { width: 100%; border-collapse: separate; border-spacing: 0; background: var(--surface); border-radius: 12px; overflow: hidden; box-shadow: 0 4px 15px rgba(0,0,0,0.03); }
-        .data-table th { text-align: left; padding: 18px 15px; background: #fafafa; color: var(--text-light); font-weight: 700; font-size: 13px; text-transform: uppercase; border-bottom: 2px solid var(--border); cursor: pointer; user-select: none; transition: background 0.2s; }
-        .data-table th:hover { background: #f0f0f0; color: var(--text-main); }
-        .data-table td { padding: 15px; border-bottom: 1px solid var(--border); vertical-align: middle; }
-        .data-table tr:last-child td { border-bottom: none; }
-        
-        .row-renewed { background-color: var(--success-bg); color: var(--success-text); }
-        .row-renewed:hover { background-color: #e3f9e9 !important; }
-        .row-dead { opacity: 0.6; background-color: var(--dead-bg); filter: grayscale(1); }
-        .row-dead:hover { opacity: 0.8; }
-
-        /* --- Grid View --- */
-        .grid-view { display: grid; grid-template-columns: repeat(auto-fill, minmax(300px, 1fr)); gap: 20px; }
-        .card { background: var(--surface); padding: 20px; border-radius: 12px; border: 1px solid var(--border); box-shadow: 0 4px 15px rgba(0,0,0,0.03); transition: transform 0.2s, box-shadow 0.2s; cursor: pointer; position: relative; }
-        .card:hover { transform: translateY(-3px); border-color: var(--accent); box-shadow: 0 8px 25px rgba(0,0,0,0.08); }
-        .card h3 { margin: 0 0 10px 0; font-size: 18px; color: var(--text-main); }
-        .card-row { display: flex; justify-content: space-between; margin-bottom: 8px; font-size: 14px; }
-        .label { color: var(--text-light); font-size: 12px; }
-
-        .card-renewed { background-color: var(--success-bg); border-color: #28a745; box-shadow: 0 4px 15px rgba(40, 167, 69, 0.1); }
-        .card-renewed h3 { color: var(--success-text); }
-        .card-dead { opacity: 0.6; background-color: var(--dead-bg); filter: grayscale(1); border-style: dashed; }
-
-        /* --- Status Indicators --- */
-        .sat-dot { height: 10px; width: 10px; border-radius: 50%; display: inline-block; margin-right: 5px; }
-        .sat-Satisfied { background: #28a745; box-shadow: 0 0 5px #28a745; }
-        .sat-Neutral { background: #ffc107; }
-        .sat-Unsatisfied { background: #dc3545; }
-        
-        .btn-edit { background: var(--accent); color: white; border: none; padding: 6px 14px; border-radius: 6px; cursor: pointer; font-size: 13px; font-weight: 600; }
-        .btn-edit:hover { background: var(--accent-dark); }
-        
-        .footer-credit { text-align: center; padding: 30px 0; color: #aaa; font-size: 12px; font-weight: 500; margin-top: 40px; border-top: 1px solid #eee; }
-
-        /* --- Charts --- */
-        .charts-container { display: grid; grid-template-columns: repeat(auto-fit, minmax(400px, 1fr)); gap: 30px; margin-bottom: 30px; }
-        .chart-box { background: white; padding: 20px; border-radius: 12px; border: 1px solid var(--border); box-shadow: 0 4px 15px rgba(0,0,0,0.03); height: 350px; }
-
-        /* --- Modal --- */
+        /* Modal */
         .modal-overlay { position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.6); display: none; justify-content: center; align-items: center; z-index: 1000; backdrop-filter: blur(2px); }
-        .modal-card { background-color: var(--surface); width: 100%; max-width: 500px; padding: 30px; border-radius: 12px; box-shadow: 0 10px 40px rgba(0,0,0,0.15); border-top: 5px solid var(--accent); position: relative; }
-        .modal-header { display: flex; justify-content: space-between; align-items: flex-start; margin-bottom: 25px; }
-        .header-content { display: flex; flex-direction: column; gap: 8px; }
-        .modal-title { color: #0f172a; font-size: 24px; font-weight: 700; margin: 0; }
-        .modal-location { font-size: 14px; color: #777; font-weight: 500; display:flex; align-items:center; gap:6px; }
-        .bmet-info { font-size: 13px; color: #555; display: flex; align-items: center; gap: 6px; background: #f0f0f0; padding: 4px 10px; border-radius: 4px; align-self: flex-start;}
-        .warranty-tag { display: none; background-color: #eee; color: #333; border: 1px solid #ccc; font-size: 12px; font-weight: 700; padding: 4px 10px; border-radius: 20px; text-transform: uppercase; letter-spacing: 0.5px; align-self: flex-start; }
-        .close-btn { background: none; border: none; font-size: 24px; cursor: pointer; color: var(--text-light); padding: 0; line-height: 1; }
-        .form-group { margin-bottom: 20px; }
-        .form-label { display: block; color: var(--text-light); font-weight: 600; font-size: 14px; margin-bottom: 8px; }
-        .contact-box { background-color: #fcfcfc; border: 1px solid var(--border); border-radius: 8px; padding: 12px 16px; position: relative; transition: border-color 0.2s; }
-        .contact-box:focus-within { border-color: var(--accent); }
-        .contact-name-input { border: none; background: transparent; font-size: 16px; color: var(--text-main); width: 90%; outline: none; font-weight: 500; padding: 0; }
-        .contact-phone { display: flex; align-items: center; color: #0f172a; font-weight: 700; margin-top: 4px; font-size: 18px; }
-        .contact-phone a { color: inherit; text-decoration: none; border-bottom: 1px dotted #ccc; }
-        .contact-phone a:hover { border-bottom: 1px solid var(--accent); }
-        .edit-icon-btn { position: absolute; right: 15px; top: 50%; transform: translateY(-50%); color: var(--accent); cursor: pointer; background: none; border: none; font-size: 16px; }
-        .form-textarea { resize: vertical; min-height: 80px; }
-        .btn-save { width: 100%; background-color: var(--accent); color: white; border: none; padding: 14px; font-size: 16px; font-weight: 600; border-radius: 8px; cursor: pointer; transition: background-color 0.2s; margin-top: 10px; }
-        .btn-save:hover { background-color: var(--accent-dark); }
-        
-        @media (max-width: 768px) {
-            .controls { flex-direction: column; }
-            .data-table { display: none; } 
-            .grid-view { display: grid !important; }
-            .view-toggles { display: none; }
-            .charts-container { grid-template-columns: 1fr; }
-        }
+        .modal-card { background: var(--surface); width: 100%; max-width: 500px; padding: 30px; border-radius: 12px; border-top: 5px solid var(--accent); }
+        .contact-box { background: #fcfcfc; border: 1px solid var(--border); padding: 12px; position: relative; }
+        .contact-phone { font-size: 18px; font-weight: 700; color: #0f172a; margin-top: 4px; }
+
+        @media (max-width: 768px) { .data-table, .view-toggles { display: none; } .grid-view { display: grid !important; } .controls { flex-direction: column; } }
     </style>
 </head>
 <body>
 
-    <div class="top-bar">
-        <div class="logo-container">
+    <div class="top-bar flex items-center justify-between">
+        <div class="flex items-center">
             <img src="https://alrowad-ksa.com/wp-content/uploads/2022/10/Rowad-Medical-Services_Horizontal_Logo.svg" alt="Rowad Logo" class="logo-img">
             <span class="page-title">Calls Dashboard</span>
         </div>
-        <div class="view-toggles">
-            <button class="view-btn active" onclick="switchView('table')"><i class="fa-solid fa-table"></i> Table</button>
-            <button class="view-btn" onclick="switchView('card')"><i class="fa-solid fa-th-large"></i> Grid</button>
-            <button class="view-btn" onclick="switchView('charts')"><i class="fa-solid fa-chart-pie"></i> Charts</button>
-            <button class="view-btn" onclick="exportToCSV()"><i class="fa-solid fa-file-csv"></i> CSV</button>
+        <div class="view-toggles flex gap-2" id="viewControls">
+            <button class="view-btn active" data-view="table"><i class="fa-solid fa-table"></i> Table</button>
+            <button class="view-btn" data-view="card"><i class="fa-solid fa-th-large"></i> Grid</button>
+            <button class="view-btn" data-view="charts"><i class="fa-solid fa-chart-pie"></i> Charts</button>
+            <button class="view-btn" data-view="csv"><i class="fa-solid fa-file-csv"></i> CSV</button>
         </div>
     </div>
 
     <div class="container">
-        <div class="controls" id="mainControls">
+        <div class="controls flex gap-4" id="mainControls">
             <div class="search-box">
                 <input type="text" id="search" placeholder="Search Hospital or Contact..." onkeyup="debouncedRender()">
             </div>
-            
-            <div class="filter-box">
-                <select id="filterDirection" onchange="updateRegionOptions()">
-                    <option value="All">All Directions</option>
-                </select>
-            </div>
-            
-            <div class="filter-box hidden" id="boxRegion">
-                <select id="filterRegion" onchange="updateCityOptions()">
-                    <option value="All">All Regions</option>
-                </select>
-            </div>
-
-            <div class="filter-box hidden" id="boxCity">
-                <select id="filterCity" onchange="debouncedRender()">
-                    <option value="All">All Cities</option>
-                </select>
-            </div>
+            <div class="filter-box"><select id="filterDirection" onchange="updateRegionOptions()"><option value="All">All Directions</option></select></div>
+            <div class="filter-box hidden" id="boxRegion"><select id="filterRegion" onchange="updateCityOptions()"><option value="All">All Regions</option></select></div>
+            <div class="filter-box hidden" id="boxCity"><select id="filterCity" onchange="debouncedRender()"><option value="All">All Cities</option></select></div>
         </div>
 
-        <div id="loading" class="loading-container">
-            <div class="spinner"></div>
-            <span>Loading Database...</span>
-        </div>
+        <div id="loading" class="loading-container"><div class="spinner"></div><span>Loading Database...</span></div>
 
         <table class="data-table hidden" id="tableView">
             <thead>
                 <tr>
-                    <th onclick="sortBy('name')" style="width: 30%">Hospital <i class="fa-solid fa-sort"></i></th>
+                    <th onclick="sortBy('name')" width="30%">Hospital <i class="fa-solid fa-sort"></i></th>
                     <th onclick="sortBy('location')">Location <i class="fa-solid fa-sort"></i></th>
-                    <th>Tags / Devices</th> 
-                    <th onclick="sortBy('satisfaction')">Satisfaction <i class="fa-solid fa-sort"></i></th>
-                    <th onclick="sortBy('contractStatus')">Call Status <i class="fa-solid fa-sort"></i></th>
-                    <th>Actions</th>
+                    <th>Tags</th> <th onclick="sortBy('satisfaction')">Sat <i class="fa-solid fa-sort"></i></th>
+                    <th onclick="sortBy('contractStatus')">Status <i class="fa-solid fa-sort"></i></th>
+                    <th>Action</th>
                 </tr>
             </thead>
             <tbody id="tableBody"></tbody>
@@ -188,582 +116,303 @@
         <div class="grid-view hidden" id="cardView"></div>
 
         <div class="hidden" id="chartsView">
-            <div class="charts-container">
-                <div class="chart-box">
-                    <canvas id="satChart"></canvas>
-                </div>
-                <div class="chart-box">
-                    <canvas id="statusChart"></canvas>
-                </div>
-                <div class="chart-box">
-                    <canvas id="regionChart"></canvas>
-                </div>
+            <div class="charts-container grid gap-4">
+                <div class="chart-box rounded"><canvas id="satChart"></canvas></div>
+                <div class="chart-box rounded"><canvas id="statusChart"></canvas></div>
+                <div class="chart-box rounded"><canvas id="regionChart"></canvas></div>
             </div>
         </div>
         
-        <div class="footer-credit">
-            Developed by Faisal Alzougbi
-        </div>
+        <div class="footer-credit text-light" style="text-align:center; padding:30px; font-size:12px;">Developed by Faisal Alzougbi</div>
     </div>
 
     <div class="modal-overlay" id="editModal">
         <div class="modal-card">
-            <div class="modal-header">
-                <div class="header-content">
-                    <h2 class="modal-title" id="modalTitle">Hospital Name</h2>
-                    <div class="modal-location">
-                        <i class="fa-solid fa-location-dot"></i> <span id="modalLocationText"></span>
-                    </div>
-                    
-                    <span class="warranty-tag" id="warrantyBadge">Under Warranty</span>
-                    <div id="modalBmetDisplay" class="bmet-info" style="display:none">
-                        <i class="fa-solid fa-user-gear"></i> <span id="bmetName"></span>
-                    </div>
+            <div class="flex justify-between items-start mb-4">
+                <div class="flex-col gap-2">
+                    <h2 style="margin:0; font-size:24px;" id="modalTitle">Hospital</h2>
+                    <div style="font-size:14px; color:#777;"><i class="fa-solid fa-location-dot"></i> <span id="modalLocationText"></span></div>
+                    <span class="tag hidden" id="warrantyBadge" style="background:#333; color:white; font-weight:bold;">WARRANTY</span>
+                    <div id="modalBmetDisplay" class="flex items-center gap-2 hidden" style="background:#f0f0f0; padding:4px 10px; border-radius:4px; font-size:13px;"><i class="fa-solid fa-user-gear"></i> <span id="bmetName"></span></div>
                 </div>
-                <button class="close-btn" onclick="closeModal()">&times;</button>
+                <button onclick="closeModal()" style="border:none; background:none; font-size:24px; cursor:pointer;">&times;</button>
             </div>
 
-            <div class="form-group">
-                <label class="form-label">Primary Contact</label>
-                <div class="contact-box">
-                    <input type="text" class="contact-name-input" id="editContactName" value="">
-                    <div class="contact-phone">
-                        <i class="fa-solid fa-phone phone-icon" style="margin-right:8px; font-size:14px;"></i> 
-                        <span id="displayPhone"></span>
-                    </div>
+            <div class="mb-4">
+                <label class="block mb-2 font-bold" style="font-size:14px; color:#666;">Contact</label>
+                <div class="contact-box rounded">
+                    <input type="text" id="editContactName" style="border:none; background:transparent; font-size:16px; font-weight:500; padding:0;">
+                    <div class="contact-phone"><i class="fa-solid fa-phone" style="font-size:14px;"></i> <span id="displayPhone"></span></div>
                     <input type="hidden" id="editContactMobile">
-                    <button class="edit-icon-btn" onclick="promptPhoneUpdate()">
-                        <i class="fa-solid fa-pen"></i>
-                    </button>
+                    <button onclick="promptPhoneUpdate()" style="position:absolute; right:15px; top:50%; transform:translateY(-50%); color:var(--accent); border:none; background:none; cursor:pointer;"><i class="fa-solid fa-pen"></i></button>
                 </div>
             </div>
 
-            <div class="form-group">
-                <label class="form-label">Customer Satisfaction</label>
-                <select class="form-select" id="editSat">
-                    <option value="-">-</option>
-                    <option value="Satisfied">Satisfied</option>
-                    <option value="Neutral">Neutral</option>
-                    <option value="Unsatisfied">Unsatisfied</option>
-                </select>
+            <div class="grid gap-4 mb-4">
+                <div><label class="block mb-2 font-bold" style="font-size:14px; color:#666;">Satisfaction</label>
+                <select id="editSat"><option value="-">-</option><option value="Satisfied">Satisfied</option><option value="Neutral">Neutral</option><option value="Unsatisfied">Unsatisfied</option></select></div>
+                <div><label class="block mb-2 font-bold" style="font-size:14px; color:#666;">Status</label>
+                <select id="editCallStatus"><option value="-">-</option><option value="No Answer">No Answer</option><option value="Call Later">Call Later</option><option value="Quote Requested">Quote Requested</option><option value="Not Interested">Not Interested</option><option value="Renewed">Renewed</option></select></div>
             </div>
 
-            <div class="form-group">
-                <label class="form-label">Call Status & Outcome</label>
-                <select class="form-select" id="editCallStatus">
-                    <option value="-">-</option>
-                    <option value="No Answer">No Answer</option>
-                    <option value="Call Later">Call Later</option>
-                    <option value="Quote Requested">Quote Requested</option>
-                    <option value="Not Interested">Not Interested</option>
-                    <option value="Renewed">Renewed</option>
-                </select>
+            <div class="mb-4">
+                <label class="block mb-2 font-bold" style="font-size:14px; color:#666;">Notes</label>
+                <textarea id="editNotes" style="resize:vertical; min-height:80px;" placeholder="Add notes..."></textarea>
             </div>
-
-            <div class="form-group">
-                <label class="form-label">Notes</label>
-                <textarea class="form-textarea" id="editNotes" placeholder="Add notes here..."></textarea>
-            </div>
-
             <button class="btn-save" id="saveBtn" onclick="saveChanges()">Save Updates</button>
         </div>
     </div>
 
     <script>
-        // Module Pattern: Encapsulate logic to avoid global scope pollution
         (() => {
             const CONFIG = {
                 SCRIPT_URL: "https://script.google.com/macros/s/AKfycbwhvbSEdhK56SFd-OoGIeS85lgkiX9bcXz5eR7ihi3wSqT7C4uSWMGHvJeD220d4xrAuw/exec",
-                COLORS: {
-                    renewed: '#155724', renewedBg: '#d4edda',
-                    quote: '#0c5460', quoteBg: '#d1ecf1',
-                    later: '#856404', laterBg: '#fff3cd',
-                    noAnswer: '#721c24', noAnswerBg: '#f8d7da',
-                    dead: '#383d41', deadBg: '#e2e3e5',
-                    default: '#2c3e50', defaultBg: 'transparent'
-                }
+                COLORS: { renewed: '#155724', renewedBg: '#d4edda', quote: '#0c5460', quoteBg: '#d1ecf1', later: '#856404', laterBg: '#fff3cd', noAnswer: '#721c24', noAnswerBg: '#f8d7da', dead: '#383d41', deadBg: '#e2e3e5', def: '#2c3e50', defBg: 'transparent' }
             };
-            
-            let db = [];
-            let currentEditId = -1;
-            let chartInstances = {};
-            let currentSort = { key: 'contractStatus', asc: true };
+            let db = [], currentEditId = -1, chartInstances = {}, currentSort = { key: 'contractStatus', asc: true };
 
-            function debounce(func, wait) {
-                let timeout;
-                return function(...args) {
-                    clearTimeout(timeout);
-                    timeout = setTimeout(() => func.apply(this, args), wait);
-                };
-            }
+            function debounce(func, wait) { let timeout; return function(...args) { clearTimeout(timeout); timeout = setTimeout(() => func.apply(this, args), wait); }; }
+            function escapeHtml(text) { return text ? String(text).replace(/[&<>"']/g, m => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#039;'}[m])) : ''; }
 
-            function escapeHtml(text) {
-                if (!text) return '';
-                return String(text)
-                    .replace(/&/g, "&amp;")
-                    .replace(/</g, "&lt;")
-                    .replace(/>/g, "&gt;")
-                    .replace(/"/g, "&quot;")
-                    .replace(/'/g, "&#039;");
-            }
-
-            window.onload = function() { fetchData(); };
+            // Optimization #2: Event Delegation for Top Bar Buttons
+            window.onload = function() {
+                fetchData();
+                document.getElementById('viewControls').addEventListener('click', (e) => {
+                    const btn = e.target.closest('button');
+                    if(!btn) return;
+                    const view = btn.dataset.view;
+                    if(view === 'csv') exportToCSV();
+                    else switchView(view);
+                });
+            };
             
             window.debouncedRender = debounce(() => render(), 300); 
 
             async function fetchData() {
                 try {
-                    const response = await fetch(CONFIG.SCRIPT_URL);
-                    const data = await response.json();
-                    
-                    db = data.map((row, index) => {
-                        let autoTags = [];
-                        const device = row['Device'] || '';
-                        if (device.includes('Surfacide') || device === 'Both') autoTags.push('Surfacide');
-                        if (device.includes('AccuFIT') || device === 'Both') autoTags.push('AccuFIT');
-                        let manualTags = row['Tags'] ? row['Tags'].split(',').map(s => s.trim()) : [];
-                        let combinedTags = [...new Set([...autoTags, ...manualTags])];
+                    const res = await fetch(CONFIG.SCRIPT_URL);
+                    const data = await res.json();
+                    db = data.map((row, idx) => {
+                        let auto = [];
+                        if ((row['Device']||'').includes('Surfacide') || row['Device'] === 'Both') auto.push('Surfacide');
+                        if ((row['Device']||'').includes('AccuFIT') || row['Device'] === 'Both') auto.push('AccuFIT');
+                        let updated = row['Last Updated'] ? new Date(row['Last Updated']) : null;
                         
-                        let updatedDate = row['Last Updated'] ? new Date(row['Last Updated']) : null;
-                        let dateStr = updatedDate ? updatedDate.toLocaleDateString('en-GB') : '';
-
                         return {
-                            id: index,
+                            id: idx,
                             name: row['Hospital Name'] || 'Unknown',
                             direction: row['Direction'] || 'Unknown',
                             region: row['Region'] || 'Unknown',
                             city: row['City'] || 'Unknown',
-                            location: (row['Region'] || '') + (row['City'] || ''),
+                            location: (row['Region']||'') + (row['City']||''),
                             contact: row['Contact'] || '',
                             mobile: row['Contact Mobile Number'] || '',
                             bmetUser: row['BMET User'] || '', 
                             satisfaction: row['Satisfaction'] || '-',
                             contractStatus: row['ContractStatus'] || '-', 
-                            tags: combinedTags,
+                            tags: [...new Set([...auto, ...(row['Tags'] ? row['Tags'].split(',').map(s=>s.trim()) : [])])],
                             notes: row['Notes'] || '',
-                            lastUpdated: dateStr
+                            lastUpdated: updated ? updated.toLocaleDateString('en-GB') : ''
                         };
                     });
-
                     initFilters();
                     document.getElementById('loading').style.display = 'none';
                     switchView('table');
                     render();
-                } catch (error) {
-                    document.getElementById('loading').innerHTML = `<span style="color:red">Error: ${escapeHtml(error.message)}</span>`;
-                }
+                } catch (e) { document.getElementById('loading').innerHTML = `<span style="color:red">Error: ${escapeHtml(e.message)}</span>`; }
             }
 
             function initFilters() {
-                const directions = [...new Set(db.map(item => item.direction))].sort();
-                const select = document.getElementById('filterDirection');
-                select.innerHTML = '<option value="All">All Directions</option>';
-                directions.forEach(d => { if(d) select.add(new Option(d, d)); });
+                const s = document.getElementById('filterDirection'), dirs = [...new Set(db.map(x => x.direction))].sort();
+                s.innerHTML = '<option value="All">All Directions</option>';
+                dirs.forEach(d => d && s.add(new Option(d, d)));
             }
-
+            
             window.updateRegionOptions = function() {
                 const dir = document.getElementById('filterDirection').value;
-                const regionBox = document.getElementById('boxRegion');
-                const cityBox = document.getElementById('boxCity');
-                
-                if (dir === 'All') {
-                    regionBox.classList.add('hidden');
-                    cityBox.classList.add('hidden');
-                    document.getElementById('filterRegion').value = 'All';
-                    document.getElementById('filterCity').value = 'All';
-                    render();
-                    return;
-                }
-
-                const regions = [...new Set(db.filter(x => x.direction === dir).map(x => x.region))].sort();
-                const select = document.getElementById('filterRegion');
-                select.innerHTML = '<option value="All">All Regions</option>';
-                regions.forEach(r => select.add(new Option(r, r)));
-                
-                regionBox.classList.remove('hidden');
-                cityBox.classList.add('hidden'); 
-                render();
+                const rBox = document.getElementById('boxRegion'), cBox = document.getElementById('boxCity');
+                if (dir === 'All') { rBox.classList.add('hidden'); cBox.classList.add('hidden'); document.getElementById('filterRegion').value='All'; document.getElementById('filterCity').value='All'; render(); return; }
+                const regs = [...new Set(db.filter(x => x.direction === dir).map(x => x.region))].sort();
+                const s = document.getElementById('filterRegion'); s.innerHTML = '<option value="All">All Regions</option>';
+                regs.forEach(r => s.add(new Option(r, r)));
+                rBox.classList.remove('hidden'); cBox.classList.add('hidden'); render();
             };
 
             window.updateCityOptions = function() {
-                const region = document.getElementById('filterRegion').value;
-                const cityBox = document.getElementById('boxCity');
-
-                if (region === 'All') {
-                    cityBox.classList.add('hidden');
-                    document.getElementById('filterCity').value = 'All';
-                    render();
-                    return;
-                }
-
-                const cities = [...new Set(db.filter(x => x.region === region).map(x => x.city))].sort();
-                const select = document.getElementById('filterCity');
-                select.innerHTML = '<option value="All">All Cities</option>';
-                cities.forEach(c => select.add(new Option(c, c)));
-
-                cityBox.classList.remove('hidden');
-                render();
+                const reg = document.getElementById('filterRegion').value;
+                if (reg === 'All') { document.getElementById('boxCity').classList.add('hidden'); document.getElementById('filterCity').value='All'; render(); return; }
+                const cities = [...new Set(db.filter(x => x.region === reg).map(x => x.city))].sort();
+                const s = document.getElementById('filterCity'); s.innerHTML = '<option value="All">All Cities</option>';
+                cities.forEach(c => s.add(new Option(c, c)));
+                document.getElementById('boxCity').classList.remove('hidden'); render();
             };
-
-            function getSortWeight(status) {
-                if (status === 'Call Later') return 1;
-                if (status === 'Quote Requested') return 1; 
-                if (status === 'No Answer') return 2;
-                if (status === '-' || !status) return 2; 
-                if (status === 'Renewed') return 3; 
-                if (status === 'Not Interested') return 4; 
-                return 2;
-            }
 
             window.sortBy = function(key) {
-                if (currentSort.key === key) {
-                    currentSort.asc = !currentSort.asc;
-                } else {
-                    currentSort.key = key;
-                    currentSort.asc = true;
-                }
+                if (currentSort.key === key) currentSort.asc = !currentSort.asc;
+                else { currentSort.key = key; currentSort.asc = true; }
                 render();
             };
 
+            function getSortWeight(s) { return {'Call Later':1, 'Quote Requested':1, 'No Answer':2, '-':2, 'Renewed':3, 'Not Interested':4}[s] || 2; }
+
             function render() {
-                const tbody = document.getElementById('tableBody');
-                const cardGrid = document.getElementById('cardView');
-                
-                tbody.innerHTML = '';
-                cardGrid.innerHTML = '';
-
+                const tb = document.getElementById('tableBody'), cg = document.getElementById('cardView');
+                tb.innerHTML = ''; cg.innerHTML = '';
                 const search = document.getElementById('search').value.toLowerCase();
-                const filterDir = document.getElementById('filterDirection').value;
-                const filterReg = document.getElementById('filterRegion').value;
-                const filterCity = document.getElementById('filterCity').value;
+                const fDir = document.getElementById('filterDirection').value, fReg = document.getElementById('filterRegion').value, fCity = document.getElementById('filterCity').value;
 
-                let filtered = db.filter(item => {
-                    const searchStr = (item.name + item.contact + item.bmetUser).toLowerCase();
-                    if (!searchStr.includes(search)) return false;
-                    if (filterDir !== 'All' && item.direction !== filterDir) return false;
-                    if (filterReg !== 'All' && item.region !== filterReg) return false;
-                    if (filterCity !== 'All' && item.city !== filterCity) return false;
+                let flt = db.filter(i => {
+                    if (!(i.name+i.contact+i.bmetUser).toLowerCase().includes(search)) return false;
+                    if (fDir!=='All' && i.direction!==fDir) return false;
+                    if (fReg!=='All' && i.region!==fReg) return false;
+                    if (fCity!=='All' && i.city!==fCity) return false;
                     return true;
                 });
 
-                // NO RESULTS CHECK
-                if (filtered.length === 0) {
-                    tbody.innerHTML = '<tr><td colspan="6" class="no-results">No results found matching your criteria.</td></tr>';
-                    cardGrid.innerHTML = '<div class="no-results">No results found matching your criteria.</div>';
-                    if(!document.getElementById('chartsView').classList.contains('hidden')) {
-                        renderCharts(); // Charts still show global data
-                    }
+                if (flt.length === 0) {
+                    tb.innerHTML = '<tr><td colspan="6" class="no-results">No results found matching your criteria.</td></tr>';
+                    cg.innerHTML = '<div class="no-results">No results found matching your criteria.</div>';
+                    if(!document.getElementById('chartsView').classList.contains('hidden')) renderCharts();
                     return; 
                 }
 
-                filtered.sort((a, b) => {
-                    let valA = a[currentSort.key];
-                    let valB = b[currentSort.key];
-
-                    if (currentSort.key === 'contractStatus') {
-                        valA = getSortWeight(valA);
-                        valB = getSortWeight(valB);
-                    } else {
-                        valA = valA ? valA.toString().toLowerCase() : '';
-                        valB = valB ? valB.toString().toLowerCase() : '';
-                    }
-
-                    if (valA < valB) return currentSort.asc ? -1 : 1;
-                    if (valA > valB) return currentSort.asc ? 1 : -1;
-                    return 0;
+                flt.sort((a,b) => {
+                    let vA = currentSort.key==='contractStatus' ? getSortWeight(a[currentSort.key]) : (a[currentSort.key]||'').toString().toLowerCase();
+                    let vB = currentSort.key==='contractStatus' ? getSortWeight(b[currentSort.key]) : (b[currentSort.key]||'').toString().toLowerCase();
+                    return (vA < vB ? -1 : 1) * (currentSort.asc ? 1 : -1);
                 });
 
-                const tableRows = filtered.map(item => {
-                    let satHtml = '-';
-                    if(item.satisfaction && item.satisfaction !== '-' && item.satisfaction !== 'Unknown') {
-                        let displayClass = item.satisfaction;
-                        if(item.satisfaction === 'High') displayClass = 'Satisfied';
-                        if(item.satisfaction === 'Medium') displayClass = 'Neutral';
-                        if(item.satisfaction === 'Low') displayClass = 'Unsatisfied';
-                        satHtml = `<span class="sat-dot sat-${displayClass}"></span> ${escapeHtml(item.satisfaction)}`;
-                    }
-
-                    let statusStyles = { color: CONFIG.COLORS.default, bg: CONFIG.COLORS.defaultBg };
-                    let rowClass = '';
-
-                    if(item.contractStatus === 'Renewed') { 
-                        statusStyles = { color: CONFIG.COLORS.renewed, bg: CONFIG.COLORS.renewedBg };
-                        rowClass = 'row-renewed';
-                    } else if(item.contractStatus === 'Quote Requested') { 
-                        statusStyles = { color: CONFIG.COLORS.quote, bg: CONFIG.COLORS.quoteBg };
-                    } else if(item.contractStatus === 'Call Later') { 
-                        statusStyles = { color: CONFIG.COLORS.later, bg: CONFIG.COLORS.laterBg };
-                    } else if(item.contractStatus === 'No Answer') { 
-                        statusStyles = { color: CONFIG.COLORS.noAnswer, bg: CONFIG.COLORS.noAnswerBg };
-                    } else if(item.contractStatus === 'Not Interested') { 
-                        statusStyles = { color: CONFIG.COLORS.dead, bg: CONFIG.COLORS.deadBg };
-                        rowClass = 'row-dead';
-                    }
-
-                    const statusHtml = (item.contractStatus && item.contractStatus !== '-') 
-                        ? `<span style="font-weight:700; color: ${statusStyles.color}; background:${statusStyles.bg}; padding: 4px 8px; border-radius: 4px; font-size:11px;">${escapeHtml(item.contractStatus)}</span>` 
-                        : '-';
-
-                    const tagsHtml = item.tags.map(t => `<span class="tag">${escapeHtml(t)}</span>`).join('');
-                    const bmetHtml = item.bmetUser ? `<div style="font-size:11px; color:#2c3e50; margin-top:4px;"><i class="fa-solid fa-user-gear"></i> ${escapeHtml(item.bmetUser)}</div>` : '';
-                    const updatedHtml = item.lastUpdated ? `<span class="last-updated">Updated: ${item.lastUpdated}</span>` : '';
-
-                    return `
-                        <tr class="${rowClass}">
-                            <td>
-                                <strong>${escapeHtml(item.name)}</strong><br>
-                                <span style="font-size:12px; color:#888">${escapeHtml(item.contact)}</span>
-                                ${bmetHtml}
-                            </td>
-                            <td>${escapeHtml(item.region)} / ${escapeHtml(item.city)}</td>
-                            <td>${tagsHtml}</td>
-                            <td>${satHtml}</td>
-                            <td>${statusHtml} ${updatedHtml}</td>
-                            <td><button class="btn-edit" onclick="openEdit(${item.id})"><i class="fa-solid fa-pen"></i></button></td>
-                        </tr>
-                    `;
+                tb.innerHTML = flt.map(i => {
+                    let satC = i.satisfaction==='High'||i.satisfaction==='Satisfied'?'Satisfied' : i.satisfaction==='Low'||i.satisfaction==='Unsatisfied'?'Unsatisfied' : i.satisfaction==='Medium'||i.satisfaction==='Neutral'?'Neutral' : '';
+                    let satHtml = satC ? `<span class="sat-dot" style="background:${satC==='Satisfied'?'#28a745':satC==='Neutral'?'#ffc107':'#dc3545'}"></span> ${escapeHtml(i.satisfaction)}` : '-';
+                    
+                    let st = i.contractStatus, stC = CONFIG.COLORS.def, stBg = CONFIG.COLORS.defBg, rowC = '';
+                    if(st==='Renewed'){ stC=CONFIG.COLORS.renewed; stBg=CONFIG.COLORS.renewedBg; rowC='row-renewed'; }
+                    else if(st==='Quote Requested'){ stC=CONFIG.COLORS.quote; stBg=CONFIG.COLORS.quoteBg; }
+                    else if(st==='Call Later'){ stC=CONFIG.COLORS.later; stBg=CONFIG.COLORS.laterBg; }
+                    else if(st==='No Answer'){ stC=CONFIG.COLORS.noAnswer; stBg=CONFIG.COLORS.noAnswerBg; }
+                    else if(st==='Not Interested'){ stC=CONFIG.COLORS.dead; stBg=CONFIG.COLORS.deadBg; rowC='row-dead'; }
+                    
+                    return `<tr class="${rowC}">
+                        <td><strong>${escapeHtml(i.name)}</strong><br><span style="font-size:12px; color:#888">${escapeHtml(i.contact)}</span>${i.bmetUser?`<div style="font-size:11px;color:#2c3e50"><i class="fa-solid fa-user-gear"></i> ${escapeHtml(i.bmetUser)}</div>`:''}</td>
+                        <td>${escapeHtml(i.region)} / ${escapeHtml(i.city)}</td>
+                        <td>${i.tags.map(t=>`<span class="tag">${escapeHtml(t)}</span>`).join('')}</td>
+                        <td>${satHtml}</td>
+                        <td>${(st&&st!=='-')?`<span class="status-badge" style="color:${stC};background:${stBg}">${escapeHtml(st)}</span>`:'-'} <span style="font-size:10px;color:#999;display:block">Updated: ${i.lastUpdated}</span></td>
+                        <td><button class="btn-action" onclick="openEdit(${i.id})"><i class="fa-solid fa-pen"></i></button></td>
+                    </tr>`;
                 }).join('');
 
-                tbody.innerHTML = tableRows;
-
-                const cardHtml = filtered.map(item => {
-                    let cardClass = '';
-                    if(item.contractStatus === 'Renewed') cardClass = 'card-renewed';
-                    if(item.contractStatus === 'Not Interested') cardClass = 'card-dead';
-                    
-                    const tagsHtml = item.tags.map(t => `<span class="tag">${escapeHtml(t)}</span>`).join('');
-                    
-                    return `
-                    <div class="card ${cardClass}" onclick="openEdit(${item.id})">
-                        <div style="display:flex; justify-content:space-between; align-items:flex-start">
-                            <h3>${escapeHtml(item.name)}</h3>
-                        </div>
-                        <div style="margin-bottom:10px;">${tagsHtml}</div>
-                        ${item.bmetUser ? `<div class="card-row"><span class="label">BMET User</span><span style="font-weight:600; color:#444"><i class="fa-solid fa-user-gear"></i> ${escapeHtml(item.bmetUser)}</span></div>` : ''}
-                        <div class="card-row">
-                            <span class="label">Location</span>
-                            <span>${escapeHtml(item.city)}</span>
-                        </div>
-                        <div class="card-row"><span class="label">Status</span><span>${escapeHtml(item.contractStatus)}</span></div>
-                        <div style="text-align:right; margin-top:8px; font-size:10px; color:#999">${item.lastUpdated ? 'Updated: '+item.lastUpdated : ''}</div>
+                cg.innerHTML = flt.map(i => {
+                    let cCls = i.contractStatus==='Renewed'?'card-renewed':i.contractStatus==='Not Interested'?'card-dead':'';
+                    return `<div class="card ${cCls}" onclick="openEdit(${i.id})">
+                        <div class="flex justify-between"><h3>${escapeHtml(i.name)}</h3></div>
+                        <div style="margin-bottom:10px;">${i.tags.map(t=>`<span class="tag">${escapeHtml(t)}</span>`).join('')}</div>
+                        ${i.bmetUser?`<div class="flex justify-between mb-2"><span class="label">BMET</span><span style="font-weight:600"><i class="fa-solid fa-user-gear"></i> ${escapeHtml(i.bmetUser)}</span></div>`:''}
+                        <div class="flex justify-between mb-2"><span class="label">Loc</span><span>${escapeHtml(i.city)}</span></div>
+                        <div class="flex justify-between"><span class="label">Status</span><span>${escapeHtml(i.contractStatus)}</span></div>
+                        <div style="text-align:right; margin-top:8px; font-size:10px; color:#999">Updated: ${i.lastUpdated}</div>
                     </div>`;
                 }).join('');
-                
-                cardGrid.innerHTML = cardHtml;
 
-                if(!document.getElementById('chartsView').classList.contains('hidden')) {
-                    renderCharts();
-                }
+                if(!document.getElementById('chartsView').classList.contains('hidden')) renderCharts();
             }
 
             function renderCharts() {
-                const satCounts = { "Satisfied": 0, "Neutral": 0, "Unsatisfied": 0, "Unknown": 0 };
-                const statusCounts = {};
-                const regionCounts = {};
-
-                db.forEach(item => {
-                    if(item.satisfaction === 'High' || item.satisfaction === 'Satisfied') satCounts["Satisfied"]++;
-                    else if(item.satisfaction === 'Medium' || item.satisfaction === 'Neutral') satCounts["Neutral"]++;
-                    else if(item.satisfaction === 'Low' || item.satisfaction === 'Unsatisfied') satCounts["Unsatisfied"]++;
-                    else satCounts["Unknown"]++;
-
-                    const s = (item.contractStatus === '-' || !item.contractStatus) ? 'No Status' : item.contractStatus;
-                    statusCounts[s] = (statusCounts[s] || 0) + 1;
-                    const r = item.region || 'Unknown';
-                    regionCounts[r] = (regionCounts[r] || 0) + 1;
+                const sC = { "Satisfied":0, "Neutral":0, "Unsatisfied":0, "Unknown":0 }, stC = {}, rC = {};
+                db.forEach(i => {
+                    if(i.satisfaction.includes('Satisfied')||i.satisfaction==='High') sC["Satisfied"]++;
+                    else if(i.satisfaction.includes('Neutral')||i.satisfaction==='Medium') sC["Neutral"]++;
+                    else if(i.satisfaction.includes('Unsatisfied')||i.satisfaction==='Low') sC["Unsatisfied"]++;
+                    else sC["Unknown"]++;
+                    stC[i.contractStatus||'No Status'] = (stC[i.contractStatus||'No Status']||0)+1;
+                    rC[i.region||'Unknown'] = (rC[i.region||'Unknown']||0)+1;
                 });
-
-                updateChart('sat', 'satChart', 'doughnut', ['Satisfied', 'Neutral', 'Unsatisfied', 'Unknown'], Object.values(satCounts), ['#28a745', '#ffc107', '#dc3545', '#ccc'], 'Customer Satisfaction');
-                updateChart('status', 'statusChart', 'bar', Object.keys(statusCounts), Object.values(statusCounts), '#2d2d2d', 'Call Outcome Status');
-                updateChart('region', 'regionChart', 'bar', Object.keys(regionCounts), Object.values(regionCounts), CONFIG.COLORS.accent, 'Hospitals by Region', { indexAxis: 'y' });
+                updCh('sat','satChart','doughnut',['Satisfied','Neutral','Unsatisfied','Unknown'],Object.values(sC),['#28a745','#ffc107','#dc3545','#ccc'],'Satisfaction');
+                updCh('status','statusChart','bar',Object.keys(stC),Object.values(stC),'#2d2d2d','Call Outcome');
+                updCh('region','regionChart','bar',Object.keys(rC),Object.values(rC),CONFIG.COLORS.accent,'By Region',{indexAxis:'y'});
             }
 
-            function updateChart(key, canvasId, type, labels, data, colors, title, extraOptions = {}) {
-                const ctx = document.getElementById(canvasId).getContext('2d');
-                if(chartInstances[key]) chartInstances[key].destroy();
-                chartInstances[key] = new Chart(ctx, {
-                    type: type,
-                    data: { labels: labels, datasets: [{ label: 'Count', data: data, backgroundColor: colors }] },
-                    options: { responsive: true, maintainAspectRatio: false, plugins: { title: { display: true, text: title } }, ...extraOptions }
-                });
+            function updCh(k,id,typ,lbl,dat,col,tit,opt={}) {
+                const ctx = document.getElementById(id).getContext('2d');
+                if(chartInstances[k]) chartInstances[k].destroy();
+                chartInstances[k] = new Chart(ctx, { type:typ, data:{labels:lbl,datasets:[{label:'Count',data:dat,backgroundColor:col}]}, options:{maintainAspectRatio:false,plugins:{title:{display:true,text:tit}},...opt} });
             }
 
             window.switchView = function(view) {
-                const table = document.getElementById('tableView');
-                const grid = document.getElementById('cardView');
-                const charts = document.getElementById('chartsView');
-                const controls = document.getElementById('mainControls');
-                const btns = document.querySelectorAll('.view-btn');
+                ['tableView','cardView','chartsView'].forEach(id => document.getElementById(id).classList.add('hidden'));
+                document.getElementById('mainControls').classList.remove('hidden');
+                document.querySelectorAll('.view-btn').forEach(b => b.classList.remove('active'));
                 
-                table.classList.add('hidden');
-                grid.classList.add('hidden');
-                charts.classList.add('hidden');
-                controls.classList.remove('hidden'); 
-                
-                btns.forEach(b => b.classList.remove('active'));
-
-                if(view === 'table') {
-                    table.classList.remove('hidden');
-                    btns[0].classList.add('active');
-                } else if(view === 'card') {
-                    grid.classList.remove('hidden');
-                    btns[1].classList.add('active');
-                } else if(view === 'charts') {
-                    charts.classList.remove('hidden');
-                    btns[2].classList.add('active');
-                    controls.classList.add('hidden'); 
-                    renderCharts();
+                const map = {'table':['tableView',0], 'card':['cardView',1], 'charts':['chartsView',2]};
+                if(map[view]) {
+                    document.getElementById(map[view][0]).classList.remove('hidden');
+                    document.querySelectorAll('.view-btn')[map[view][1]].classList.add('active');
                 }
+                if(view==='charts') { document.getElementById('mainControls').classList.add('hidden'); renderCharts(); }
             };
 
             window.openEdit = function(id) {
-                currentEditId = id; 
-                const item = db[id]; 
-                
-                document.getElementById('modalTitle').innerText = item.name;
-                document.getElementById('modalLocationText').innerText = `${item.region} / ${item.city}`;
+                currentEditId = id; const i = db[id];
+                document.getElementById('modalTitle').innerText = i.name;
+                document.getElementById('modalLocationText').innerText = `${i.region} / ${i.city}`;
+                document.getElementById('warrantyBadge').classList.toggle('hidden', !i.tags.some(t=>t.toLowerCase().includes('warranty')));
+                document.getElementById('modalBmetDisplay').classList.toggle('hidden', !i.bmetUser);
+                if(i.bmetUser) document.getElementById('bmetName').innerText = i.bmetUser;
 
-                const isWarranty = item.tags.some(tag => tag.toLowerCase().includes('warranty'));
-                document.getElementById('warrantyBadge').style.display = isWarranty ? 'inline-block' : 'none';
-                
-                const bmetDisplay = document.getElementById('modalBmetDisplay');
-                if(item.bmetUser) {
-                    document.getElementById('bmetName').innerText = item.bmetUser;
-                    bmetDisplay.style.display = 'flex';
-                } else {
-                    bmetDisplay.style.display = 'none';
-                }
-
-                document.getElementById('editContactName').value = item.contact || "";
-                
-                const phoneInput = document.getElementById('editContactMobile');
-                const mobile = item.mobile || "";
-                phoneInput.value = mobile;
-                updatePhoneDisplay(mobile);
-
-                document.getElementById('editSat').value = (item.satisfaction === '-' || !item.satisfaction) ? '-' : item.satisfaction;
-                document.getElementById('editCallStatus').value = (item.contractStatus === '-' || !item.contractStatus) ? '-' : item.contractStatus;
-                document.getElementById('editNotes').value = item.notes;
-
+                document.getElementById('editContactName').value = i.contact || "";
+                document.getElementById('editContactMobile').value = i.mobile || "";
+                updPhone(i.mobile);
+                document.getElementById('editSat').value = (['Satisfied','Neutral','Unsatisfied'].includes(i.satisfaction)) ? i.satisfaction : '-';
+                document.getElementById('editCallStatus').value = (i.contractStatus==='-'||!i.contractStatus) ? '-' : i.contractStatus;
+                document.getElementById('editNotes').value = i.notes;
                 document.getElementById('editModal').style.display = 'flex';
             };
 
-            function updatePhoneDisplay(mobile) {
-                const display = document.getElementById('displayPhone');
-                if(mobile) {
-                    display.innerHTML = `<a href="tel:${escapeHtml(mobile)}">${escapeHtml(mobile)}</a>`;
-                } else {
-                    display.innerText = "No Number";
-                }
-            }
-
+            function updPhone(m) { document.getElementById('displayPhone').innerHTML = m ? `<a href="tel:${escapeHtml(m)}">${escapeHtml(m)}</a>` : "No Number"; }
+            
             window.promptPhoneUpdate = function() {
-                const hiddenInput = document.getElementById('editContactMobile');
-                const current = hiddenInput.value;
-                const newPhone = prompt("Enter new mobile number:", current);
-                
-                if(newPhone !== null) {
-                    hiddenInput.value = newPhone;
-                    updatePhoneDisplay(newPhone);
-                }
-                document.getElementById('editContactName').focus();
+                const inp = document.getElementById('editContactMobile');
+                const n = prompt("Enter new mobile number:", inp.value);
+                if(n!==null) { inp.value = n; updPhone(n); }
             };
 
             window.saveChanges = async function() {
-                const btn = document.getElementById('saveBtn');
-                const originalText = btn.textContent;
-                
-                const modalInputs = document.querySelectorAll('#editModal input, #editModal select, #editModal textarea, #editModal button');
-                modalInputs.forEach(el => el.disabled = true);
-                
-                btn.textContent = "Saving...";
-
-                const item = db[currentEditId];
-                if (!item) {
-                    alert("Error: Record not found in local data.");
-                    resetModalUI(modalInputs, btn, originalText);
-                    return;
-                }
-                
-                const newSat = document.getElementById('editSat').value;
-                const newCallStatus = document.getElementById('editCallStatus').value;
-                const newNotes = document.getElementById('editNotes').value;
-                const newContactName = document.getElementById('editContactName').value;
-                const newContactMobile = document.getElementById('editContactMobile').value;
-
-                const payload = {
-                    hospitalName: item.name, 
-                    satisfaction: newSat,
-                    contractStatus: newCallStatus, 
-                    notes: newNotes,
-                    contactName: newContactName,
-                    contactMobile: newContactMobile
-                };
+                const btn = document.getElementById('saveBtn'), txt = btn.textContent;
+                const inps = document.querySelectorAll('#editModal input, #editModal select, #editModal textarea, #editModal button');
+                inps.forEach(e => e.disabled = true); btn.textContent = "Saving...";
 
                 try {
-                    const response = await fetch(CONFIG.SCRIPT_URL, {
-                        method: 'POST',
-                        redirect: "follow", 
-                        headers: { 'Content-Type': 'text/plain;charset=utf-8' },
-                        body: JSON.stringify(payload)
-                    });
-
-                    if (!response.ok) throw new Error(`Server returned ${response.status}`);
-                    const result = await response.json();
-                    if (result.result !== "success") throw new Error(result.message || "Unknown error");
+                    const i = db[currentEditId];
+                    if(!i) throw new Error("Record not found");
                     
-                    item.satisfaction = newSat;
-                    item.contractStatus = newCallStatus;
-                    item.notes = newNotes;
-                    item.contact = newContactName;
-                    item.mobile = newContactMobile;
-                    item.lastUpdated = new Date().toLocaleDateString('en-GB');
+                    const pld = {
+                        hospitalName: i.name, satisfaction: document.getElementById('editSat').value,
+                        contractStatus: document.getElementById('editCallStatus').value, notes: document.getElementById('editNotes').value,
+                        contactName: document.getElementById('editContactName').value, contactMobile: document.getElementById('editContactMobile').value
+                    };
 
-                    closeModal();
-                    render(); 
-                    alert("Saved successfully.");
-
-                } catch (error) {
-                    console.error(error);
-                    alert("Error saving: " + error.message);
-                } finally {
-                    resetModalUI(modalInputs, btn, originalText);
-                }
+                    const r = await fetch(CONFIG.SCRIPT_URL, { method:'POST', redirect:"follow", headers:{'Content-Type':'text/plain;charset=utf-8'}, body:JSON.stringify(pld) });
+                    if(!r.ok) throw new Error(r.status);
+                    const res = await r.json();
+                    if(res.result!=="success") throw new Error(res.message);
+                    
+                    Object.assign(i, { satisfaction:pld.satisfaction, contractStatus:pld.contractStatus, notes:pld.notes, contact:pld.contactName, mobile:pld.contactMobile, lastUpdated: new Date().toLocaleDateString('en-GB') });
+                    closeModal(); render(); alert("Saved successfully.");
+                } catch(e) { alert("Error: "+e.message); } 
+                finally { inps.forEach(e => e.disabled = false); btn.textContent = txt; }
             };
 
-            function resetModalUI(inputs, btn, originalText) {
-                inputs.forEach(el => el.disabled = false);
-                btn.textContent = originalText;
-            }
-
-            window.closeModal = function() {
-                document.getElementById('editModal').style.display = 'none';
-            };
+            window.closeModal = function() { document.getElementById('editModal').style.display = 'none'; };
 
             window.exportToCSV = function() {
-                if(!db || db.length === 0) { alert("No data to export"); return; }
-                const headers = ["Hospital Name", "Direction", "Region", "City", "Contact Name", "Contact Mobile", "BMET User", "Satisfaction", "Contract Status", "Last Updated", "Tags", "Notes"];
-                const csvRows = db.map(item => {
-                    const row = [
-                        item.name, item.direction, item.region, item.city,
-                        item.contact, item.mobile, item.bmetUser,
-                        item.satisfaction, item.contractStatus, item.lastUpdated,
-                        item.tags.join("; "), item.notes.replace(/(\r\n|\n|\r)/gm, " ")
-                    ];
-                    return row.map(str => `"${String(str).replace(/"/g, '""')}"`).join(",");
-                });
-                const csvContent = [headers.join(","), ...csvRows].join("\n");
-                const blob = new Blob([csvContent], { type: 'text/csv;charset=utf-8;' });
-                const url = URL.createObjectURL(blob);
-                const link = document.createElement("a");
-                link.setAttribute("href", url);
-                link.setAttribute("download", "Rowad_Calls_Export.csv");
-                link.style.visibility = 'hidden';
-                document.body.appendChild(link);
-                link.click();
-                document.body.removeChild(link);
+                if(!db.length) return alert("No data");
+                const head = ["Hospital Name", "Direction", "Region", "City", "Contact Name", "Contact Mobile", "BMET User", "Satisfaction", "Contract Status", "Last Updated", "Tags", "Notes"];
+                const rows = db.map(i => [i.name, i.direction, i.region, i.city, i.contact, i.mobile, i.bmetUser, i.satisfaction, i.contractStatus, i.lastUpdated, i.tags.join("; "), i.notes.replace(/[\r\n]/g, " ")].map(s=>`"${String(s).replace(/"/g,'""')}"`).join(","));
+                const blob = new Blob([[head.join(","), ...rows].join("\n")], { type: 'text/csv;charset=utf-8;' });
+                const link = document.createElement("a"); link.href = URL.createObjectURL(blob); link.download = "Rowad_Calls_Export.csv";
+                document.body.appendChild(link); link.click(); document.body.removeChild(link);
             };
-
         })();
     </script>
 </body>
