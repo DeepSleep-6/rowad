@@ -3,7 +3,8 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Calls Dashboard</title>
+    <title>Rowad Calls Dashboard</title>
+    <script src="https://accounts.google.com/gsi/client" async defer></script>
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
     <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
     <style>
@@ -14,106 +15,85 @@
             --danger-bg: #f8d7da; --danger-text: #721c24;
         }
         body { font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; background: var(--bg); margin: 0; color: var(--text); }
-        
-        /* --- UTILITIES --- */
-        .flex { display: flex; } .flex-col { flex-direction: column; } .grid { display: grid; }
-        .items-center { align-items: center; } .justify-between { justify-content: space-between; }
-        .gap-2 { gap: 8px; } .gap-4 { gap: 16px; } .w-full { width: 100%; } .hidden { display: none !important; }
+        .flex { display: flex; } .items-center { align-items: center; } .justify-between { justify-content: space-between; }
+        .gap-2 { gap: 8px; } .gap-4 { gap: 16px; } .hidden { display: none !important; }
         .p-4 { padding: 16px; } .rounded { border-radius: 8px; }
-        .mt-4 { margin-top: 16px; }
-        
-        /* --- COMPONENTS --- */
+
+        /* Top Bar */
         .top-bar { background: var(--surface); padding: 15px 30px; box-shadow: 0 4px 20px rgba(0,0,0,0.05); border-bottom: 3px solid var(--accent); position: sticky; top: 0; z-index: 100; }
         .logo-img { height: 45px; width: auto; } 
         .page-title { font-size: 20px; font-weight: 700; padding-left: 15px; border-left: 2px solid #eee; margin-left: 15px; }
         
-        /* Inputs & Buttons */
+        /* Login UI */
+        .user-badge { background: #f0f0f0; padding: 6px 12px; border-radius: 20px; font-size: 13px; font-weight: 600; display: flex; align-items: center; gap: 8px; }
+        .role-tag { font-size: 10px; padding: 2px 6px; border-radius: 4px; background: #ccc; color: #333; text-transform: uppercase; }
+        .role-admin { background: #e8f5e9; color: #1b5e20; border: 1px solid #c8e6c9; }
+        .role-rowad { background: #e3f2fd; color: #0d47a1; border: 1px solid #bbdefb; }
+
+        /* Controls */
         .view-btn { border: none; background: #eee; padding: 8px 12px; cursor: pointer; border-radius: 6px; color: var(--text-light); transition: 0.2s; }
-        .view-btn:hover { background: #ddd; }
         .view-btn.active { background: white; color: var(--accent-dark); font-weight: bold; box-shadow: 0 1px 3px rgba(0,0,0,0.1); }
-        
         input, select, textarea { padding: 12px; border: 1px solid var(--border); border-radius: 8px; width: 100%; box-sizing: border-box; outline: none; background: #fff; font-family: inherit; }
-        input:focus, select:focus, textarea:focus { border-color: var(--accent); box-shadow: 0 0 0 2px rgba(191,161,95,0.2); }
-        .btn-action { background: var(--accent); color: white; border: none; padding: 6px 14px; border-radius: 6px; cursor: pointer; font-weight: 600; }
-        .btn-save { width: 100%; padding: 14px; margin-top: 10px; background: var(--accent); color: white; border: none; border-radius: 8px; cursor: pointer; font-size: 16px; font-weight: 600; }
-        
-        /* Layouts */
         .container { max-width: 1400px; margin: 30px auto; padding: 0 20px; min-height: 80vh; }
         .controls { flex-wrap: wrap; margin-bottom: 25px; }
         .search-box { flex: 2; min-width: 250px; } .filter-box { flex: 1; min-width: 150px; }
-        
-        /* Widget: Money on the Table */
-        .alert-widget { background: var(--danger-bg); color: var(--danger-text); border: 1px solid #f5c6cb; padding: 15px; margin-bottom: 20px; border-radius: 8px; display: flex; align-items: center; justify-content: space-between; }
-        .alert-widget i { margin-right: 10px; font-size: 1.2em; }
-        .alert-count { font-weight: 800; font-size: 1.1em; text-decoration: underline; }
 
         /* Table */
         .data-table { width: 100%; border-collapse: separate; border-spacing: 0; background: var(--surface); border-radius: 12px; overflow: hidden; box-shadow: 0 4px 15px rgba(0,0,0,0.03); }
         .data-table th { text-align: left; padding: 18px 15px; background: #fafafa; color: var(--text-light); font-weight: 700; text-transform: uppercase; border-bottom: 2px solid var(--border); cursor: pointer; }
         .data-table td { padding: 15px; border-bottom: 1px solid var(--border); }
-        
-        /* Cards & Status */
-        .grid-view { grid-template-columns: repeat(auto-fill, minmax(300px, 1fr)); gap: 20px; }
-        .card { background: var(--surface); padding: 20px; border: 1px solid var(--border); transition: transform 0.2s; cursor: pointer; }
-        .card:hover { transform: translateY(-3px); border-color: var(--accent); box-shadow: 0 8px 25px rgba(0,0,0,0.08); }
-        
         .tag { padding: 4px 10px; border-radius: 12px; font-size: 11px; background: #eee; border: 1px solid #ddd; display: inline-block; margin: 0 4px 2px 0; }
-        .status-badge { font-weight: 700; padding: 4px 8px; border-radius: 4px; font-size: 11px; }
-        .row-renewed, .card-renewed { background-color: var(--success-bg); }
-        .row-dead, .card-dead { opacity: 0.6; background-color: #f9f9f9; filter: grayscale(1); }
-        .sat-dot { height: 10px; width: 10px; border-radius: 50%; display: inline-block; margin-right: 5px; }
+        .btn-action { background: var(--accent); color: white; border: none; padding: 6px 14px; border-radius: 6px; cursor: pointer; font-weight: 600; }
         
-        /* Misc */
-        .loading-container { text-align: center; padding: 60px 0; color: var(--text-light); }
-        .spinner { width: 40px; height: 40px; border: 4px solid #e0e0e0; border-top-color: var(--accent); border-radius: 50%; animation: spin 1s linear infinite; margin: 0 auto 15px; }
-        .charts-container { grid-template-columns: repeat(auto-fit, minmax(400px, 1fr)); margin-bottom: 30px; }
-        .chart-box { background: white; padding: 20px; border: 1px solid var(--border); height: 350px; }
-        @keyframes spin { to { transform: rotate(360deg); } }
-        .no-results { text-align: center; padding: 40px; color: var(--text-light); font-style: italic; grid-column: 1 / -1; }
-
         /* Modal */
         .modal-overlay { position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.6); display: none; justify-content: center; align-items: center; z-index: 1000; backdrop-filter: blur(2px); }
         .modal-card { background: var(--surface); width: 100%; max-width: 500px; padding: 30px; border-radius: 12px; border-top: 5px solid var(--accent); }
         .contact-box { background: #fcfcfc; border: 1px solid var(--border); padding: 12px; position: relative; }
-        .contact-phone { font-size: 18px; font-weight: 700; color: #0f172a; margin-top: 4px; display: flex; align-items: center; gap: 10px; }
-        .wa-btn { background: #25D366; color: white; border: none; border-radius: 50%; width: 32px; height: 32px; display: flex; align-items: center; justify-content: center; cursor: pointer; text-decoration: none; font-size: 16px; transition: 0.2s; }
-        .wa-btn:hover { background: #128C7E; transform: scale(1.1); }
-        .wa-btn.disabled { background: #ccc; cursor: not-allowed; pointer-events: none; }
+        .wa-btn { background: #25D366; color: white; border: none; border-radius: 50%; width: 32px; height: 32px; display: flex; align-items: center; justify-content: center; cursor: pointer; text-decoration: none; font-size: 16px; margin-left: auto; }
+        .btn-save { width: 100%; padding: 14px; margin-top: 10px; background: var(--accent); color: white; border: none; border-radius: 8px; cursor: pointer; font-size: 16px; font-weight: 600; }
+        .btn-save:disabled { background: #ccc; cursor: not-allowed; }
+        
+        .loading-container { text-align: center; padding: 60px 0; color: var(--text-light); }
+        .spinner { width: 40px; height: 40px; border: 4px solid #e0e0e0; border-top-color: var(--accent); border-radius: 50%; animation: spin 1s linear infinite; margin: 0 auto 15px; }
+        @keyframes spin { to { transform: rotate(360deg); } }
 
-        @media (max-width: 768px) { .data-table, .view-toggles { display: none; } .grid-view { display: grid !important; } .controls { flex-direction: column; } }
+        @media (max-width: 768px) { .data-table { display: none; } .grid-view { display: grid !important; } .controls { flex-direction: column; } }
+        .grid-view { display: grid; grid-template-columns: repeat(auto-fill, minmax(300px, 1fr)); gap: 20px; }
+        .card { background: var(--surface); padding: 20px; border: 1px solid var(--border); transition: transform 0.2s; cursor: pointer; }
     </style>
 </head>
 <body>
-
     <div class="top-bar flex items-center justify-between">
         <div class="flex items-center">
             <img src="https://alrowad-ksa.com/wp-content/uploads/2022/10/Rowad-Medical-Services_Horizontal_Logo.svg" alt="Rowad Logo" class="logo-img">
             <span class="page-title">Calls Dashboard</span>
         </div>
-        <div class="view-toggles flex gap-2" id="viewControls">
-            <button class="view-btn active" data-view="table"><i class="fa-solid fa-table"></i> Table</button>
-            <button class="view-btn" data-view="card"><i class="fa-solid fa-th-large"></i> Grid</button>
-            <button class="view-btn" data-view="charts"><i class="fa-solid fa-chart-pie"></i> Charts</button>
-            <button class="view-btn" data-view="csv"><i class="fa-solid fa-file-csv"></i> Export</button>
+        <div class="flex items-center gap-4">
+            <div id="g_id_onload"
+                 data-client_id="174253379694-95msalgnm4kbpjlftil4vm8o26c7h7cc.apps.googleusercontent.com"
+                 data-callback="handleCredentialResponse"
+                 data-auto_prompt="false">
+            </div>
+            <div class="g_id_signin" data-type="standard" data-shape="pill" data-theme="outline" data-text="signin_with" data-size="medium" data-logo_alignment="left" id="loginBtn"></div>
+            
+            <div id="userBadge" class="user-badge hidden">
+                <i class="fa-solid fa-user-circle"></i>
+                <span id="userNameDisplay">User</span>
+                <span id="roleLabel" class="role-tag">Public</span>
+            </div>
+
+            <div class="view-toggles flex gap-2" id="viewControls">
+                <button class="view-btn active" data-view="table"><i class="fa-solid fa-table"></i></button>
+                <button class="view-btn" data-view="card"><i class="fa-solid fa-th-large"></i></button>
+                <button class="view-btn" data-view="charts"><i class="fa-solid fa-chart-pie"></i></button>
+            </div>
         </div>
     </div>
 
     <div class="container">
-        <div id="alertWidget" class="alert-widget hidden">
-            <div class="flex items-center">
-                <i class="fa-solid fa-circle-exclamation"></i>
-                <span><strong>Money on the Table:</strong> You have <span id="overdueCount" class="alert-count">0</span> pending quotes overdue (>14 days).</span>
-            </div>
-            <button class="view-btn" onclick="filterOverdue()" style="background:white; border:1px solid #721c24; color:#721c24;">Show List</button>
-        </div>
-
-        <div class="controls flex gap-4" id="mainControls">
-            <div class="search-box">
-                <input type="text" id="search" placeholder="Search Hospital, Contact, or SN..." onkeyup="debouncedRender()">
-            </div>
-            <div class="filter-box"><select id="filterDirection" onchange="updateRegionOptions()"><option value="All">All Directions</option></select></div>
-            <div class="filter-box hidden" id="boxRegion"><select id="filterRegion" onchange="updateCityOptions()"><option value="All">All Regions</option></select></div>
-            <div class="filter-box hidden" id="boxCity"><select id="filterCity" onchange="debouncedRender()"><option value="All">All Cities</option></select></div>
+        <div class="controls flex gap-4">
+            <div class="search-box"><input type="text" id="search" placeholder="Search Hospital, Contact..." onkeyup="debouncedRender()"></div>
+            <div class="filter-box"><select id="filterDirection" onchange="debouncedRender()"><option value="All">All Directions</option></select></div>
         </div>
 
         <div id="loading" class="loading-container"><div class="spinner"></div><span>Loading Database...</span></div>
@@ -121,419 +101,270 @@
         <table class="data-table hidden" id="tableView">
             <thead>
                 <tr>
-                    <th onclick="sortBy('name')" width="30%">Hospital <i class="fa-solid fa-sort"></i></th>
-                    <th onclick="sortBy('location')">Location <i class="fa-solid fa-sort"></i></th>
-                    <th>Tags</th> <th onclick="sortBy('satisfaction')">Sat <i class="fa-solid fa-sort"></i></th>
-                    <th onclick="sortBy('contractStatus')">Status <i class="fa-solid fa-sort"></i></th>
-                    <th>Action</th>
+                    <th width="30%">Hospital</th> <th>Location</th> <th>Tags</th> <th>Sat</th> <th>Status</th> <th>Action</th>
                 </tr>
             </thead>
             <tbody id="tableBody"></tbody>
         </table>
-
-        <div class="grid-view hidden" id="cardView"></div>
-
-        <div class="hidden" id="chartsView">
-            <div class="charts-container grid gap-4">
-                <div class="chart-box rounded"><canvas id="satChart"></canvas></div>
-                <div class="chart-box rounded"><canvas id="qualityChart"></canvas></div>
-                <div class="chart-box rounded"><canvas id="statusChart"></canvas></div>
-            </div>
-        </div>
         
-        <div class="footer-credit text-light" style="text-align:center; padding:30px; font-size:12px;">Developed by Faisal Alzougbi</div>
+        <div class="grid-view hidden" id="cardView"></div>
+        <div class="hidden" id="chartsView"><canvas id="statusChart" style="max-height:400px"></canvas></div>
     </div>
 
     <div class="modal-overlay" id="editModal">
         <div class="modal-card">
             <div class="flex justify-between items-start mb-4">
-                <div class="flex-col gap-2">
-                    <h2 style="margin:0; font-size:24px;" id="modalTitle">Hospital</h2>
-                    <div style="font-size:14px; color:#777;"><i class="fa-solid fa-location-dot"></i> <span id="modalLocationText"></span></div>
-                    <span class="tag hidden" id="warrantyBadge" style="background:#333; color:white; font-weight:bold;">WARRANTY</span>
-                    <div id="modalBmetDisplay" class="flex items-center gap-2 hidden" style="background:#f0f0f0; padding:4px 10px; border-radius:4px; font-size:13px;"><i class="fa-solid fa-user-gear"></i> <span id="bmetName"></span></div>
-                </div>
+                <h2 style="margin:0; font-size:24px;" id="modalTitle">Hospital</h2>
                 <button onclick="closeModal()" style="border:none; background:none; font-size:24px; cursor:pointer;">&times;</button>
             </div>
 
             <div class="mb-4">
                 <label class="block mb-2 font-bold" style="font-size:14px; color:#666;">Contact</label>
                 <div class="contact-box rounded">
-                    <input type="text" id="editContactName" style="border:none; background:transparent; font-size:16px; font-weight:500; padding:0; width:100%;" placeholder="Name">
-                    <div class="contact-phone">
-                        <i class="fa-solid fa-phone" style="font-size:14px;"></i> 
-                        <span id="displayPhone"></span>
-                        <a id="waLink" class="wa-btn hidden" target="_blank" title="Open WhatsApp"><i class="fa-brands fa-whatsapp"></i></a>
+                    <input type="text" id="editContactName" class="secure-input" disabled placeholder="Name">
+                    <div class="flex items-center mt-2">
+                        <i class="fa-solid fa-phone" style="margin-right:8px; color:#666;"></i> 
+                        <span id="displayPhone">***</span>
+                        <a id="waLink" class="wa-btn hidden" target="_blank"><i class="fa-brands fa-whatsapp"></i></a>
                     </div>
                     <input type="hidden" id="editContactMobile">
-                    <button onclick="promptPhoneUpdate()" style="position:absolute; right:15px; top:50%; transform:translateY(-50%); color:var(--accent); border:none; background:none; cursor:pointer;"><i class="fa-solid fa-pen"></i></button>
+                    <button id="editPhoneBtn" onclick="promptPhoneUpdate()" class="hidden" style="margin-top:5px; color:var(--accent); border:none; background:none; cursor:pointer; font-size:12px;">Change Number</button>
                 </div>
             </div>
 
             <div class="grid gap-4 mb-4">
-                <div><label class="block mb-2 font-bold" style="font-size:14px; color:#666;">Satisfaction</label>
-                <select id="editSat"><option value="-">-</option><option value="Satisfied">Satisfied</option><option value="Neutral">Neutral</option><option value="Unsatisfied">Unsatisfied</option></select></div>
-                <div><label class="block mb-2 font-bold" style="font-size:14px; color:#666;">Status</label>
-                <select id="editCallStatus"><option value="-">-</option><option value="No Answer">No Answer</option><option value="Call Later">Call Later</option><option value="Quote Requested">Quote Requested</option><option value="Not Interested">Not Interested</option><option value="Renewed">Renewed</option></select></div>
+                <div><label class="block mb-2 font-bold">Satisfaction</label>
+                <select id="editSat" class="secure-input" disabled><option value="-">-</option><option value="Satisfied">Satisfied</option><option value="Neutral">Neutral</option><option value="Unsatisfied">Unsatisfied</option></select></div>
+                <div><label class="block mb-2 font-bold">Status</label>
+                <select id="editCallStatus" class="secure-input" disabled><option value="-">-</option><option value="No Answer">No Answer</option><option value="Call Later">Call Later</option><option value="Quote Requested">Quote Requested</option><option value="Not Interested">Not Interested</option><option value="Renewed">Renewed</option></select></div>
             </div>
 
             <div class="mb-4">
-                <label class="block mb-2 font-bold" style="font-size:14px; color:#666;">Notes</label>
-                <textarea id="editNotes" style="resize:vertical; min-height:80px;" placeholder="Add notes..."></textarea>
+                <label class="block mb-2 font-bold">Notes</label>
+                <textarea id="editNotes" class="secure-input" disabled style="resize:vertical; min-height:80px;" placeholder="Add notes..."></textarea>
             </div>
-            <button class="btn-save" id="saveBtn" onclick="saveChanges()">Save Updates</button>
+            
+            <button class="btn-save" id="saveBtn" onclick="saveChanges()" disabled>Login to Edit</button>
+            <div id="loginPrompt" style="text-align:center; font-size:12px; color:#666; margin-top:5px;" class="hidden">Only Editors can save changes.</div>
         </div>
     </div>
 
     <script>
-        (() => {
-            const CONFIG = {
-                // UPDATED URL
-                SCRIPT_URL: "https://script.google.com/macros/s/AKfycbyxRpBv4bC-YqWnEHv4vO8TAmt85QBvT1NuDT1_Siu5nA9RUASkeR96Dqg2cDUKzLX0CA/exec",
-                COLORS: { renewed: '#155724', renewedBg: '#d4edda', quote: '#0c5460', quoteBg: '#d1ecf1', later: '#856404', laterBg: '#fff3cd', noAnswer: '#721c24', noAnswerBg: '#f8d7da', dead: '#383d41', deadBg: '#e2e3e5', def: '#2c3e50', defBg: 'transparent' },
-                WA_MSG: encodeURIComponent("يرجى المشاركة في هذا التقييم كجزء من جهودنا المستمرة لخدمتكم بشكل أفضل\nhttps://forms.gle/DfmEtq8LftRDrAqz5")
-            };
-            let db = [], currentEditId = -1, chartInstances = {}, currentSort = { key: 'contractStatus', asc: true };
+        // --- PASTE YOUR DEPLOYED SCRIPT URL HERE ---
+        const SCRIPT_URL = "https://script.google.com/macros/s/AKfycbwaush-5NL-MH3OXm7mqXdj4Gy9M9Wlv8qh8Pe7UmlaH5k7jcb4T218DDpHfD4r4B3asA/exec"; 
+        
+        let db = [], currentEditId = -1;
+        let currentUser = { email: null, token: null, role: 'Public' };
 
-            function debounce(func, wait) { let timeout; return function(...args) { clearTimeout(timeout); timeout = setTimeout(() => func.apply(this, args), wait); }; }
-            function escapeHtml(text) { return text ? String(text).replace(/[&<>"']/g, m => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#039;'}[m])) : ''; }
+        // 1. INIT
+        window.onload = function() {
+            fetchData();
+            document.getElementById('viewControls').addEventListener('click', (e) => {
+                const btn = e.target.closest('button');
+                if(btn) switchView(btn.dataset.view);
+            });
+        };
 
-            window.onload = function() {
-                fetchData();
-                document.getElementById('viewControls').addEventListener('click', (e) => {
-                    const btn = e.target.closest('button');
-                    if(!btn) return;
-                    const view = btn.dataset.view;
-                    if(view === 'csv') exportToCSV();
-                    else switchView(view);
+        // 2. LOGIN HANDLER
+        window.handleCredentialResponse = async function(response) {
+            currentUser.token = response.credential;
+            document.getElementById('loginBtn').style.opacity = '0.5';
+
+            try {
+                // Exchange token for Privileged Data
+                const res = await fetch(SCRIPT_URL, {
+                    method: 'POST',
+                    body: JSON.stringify({ action: 'login', token: currentUser.token })
                 });
-            };
-            
-            window.debouncedRender = debounce(() => render(), 300); 
+                const json = await res.json();
 
-            async function fetchData() {
-                try {
-                    const res = await fetch(CONFIG.SCRIPT_URL);
-                    const data = await res.json();
-                    db = data.map((row, idx) => {
-                        let auto = [];
-                        if ((row['Device']||'').includes('Surfacide') || row['Device'] === 'Both') auto.push('Surfacide');
-                        if ((row['Device']||'').includes('AccuFIT') || row['Device'] === 'Both') auto.push('AccuFIT');
-                        let updated = row['Last Updated'] ? new Date(row['Last Updated']) : null;
-                        
-                        return {
-                            id: idx,
-                            name: row['Hospital Name'] || 'Unknown',
-                            direction: row['Direction'] || 'Unknown',
-                            region: row['Region'] || 'Unknown',
-                            city: row['City'] || 'Unknown',
-                            location: (row['Region']||'') + (row['City']||''),
-                            contact: row['Contact'] || '',
-                            mobile: row['Contact Mobile Number'] || '',
-                            bmetUser: row['BMET User'] || '', 
-                            satisfaction: row['Satisfaction'] || '-',
-                            contractStatus: row['ContractStatus'] || '-', 
-                            tags: [...new Set([...auto, ...(row['Tags'] ? row['Tags'].split(',').map(s=>s.trim()) : [])])],
-                            notes: row['Notes'] || '',
-                            lastUpdated: updated ? updated.toLocaleDateString('en-GB') : '',
-                            lastUpdatedObj: updated,
-                            surfacideSN: row['Surfacide SN'] || '',
-                            accufitSN: row['AccuFIT SN'] || ''
-                        };
-                    });
-                    initFilters();
-                    calcWidget();
-                    document.getElementById('loading').style.display = 'none';
-                    switchView('table');
+                if (json.result === 'success') {
+                    // Update Identity
+                    currentUser.email = json.email;
+                    currentUser.role = json.role; 
+                    processData(json.data); // Reload DB with uncensored data
                     render();
-                } catch (e) { document.getElementById('loading').innerHTML = `<span style="color:red">Error: ${escapeHtml(e.message)}</span>`; }
-            }
-
-            function calcWidget() {
-                const now = new Date();
-                const overdue = db.filter(i => {
-                    if (i.contractStatus !== 'Quote Requested') return false;
-                    if (!i.lastUpdatedObj) return false;
-                    const diffTime = Math.abs(now - i.lastUpdatedObj);
-                    const diffDays = Math.ceil(diffTime / (1000 * 60 * 60 * 24)); 
-                    return diffDays > 14;
-                });
-                
-                const w = document.getElementById('alertWidget');
-                if (overdue.length > 0) {
-                    w.classList.remove('hidden');
-                    document.getElementById('overdueCount').innerText = overdue.length;
+                    updateUserUI(json);
                 } else {
-                    w.classList.add('hidden');
+                    alert("Login Failed: " + json.message);
                 }
-            }
+            } catch (e) { console.error(e); alert("Connection failed."); }
+        };
 
-            window.filterOverdue = function() {
-                // Simple filter injection
-                document.getElementById('search').value = "Quote Requested"; 
-                currentSort = { key: 'lastUpdated', asc: true }; // Oldest first
-                debouncedRender();
-            }
+        function updateUserUI(json) {
+            document.getElementById('loginBtn').classList.add('hidden');
+            const badge = document.getElementById('userBadge');
+            badge.classList.remove('hidden');
+            document.getElementById('userNameDisplay').innerText = json.email.split('@')[0];
+            const tag = document.getElementById('roleLabel');
+            tag.innerText = json.role;
+            tag.className = 'role-tag ' + (json.role === 'Admin' || json.role === 'Editor' ? 'role-admin' : 'role-rowad');
+        }
 
-            function initFilters() {
-                const s = document.getElementById('filterDirection'), dirs = [...new Set(db.map(x => x.direction))].sort();
-                s.innerHTML = '<option value="All">All Directions</option>';
-                dirs.forEach(d => d && s.add(new Option(d, d)));
-            }
-            
-            window.updateRegionOptions = function() {
-                const dir = document.getElementById('filterDirection').value;
-                const rBox = document.getElementById('boxRegion'), cBox = document.getElementById('boxCity');
-                if (dir === 'All') { rBox.classList.add('hidden'); cBox.classList.add('hidden'); document.getElementById('filterRegion').value='All'; document.getElementById('filterCity').value='All'; render(); return; }
-                const regs = [...new Set(db.filter(x => x.direction === dir).map(x => x.region))].sort();
-                const s = document.getElementById('filterRegion'); s.innerHTML = '<option value="All">All Regions</option>';
-                regs.forEach(r => s.add(new Option(r, r)));
-                rBox.classList.remove('hidden'); cBox.classList.add('hidden'); render();
-            };
-
-            window.updateCityOptions = function() {
-                const reg = document.getElementById('filterRegion').value;
-                if (reg === 'All') { document.getElementById('boxCity').classList.add('hidden'); document.getElementById('filterCity').value='All'; render(); return; }
-                const cities = [...new Set(db.filter(x => x.region === reg).map(x => x.city))].sort();
-                const s = document.getElementById('filterCity'); s.innerHTML = '<option value="All">All Cities</option>';
-                cities.forEach(c => s.add(new Option(c, c)));
-                document.getElementById('boxCity').classList.remove('hidden'); render();
-            };
-
-            window.sortBy = function(key) {
-                if (currentSort.key === key) currentSort.asc = !currentSort.asc;
-                else { currentSort.key = key; currentSort.asc = true; }
+        // 3. FETCH & RENDER
+        async function fetchData() {
+            try {
+                const res = await fetch(SCRIPT_URL);
+                const data = await res.json();
+                processData(data);
+                document.getElementById('loading').style.display = 'none';
+                document.getElementById('tableView').classList.remove('hidden');
                 render();
-            };
+            } catch(e) { console.error(e); }
+        }
 
-            function getSortWeight(s) { return {'Call Later':1, 'Quote Requested':1, 'No Answer':2, '-':2, 'Renewed':3, 'Not Interested':4}[s] || 2; }
-
-            function render() {
-                const tb = document.getElementById('tableBody'), cg = document.getElementById('cardView');
-                tb.innerHTML = ''; cg.innerHTML = '';
-                const search = document.getElementById('search').value.toLowerCase();
-                const fDir = document.getElementById('filterDirection').value, fReg = document.getElementById('filterRegion').value, fCity = document.getElementById('filterCity').value;
-
-                let flt = db.filter(i => {
-                    const txt = (i.name+i.contact+i.bmetUser+i.surfacideSN+i.accufitSN+i.contractStatus).toLowerCase();
-                    if (!txt.includes(search)) return false;
-                    if (fDir!=='All' && i.direction!==fDir) return false;
-                    if (fReg!=='All' && i.region!==fReg) return false;
-                    if (fCity!=='All' && i.city!==fCity) return false;
-                    return true;
-                });
-
-                if (flt.length === 0) {
-                    tb.innerHTML = '<tr><td colspan="6" class="no-results">No results found matching your criteria.</td></tr>';
-                    cg.innerHTML = '<div class="no-results">No results found matching your criteria.</div>';
-                    if(!document.getElementById('chartsView').classList.contains('hidden')) renderCharts();
-                    return; 
-                }
-
-                flt.sort((a,b) => {
-                    let vA, vB;
-                    if (currentSort.key==='contractStatus') {
-                         vA = getSortWeight(a[currentSort.key]); vB = getSortWeight(b[currentSort.key]);
-                    } else if (currentSort.key==='lastUpdated') {
-                        vA = a.lastUpdatedObj || new Date(0); vB = b.lastUpdatedObj || new Date(0);
-                    } else {
-                        vA = (a[currentSort.key]||'').toString().toLowerCase(); vB = (b[currentSort.key]||'').toString().toLowerCase();
-                    }
-                    return (vA < vB ? -1 : 1) * (currentSort.asc ? 1 : -1);
-                });
-
-                tb.innerHTML = flt.map(i => {
-                    let satC = i.satisfaction==='High'||i.satisfaction==='Satisfied'?'Satisfied' : i.satisfaction==='Low'||i.satisfaction==='Unsatisfied'?'Unsatisfied' : i.satisfaction==='Medium'||i.satisfaction==='Neutral'?'Neutral' : '';
-                    let satHtml = satC ? `<span class="sat-dot" style="background:${satC==='Satisfied'?'#28a745':satC==='Neutral'?'#ffc107':'#dc3545'}"></span> ${escapeHtml(i.satisfaction)}` : '-';
-                    
-                    let st = i.contractStatus, stC = CONFIG.COLORS.def, stBg = CONFIG.COLORS.defBg, rowC = '';
-                    if(st==='Renewed'){ stC=CONFIG.COLORS.renewed; stBg=CONFIG.COLORS.renewedBg; rowC='row-renewed'; }
-                    else if(st==='Quote Requested'){ stC=CONFIG.COLORS.quote; stBg=CONFIG.COLORS.quoteBg; }
-                    else if(st==='Call Later'){ stC=CONFIG.COLORS.later; stBg=CONFIG.COLORS.laterBg; }
-                    else if(st==='No Answer'){ stC=CONFIG.COLORS.noAnswer; stBg=CONFIG.COLORS.noAnswerBg; }
-                    else if(st==='Not Interested'){ stC=CONFIG.COLORS.dead; stBg=CONFIG.COLORS.deadBg; rowC='row-dead'; }
-                    
-                    return `<tr class="${rowC}">
-                        <td><strong>${escapeHtml(i.name)}</strong><br><span style="font-size:12px; color:#888">${escapeHtml(i.contact)}</span>${i.bmetUser?`<div style="font-size:11px;color:#2c3e50"><i class="fa-solid fa-user-gear"></i> ${escapeHtml(i.bmetUser)}</div>`:''}</td>
-                        <td>${escapeHtml(i.region)} / ${escapeHtml(i.city)}</td>
-                        <td>${i.tags.map(t=>`<span class="tag">${escapeHtml(t)}</span>`).join('')}</td>
-                        <td>${satHtml}</td>
-                        <td>${(st&&st!=='-')?`<span class="status-badge" style="color:${stC};background:${stBg}">${escapeHtml(st)}</span>`:'-'} <span style="font-size:10px;color:#999;display:block">Updated: ${i.lastUpdated}</span></td>
-                        <td><button class="btn-action" onclick="openEdit(${i.id})"><i class="fa-solid fa-pen"></i></button></td>
-                    </tr>`;
-                }).join('');
-
-                cg.innerHTML = flt.map(i => {
-                    let cCls = i.contractStatus==='Renewed'?'card-renewed':i.contractStatus==='Not Interested'?'card-dead':'';
-                    return `<div class="card ${cCls}" onclick="openEdit(${i.id})">
-                        <div class="flex justify-between"><h3>${escapeHtml(i.name)}</h3></div>
-                        <div style="margin-bottom:10px;">${i.tags.map(t=>`<span class="tag">${escapeHtml(t)}</span>`).join('')}</div>
-                        ${i.bmetUser?`<div class="flex justify-between mb-2"><span class="label">BMET</span><span style="font-weight:600"><i class="fa-solid fa-user-gear"></i> ${escapeHtml(i.bmetUser)}</span></div>`:''}
-                        <div class="flex justify-between mb-2"><span class="label">Loc</span><span>${escapeHtml(i.city)}</span></div>
-                        <div class="flex justify-between"><span class="label">Status</span><span>${escapeHtml(i.contractStatus)}</span></div>
-                        <div style="text-align:right; margin-top:8px; font-size:10px; color:#999">Updated: ${i.lastUpdated}</div>
-                    </div>`;
-                }).join('');
-
-                if(!document.getElementById('chartsView').classList.contains('hidden')) renderCharts();
-            }
-
-            function renderCharts() {
-                const sC = { "Satisfied":0, "Neutral":0, "Unsatisfied":0, "Unknown":0 }, stC = {};
-                // Quality Metric
-                const qC = { "Productive": 0, "Unproductive": 0 };
-                
-                db.forEach(i => {
-                    // Sat
-                    if(i.satisfaction.includes('Satisfied')||i.satisfaction==='High') sC["Satisfied"]++;
-                    else if(i.satisfaction.includes('Neutral')||i.satisfaction==='Medium') sC["Neutral"]++;
-                    else if(i.satisfaction.includes('Unsatisfied')||i.satisfaction==='Low') sC["Unsatisfied"]++;
-                    else sC["Unknown"]++;
-                    
-                    // Status
-                    stC[i.contractStatus||'No Status'] = (stC[i.contractStatus||'No Status']||0)+1;
-
-                    // Quality
-                    const s = i.contractStatus;
-                    if(['Renewed', 'Quote Requested', 'Call Later'].includes(s)) qC["Productive"]++;
-                    else if(['No Answer', 'Not Interested', 'Wrong Number'].includes(s)) qC["Unproductive"]++;
-                });
-
-                updCh('sat','satChart','doughnut',['Satisfied','Neutral','Unsatisfied','Unknown'],Object.values(sC),['#28a745','#ffc107','#dc3545','#ccc'],'Satisfaction');
-                
-                // Contact Quality Chart
-                updCh('qual','qualityChart','pie',['Productive','Unproductive'],[qC.Productive, qC.Unproductive],['#155724', '#721c24'],'Contact Quality');
-
-                updCh('status','statusChart','bar',Object.keys(stC),Object.values(stC),'#2d2d2d','Call Outcome');
-            }
-
-            function updCh(k,id,typ,lbl,dat,col,tit,opt={}) {
-                const ctx = document.getElementById(id).getContext('2d');
-                if(chartInstances[k]) chartInstances[k].destroy();
-                chartInstances[k] = new Chart(ctx, { type:typ, data:{labels:lbl,datasets:[{label:'Count',data:dat,backgroundColor:col}]}, options:{maintainAspectRatio:false,plugins:{title:{display:true,text:tit}},...opt} });
-            }
-
-            window.switchView = function(view) {
-                ['tableView','cardView','chartsView'].forEach(id => document.getElementById(id).classList.add('hidden'));
-                document.getElementById('mainControls').classList.remove('hidden');
-                document.querySelectorAll('.view-btn').forEach(b => b.classList.remove('active'));
-                
-                const map = {'table':['tableView',0], 'card':['cardView',1], 'charts':['chartsView',2]};
-                if(map[view]) {
-                    document.getElementById(map[view][0]).classList.remove('hidden');
-                    document.querySelectorAll('.view-btn')[map[view][1]].classList.add('active');
-                }
-                if(view==='charts') { document.getElementById('mainControls').classList.add('hidden'); renderCharts(); }
-            };
-
-            window.openEdit = function(id) {
-                currentEditId = id; const i = db[id];
-                document.getElementById('modalTitle').innerText = i.name;
-                document.getElementById('modalLocationText').innerText = `${i.region} / ${i.city}`;
-                document.getElementById('warrantyBadge').classList.toggle('hidden', !i.tags.some(t=>t.toLowerCase().includes('warranty')));
-                document.getElementById('modalBmetDisplay').classList.toggle('hidden', !i.bmetUser);
-                if(i.bmetUser) document.getElementById('bmetName').innerText = i.bmetUser;
-
-                document.getElementById('editContactName').value = i.contact || "";
-                document.getElementById('editContactMobile').value = i.mobile || "";
-                updPhone(i.mobile, i.contact, i.name);
-                document.getElementById('editSat').value = (['Satisfied','Neutral','Unsatisfied'].includes(i.satisfaction)) ? i.satisfaction : '-';
-                document.getElementById('editCallStatus').value = (i.contractStatus==='-'||!i.contractStatus) ? '-' : i.contractStatus;
-                document.getElementById('editNotes').value = i.notes;
-                document.getElementById('editModal').style.display = 'flex';
-            };
-
-            function updPhone(m, cName, hName) { 
-                const disp = document.getElementById('displayPhone');
-                const waBtn = document.getElementById('waLink');
-                
-                if (m) {
-                    disp.innerHTML = `<a href="tel:${escapeHtml(m)}">${escapeHtml(m)}</a>`;
-                    waBtn.classList.remove('hidden', 'disabled');
-                    // Format 05XXXXXXXX to 9665XXXXXXXX for WhatsApp
-                    const waNum = m.startsWith('0') ? '966' + m.substring(1) : m;
-                    waBtn.href = `https://wa.me/${waNum}?text=${CONFIG.WA_MSG}`;
-                } else {
-                    disp.innerHTML = "No Number";
-                    waBtn.classList.add('hidden');
-                }
-            }
+        function processData(rawData) {
+            db = rawData.map((row, idx) => ({
+                id: idx,
+                name: row['Hospital Name'] || 'Unknown',
+                region: row['Region'] || 'Unknown',
+                city: row['City'] || 'Unknown',
+                contact: row['Contact'] || '',
+                mobile: row['Contact Mobile Number'] || '',
+                satisfaction: row['Satisfaction'] || '-',
+                contractStatus: row['ContractStatus'] || '-',
+                notes: row['Notes'] || '',
+                tags: row['Tags'] ? row['Tags'].split(',') : []
+            }));
             
-            window.promptPhoneUpdate = function() {
-                const inp = document.getElementById('editContactMobile');
-                let n = prompt("Enter new mobile number (Format: 05XXXXXXXX):", inp.value);
-                
-                if(n !== null) { 
-                    n = n.trim();
-                    // Local Validation
-                    const mobileRegex = /^05\d{8}$/;
-                    if (!mobileRegex.test(n)) {
-                        alert("Invalid Format! Must be 10 digits starting with 05 (e.g., 0512345678).");
-                        return;
-                    }
-                    inp.value = n; 
-                    updPhone(n); 
+            // Filters
+            const dirs = [...new Set(rawData.map(r => r.Direction))].filter(Boolean).sort();
+            const s = document.getElementById('filterDirection');
+            s.innerHTML = '<option value="All">All Directions</option>';
+            dirs.forEach(d => s.add(new Option(d, d)));
+        }
+
+        const debounce = (fn, ms) => { let t; return (...a) => { clearTimeout(t); t=setTimeout(()=>fn(...a), ms); }};
+        window.debouncedRender = debounce(() => render(), 300);
+
+        function render() {
+            const tb = document.getElementById('tableBody');
+            const search = document.getElementById('search').value.toLowerCase();
+            const fDir = document.getElementById('filterDirection').value;
+            
+            tb.innerHTML = '';
+            // Render Cards cleared
+            document.getElementById('cardView').innerHTML = '';
+
+            const flt = db.filter(i => {
+                if(fDir !== 'All' && i.region !== fDir && i.direction !== fDir) return true; 
+                return (i.name + i.contact).toLowerCase().includes(search);
+            });
+
+            // Table View
+            tb.innerHTML = flt.map(i => `
+                <tr>
+                    <td><strong>${i.name}</strong><br><small style="color:#888">${i.contact}</small></td>
+                    <td>${i.city}</td>
+                    <td>${i.tags.map(t => `<span class="tag">${t}</span>`).join('')}</td>
+                    <td>${i.satisfaction}</td>
+                    <td><span class="tag" style="background:#e3f2fd">${i.contractStatus}</span></td>
+                    <td><button class="btn-action" onclick="openEdit(${i.id})"><i class="fa-solid fa-pen"></i></button></td>
+                </tr>
+            `).join('');
+
+            // Card View
+            document.getElementById('cardView').innerHTML = flt.map(i => `
+                <div class="card" onclick="openEdit(${i.id})">
+                    <h3 style="margin:0 0 10px 0">${i.name}</h3>
+                    <p style="font-size:12px; color:#666">${i.city} | ${i.contact}</p>
+                    <div style="margin-top:10px;">
+                        <span class="tag">${i.contractStatus}</span>
+                        <span class="tag">${i.satisfaction}</span>
+                    </div>
+                </div>
+            `).join('');
+        }
+
+        // 4. MODAL & EDIT
+        window.openEdit = function(id) {
+            currentEditId = id; 
+            const i = db[id];
+            
+            document.getElementById('modalTitle').innerText = i.name;
+            document.getElementById('editContactName').value = i.contact;
+            document.getElementById('editContactMobile').value = i.mobile;
+            document.getElementById('editSat').value = (['Satisfied','Neutral','Unsatisfied'].includes(i.satisfaction)) ? i.satisfaction : '-';
+            document.getElementById('editCallStatus').value = i.contractStatus || '-';
+            document.getElementById('editNotes').value = i.notes;
+            
+            // Logic: Is this an uncensored number?
+            const isUncensored = i.mobile && !i.mobile.includes('*');
+            const display = document.getElementById('displayPhone');
+            const wa = document.getElementById('waLink');
+            
+            display.innerText = i.mobile || "No Number";
+            
+            if (isUncensored) {
+                wa.classList.remove('hidden');
+                wa.href = `https://wa.me/966${i.mobile.substring(1)}`;
+                display.innerHTML = `<a href="tel:${i.mobile}">${i.mobile}</a>`;
+            } else {
+                wa.classList.add('hidden');
+            }
+
+            // PERMISSIONS
+            const canEdit = currentUser.role === 'Admin' || currentUser.role === 'Editor';
+            
+            document.querySelectorAll('.secure-input').forEach(el => el.disabled = !canEdit);
+            document.getElementById('saveBtn').disabled = !canEdit;
+            document.getElementById('editPhoneBtn').classList.toggle('hidden', !canEdit);
+            
+            const btn = document.getElementById('saveBtn');
+            btn.innerText = canEdit ? "Save Updates" : "Login to Edit";
+            document.getElementById('loginPrompt').classList.toggle('hidden', canEdit);
+
+            document.getElementById('editModal').style.display = 'flex';
+        };
+
+        window.promptPhoneUpdate = function() {
+            const newNum = prompt("Enter new 05xxxxxxxx number:");
+            if(newNum) {
+                if(!/^05\d{8}$/.test(newNum)) return alert("Invalid format. Must be 05xxxxxxxx");
+                document.getElementById('editContactMobile').value = newNum;
+                document.getElementById('displayPhone').innerText = newNum;
+            }
+        };
+
+        window.saveChanges = async function() {
+            if (currentUser.role !== 'Admin' && currentUser.role !== 'Editor') return;
+            const btn = document.getElementById('saveBtn');
+            btn.innerText = "Saving...";
+            
+            const pld = {
+                action: 'save',
+                token: currentUser.token,
+                data: {
+                    hospitalName: db[currentEditId].name,
+                    satisfaction: document.getElementById('editSat').value,
+                    contractStatus: document.getElementById('editCallStatus').value,
+                    notes: document.getElementById('editNotes').value,
+                    contactName: document.getElementById('editContactName').value,
+                    contactMobile: document.getElementById('editContactMobile').value
                 }
             };
 
-            window.saveChanges = async function() {
-                const btn = document.getElementById('saveBtn'), txt = btn.textContent;
-                
-                // Guard Rail: Validation
-                const mobile = document.getElementById('editContactMobile').value;
-                if (mobile && !/^05\d{8}$/.test(mobile)) {
-                    alert("Cannot Save: Mobile number must start with 05 and have 10 digits total.");
-                    return;
+            try {
+                const r = await fetch(SCRIPT_URL, { method:'POST', body:JSON.stringify(pld) });
+                const res = await r.json();
+                if(res.result === "success") {
+                    alert("Saved!");
+                    Object.assign(db[currentEditId], pld.data);
+                    closeModal();
+                    render();
+                } else {
+                    alert("Error: " + res.message);
                 }
+            } catch(e) { alert("Save failed"); }
+            btn.innerText = "Save Updates";
+        };
 
-                const inps = document.querySelectorAll('#editModal input, #editModal select, #editModal textarea, #editModal button');
-                inps.forEach(e => e.disabled = true); btn.textContent = "Saving...";
-
-                try {
-                    const i = db[currentEditId];
-                    if(!i) throw new Error("Record not found");
-                    
-                    const pld = {
-                        hospitalName: i.name, satisfaction: document.getElementById('editSat').value,
-                        contractStatus: document.getElementById('editCallStatus').value, notes: document.getElementById('editNotes').value,
-                        contactName: document.getElementById('editContactName').value, contactMobile: mobile
-                    };
-
-                    const r = await fetch(CONFIG.SCRIPT_URL, { method:'POST', redirect:"follow", headers:{'Content-Type':'text/plain;charset=utf-8'}, body:JSON.stringify(pld) });
-                    if(!r.ok) throw new Error(r.status);
-                    const res = await r.json();
-                    if(res.result!=="success") throw new Error(res.message);
-                    
-                    // Update Local State
-                    Object.assign(i, { satisfaction:pld.satisfaction, contractStatus:pld.contractStatus, notes:pld.notes, contact:pld.contactName, mobile:pld.contactMobile, lastUpdated: new Date().toLocaleDateString('en-GB'), lastUpdatedObj: new Date() });
-                    closeModal(); 
-                    calcWidget(); // Re-calculate widget
-                    render(); 
-                    alert("Saved successfully.");
-                } catch(e) { alert("Error: "+e.message); } 
-                finally { inps.forEach(e => e.disabled = false); btn.textContent = txt; }
-            };
-
-            window.closeModal = function() { document.getElementById('editModal').style.display = 'none'; };
-
-            window.exportToCSV = function() {
-                if(!db.length) return alert("No data");
-                // Updated Column Order
-                const head = ["Direction", "Region", "City", "Hospital Name", "Contact Name", "Contact Mobile", "BMET User", "Satisfaction", "Contract Status", "Last Updated", "Tags", "Notes", "Surfacide SN", "AccuFIT SN"];
-                
-                const rows = db.map(i => [
-                    i.direction, i.region, i.city, i.name, 
-                    i.contact, i.mobile, i.bmetUser, 
-                    i.satisfaction, i.contractStatus, i.lastUpdated, 
-                    i.tags.join("; "), i.notes.replace(/[\r\n]/g, " "),
-                    i.surfacideSN, i.accufitSN
-                ].map(s=>`"${String(s).replace(/"/g,'""')}"`).join(","));
-                
-                const blob = new Blob([[head.join(","), ...rows].join("\n")], { type: 'text/csv;charset=utf-8;' });
-                const link = document.createElement("a"); link.href = URL.createObjectURL(blob); link.download = "Rowad_Calls_Export.csv";
-                document.body.appendChild(link); link.click(); document.body.removeChild(link);
-            };
-        })();
+        window.closeModal = function() { document.getElementById('editModal').style.display = 'none'; };
+        window.switchView = function(v) { 
+            document.getElementById('tableView').classList.toggle('hidden', v!=='table');
+            document.getElementById('cardView').classList.toggle('hidden', v!=='card');
+            document.querySelectorAll('.view-btn').forEach(b => b.classList.toggle('active', b.dataset.view===v));
+        };
     </script>
 </body>
 </html>
