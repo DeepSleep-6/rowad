@@ -23,15 +23,16 @@
         /* Layout */
         .top-bar { background: var(--surface); padding: 15px 30px; box-shadow: 0 4px 20px rgba(0, 0, 0, 0.05); display: flex; justify-content: space-between; align-items: center; position: sticky; top: 0; z-index: 100; border-bottom: 3px solid var(--accent); }
         
-        /* UPDATED: Logo Image Styling */
+        /* Logo Image Styling */
         .logo { display: flex; align-items: center; gap: 10px; font-size: 24px; font-weight: 800; color: var(--text-main); }
-        .logo img { height: 40px; width: auto; } /* Adjust height as needed */
+        .logo img { height: 40px; width: auto; } 
 
         .view-toggles { display: flex; gap: 5px; background: #eee; padding: 4px; border-radius: 8px; }
-        .view-btn { border: none; background: none; padding: 8px 12px; cursor: pointer; border-radius: 6px; color: var(--text-light); transition: 0.2s; }
+        .view-btn { border: none; background: none; padding: 8px 12px; cursor: pointer; border-radius: 6px; color: var(--text-light); transition: 0.2s; font-size: 14px; display: flex; align-items: center; gap: 6px; }
+        .view-btn:hover { background: #ddd; }
         .view-btn.active { background: white; color: var(--accent-dark); font-weight: bold; box-shadow: 0 1px 3px rgba(0,0,0,0.1); }
 
-        .container { max-width: 1400px; margin: 30px auto; padding: 0 20px; min-height: 80vh; } /* Added min-height for footer pushing */
+        .container { max-width: 1400px; margin: 30px auto; padding: 0 20px; min-height: 80vh; } 
         .loading { text-align: center; padding: 40px; color: var(--text-light); font-size: 18px; }
 
         /* Controls */
@@ -139,6 +140,9 @@
         .header-content { display: flex; flex-direction: column; gap: 8px; }
         .modal-title { color: #0f172a; font-size: 24px; font-weight: 700; margin: 0; }
         
+        /* New Location Subtitle */
+        .modal-location { font-size: 14px; color: #777; font-weight: 500; display:flex; align-items:center; gap:6px; }
+
         .bmet-info { font-size: 13px; color: #555; display: flex; align-items: center; gap: 6px; background: #f0f0f0; padding: 4px 10px; border-radius: 4px; align-self: flex-start;}
 
         .warranty-tag {
@@ -197,6 +201,7 @@
         <div class="view-toggles">
             <button class="view-btn active" onclick="switchView('table')"><i class="fa-solid fa-table"></i> Table</button>
             <button class="view-btn" onclick="switchView('card')"><i class="fa-solid fa-th-large"></i> Grid</button>
+            <button class="view-btn" onclick="exportToCSV()"><i class="fa-solid fa-file-csv"></i> Export CSV</button>
         </div>
     </div>
 
@@ -254,6 +259,10 @@
             <div class="modal-header">
                 <div class="header-content">
                     <h2 class="modal-title" id="modalTitle">Hospital Name</h2>
+                    <div class="modal-location">
+                        <i class="fa-solid fa-location-dot"></i> <span id="modalLocationText"></span>
+                    </div>
+                    
                     <span class="warranty-tag" id="warrantyBadge">Under Warranty</span>
                     <div id="modalBmetDisplay" class="bmet-info" style="display:none">
                         <i class="fa-solid fa-user-gear"></i> <span id="bmetName"></span>
@@ -486,7 +495,6 @@
 
                 const bmetHtml = item.bmetUser ? `<div style="font-size:11px; color:#2c3e50; margin-top:4px;"><i class="fa-solid fa-user-gear"></i> ${item.bmetUser}</div>` : '';
 
-                // UPDATED: Table Button changed to Icon only
                 const tr = `
                     <tr class="${rowClass}">
                         <td>
@@ -509,7 +517,6 @@
                         <span style="font-weight:600; color:#444"><i class="fa-solid fa-user-gear"></i> ${item.bmetUser}</span>
                     </div>` : '';
 
-                // UPDATED: Grid Card removed Edit Button
                 const card = `
                     <div class="card ${cardClass}" onclick="openEdit(${item.id})">
                         <div style="display:flex; justify-content:space-between; align-items:flex-start">
@@ -618,10 +625,20 @@
         }
 
         function openEdit(id) {
+            // UPDATED: Password Protection
+            const password = prompt("Please enter the admin password to edit:");
+            if(password !== "1234") {
+                alert("Incorrect password.");
+                return;
+            }
+
             currentEditId = id; 
             const item = db[id]; 
             
             document.getElementById('modalTitle').innerText = item.name;
+            
+            // UPDATED: Set Location Text
+            document.getElementById('modalLocationText').innerText = `${item.region} / ${item.city}`;
 
             const isWarranty = item.tags.some(tag => tag.toLowerCase().includes('warranty'));
             const warrantyBadge = document.getElementById('warrantyBadge');
@@ -631,7 +648,6 @@
                 warrantyBadge.style.display = 'none';
             }
             
-            // BMET Display in Modal
             const bmetDisplay = document.getElementById('modalBmetDisplay');
             if(item.bmetUser) {
                 document.getElementById('bmetName').innerText = item.bmetUser;
@@ -677,6 +693,54 @@
                 }
             }
             document.getElementById('editContactName').focus();
+        }
+
+        // UPDATED: CSV Export Function
+        function exportToCSV() {
+            if(!db || db.length === 0) {
+                alert("No data to export");
+                return;
+            }
+
+            // Headers
+            const headers = ["Hospital Name", "Direction", "Region", "City", "Contact Name", "Contact Mobile", "BMET User", "Satisfaction", "Contract Status", "Tags", "Notes"];
+            
+            // Map data to CSV rows
+            const csvRows = db.map(item => {
+                const row = [
+                    item.name,
+                    item.direction,
+                    item.region,
+                    item.city,
+                    item.contact,
+                    item.mobile,
+                    item.bmetUser,
+                    item.satisfaction,
+                    item.contractStatus,
+                    item.tags.join("; "), // Join tags with semicolon
+                    item.notes.replace(/(\r\n|\n|\r)/gm, " ") // Remove line breaks from notes
+                ];
+                
+                // Escape quotes and wrap in quotes for CSV safety
+                return row.map(str => {
+                    const escaped = String(str).replace(/"/g, '""');
+                    return `"${escaped}"`;
+                }).join(",");
+            });
+
+            // Combine headers and rows
+            const csvContent = [headers.join(","), ...csvRows].join("\n");
+
+            // Trigger Download
+            const blob = new Blob([csvContent], { type: 'text/csv;charset=utf-8;' });
+            const url = URL.createObjectURL(blob);
+            const link = document.createElement("a");
+            link.setAttribute("href", url);
+            link.setAttribute("download", "Rowad_Calls_Export.csv");
+            link.style.visibility = 'hidden';
+            document.body.appendChild(link);
+            link.click();
+            document.body.removeChild(link);
         }
 
         function closeModal() {
