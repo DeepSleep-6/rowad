@@ -81,7 +81,7 @@
             border: 1px solid var(--border); 
             box-shadow: 0 4px 15px rgba(0,0,0,0.03); 
             transition: transform 0.2s, box-shadow 0.2s; 
-            cursor: pointer; /* Makes it look clickable */
+            cursor: pointer; 
             position: relative;
         }
         .card:hover { transform: translateY(-3px); border-color: var(--accent); box-shadow: 0 8px 25px rgba(0,0,0,0.08); }
@@ -125,6 +125,8 @@
         .modal-header { display: flex; justify-content: space-between; align-items: flex-start; margin-bottom: 25px; }
         .header-content { display: flex; flex-direction: column; gap: 8px; }
         .modal-title { color: #0f172a; font-size: 24px; font-weight: 700; margin: 0; }
+        
+        .bmet-info { font-size: 13px; color: #555; display: flex; align-items: center; gap: 6px; background: #f0f0f0; padding: 4px 10px; border-radius: 4px; align-self: flex-start;}
 
         .warranty-tag {
             display: none; 
@@ -238,6 +240,9 @@
                 <div class="header-content">
                     <h2 class="modal-title" id="modalTitle">Hospital Name</h2>
                     <span class="warranty-tag" id="warrantyBadge">Under Warranty</span>
+                    <div id="modalBmetDisplay" class="bmet-info" style="display:none">
+                        <i class="fa-solid fa-user-gear"></i> <span id="bmetName"></span>
+                    </div>
                 </div>
                 <button class="close-btn" onclick="closeModal()">&times;</button>
             </div>
@@ -293,7 +298,7 @@
         const SCRIPT_URL = "https://script.google.com/macros/s/AKfycbwhvbSEdhK56SFd-OoGIeS85lgkiX9bcXz5eR7ihi3wSqT7C4uSWMGHvJeD220d4xrAuw/exec";
         
         let db = [];
-        let currentEditId = -1; // Changed to use numeric ID/Index
+        let currentEditId = -1; 
 
         window.onload = fetchData;
 
@@ -302,7 +307,6 @@
                 const response = await fetch(SCRIPT_URL);
                 const data = await response.json();
                 
-                // MAP DATA AND ASSIGN PERMANENT IDs
                 db = data.map((row, index) => {
                     let autoTags = [];
                     const device = row['Device'] || '';
@@ -312,13 +316,14 @@
                     let combinedTags = [...new Set([...autoTags, ...manualTags])];
 
                     return {
-                        id: index, // Robust identification
+                        id: index,
                         name: row['Hospital Name'],
                         direction: row['Direction'] || 'Unknown',
                         region: row['Region'] || 'Unknown',
                         city: row['City'] || 'Unknown',
                         contact: row['Contact'] || '',
                         mobile: row['Contact Mobile Number'] || '',
+                        bmetUser: row['BMET User'] || '', // NEW FIELD MAPPING
                         
                         satisfaction: row['Satisfaction'] || '-',
                         contractStatus: row['ContractStatus'] || '-', 
@@ -388,7 +393,6 @@
         }
 
         function getSortWeight(status) {
-            // Lower number = Higher priority (Top of list)
             if (status === 'Call Later') return 1;
             if (status === 'Quote Requested') return 1; 
             if (status === 'No Answer') return 2;
@@ -411,7 +415,8 @@
 
             // 1. FILTER
             let filtered = db.filter(item => {
-                if (!item.name.toLowerCase().includes(search) && !item.contact.toLowerCase().includes(search)) return false;
+                const searchStr = (item.name + item.contact + item.bmetUser).toLowerCase();
+                if (!searchStr.includes(search)) return false;
                 if (filterDir !== 'All' && item.direction !== filterDir) return false;
                 if (filterReg !== 'All' && item.region !== filterReg) return false;
                 if (filterCity !== 'All' && item.city !== filterCity) return false;
@@ -464,12 +469,15 @@
                     tagsHtml += `<span class="tag">${t}</span>`;
                 });
 
-                // NOTE: Passing item.id instead of name for robustness
+                // Prepare BMET HTML snippet
+                const bmetHtml = item.bmetUser ? `<div style="font-size:11px; color:#2c3e50; margin-top:4px;"><i class="fa-solid fa-user-gear"></i> ${item.bmetUser}</div>` : '';
+
                 const tr = `
                     <tr class="${rowClass}">
                         <td>
                             <strong>${item.name}</strong><br>
                             <span style="font-size:12px; color:#888">${item.contact}</span>
+                            ${bmetHtml}
                         </td>
                         <td>${item.region} / ${item.city}</td>
                         <td>${tagsHtml}</td> <td>${satHtml}</td>
@@ -479,7 +487,13 @@
                 `;
                 tbody.innerHTML += tr;
 
-                // Card has onClick on the whole wrapper now
+                // BMET Row for Card
+                const bmetRow = item.bmetUser ? `
+                    <div class="card-row">
+                        <span class="label">BMET User</span>
+                        <span style="font-weight:600; color:#444"><i class="fa-solid fa-user-gear"></i> ${item.bmetUser}</span>
+                    </div>` : '';
+
                 const card = `
                     <div class="card ${cardClass}" onclick="openEdit(${item.id})">
                         <div style="display:flex; justify-content:space-between; align-items:flex-start">
@@ -487,6 +501,7 @@
                             <button class="btn-edit"><i class="fa-solid fa-pen"></i></button>
                         </div>
                         <div style="margin-bottom:10px;">${tagsHtml}</div>
+                        ${bmetRow}
                         <div class="card-row">
                             <span class="label">Location</span>
                             <span>${item.city}</span>
@@ -509,7 +524,6 @@
             btn.textContent = "Saving...";
             btn.disabled = true;
 
-            // Use the numeric ID to find the exact item object in db
             const item = db[currentEditId];
             if (!item) {
                 alert("Error: Record not found in local data.");
@@ -589,8 +603,8 @@
         }
 
         function openEdit(id) {
-            currentEditId = id; // Update global tracking ID
-            const item = db[id]; // Direct array access
+            currentEditId = id; 
+            const item = db[id]; 
             
             document.getElementById('modalTitle').innerText = item.name;
 
@@ -601,18 +615,25 @@
             } else {
                 warrantyBadge.style.display = 'none';
             }
+            
+            // BMET Display in Modal
+            const bmetDisplay = document.getElementById('modalBmetDisplay');
+            if(item.bmetUser) {
+                document.getElementById('bmetName').innerText = item.bmetUser;
+                bmetDisplay.style.display = 'flex';
+            } else {
+                bmetDisplay.style.display = 'none';
+            }
 
             document.getElementById('editContactName').value = item.contact || "";
             
             const phoneDisplay = document.getElementById('displayPhone');
             const phoneInput = document.getElementById('editContactMobile');
             
-            // Logic for clickable phone number
             const mobile = item.mobile || "";
             phoneInput.value = mobile;
             
             if(mobile) {
-                // If number exists, make it a clickable tel: link
                 phoneDisplay.innerHTML = `<a href="tel:${mobile}">${mobile}</a>`;
             } else {
                 phoneDisplay.innerHTML = "No Number";
@@ -634,7 +655,6 @@
             
             if(newPhone !== null) {
                 hiddenInput.value = newPhone;
-                // Update text and link dynamically
                 if(newPhone) {
                     display.innerHTML = `<a href="tel:${newPhone}">${newPhone}</a>`;
                 } else {
