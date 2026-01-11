@@ -106,7 +106,7 @@
 
         .warranty-tag {
             display: none; 
-            background-color: #eee; /* Neutral as requested */
+            background-color: #eee; 
             color: #333;
             border: 1px solid #ccc;
             font-size: 12px;
@@ -221,10 +221,10 @@
             <div class="form-group">
                 <label class="form-label">Primary Contact</label>
                 <div class="contact-box">
-                    <input type="text" class="contact-name-input" id="editContactName" value="Tamer Ata">
+                    <input type="text" class="contact-name-input" id="editContactName" value="">
                     <div class="contact-phone">
                         <i class="fa-solid fa-phone phone-icon"></i> 
-                        <span id="displayPhone">0542583962</span>
+                        <span id="displayPhone"></span>
                     </div>
                     <input type="hidden" id="editContactMobile">
                     <button class="edit-icon-btn" onclick="promptPhoneUpdate()">
@@ -244,12 +244,14 @@
             </div>
 
             <div class="form-group">
-                <label class="form-label">Current Call Status</label>
+                <label class="form-label">Call Status & Outcome</label>
                 <select class="form-select" id="editCallStatus">
                     <option value="-">-</option>
                     <option value="No Answer">No Answer</option>
                     <option value="Call Later">Call Later</option>
-                    <option value="Called">Called</option>
+                    <option value="Quote Requested">Quote Requested</option>
+                    <option value="Not Interested">Not Interested</option>
+                    <option value="Renewed">Renewed</option>
                 </select>
             </div>
 
@@ -293,7 +295,7 @@
                         mobile: row['Contact Mobile Number'] || '',
                         
                         satisfaction: row['Satisfaction'] || '-',
-                        contractStatus: row['ContractStatus'] || '-', // Default to "-" if empty
+                        contractStatus: row['ContractStatus'] || '-', 
                         tags: combinedTags,
                         notes: row['Notes'] || ''
                     };
@@ -387,16 +389,21 @@
 
                 let statusHtml = '-';
                 if(item.contractStatus && item.contractStatus !== '-') {
-                    let color = '#2c3e50';
-                    if(item.contractStatus === 'Called') color = '#28a745';
-                    if(item.contractStatus === 'No Answer') color = '#dc3545';
-                    if(item.contractStatus === 'Call Later') color = '#ffc107';
-                    statusHtml = `<span style="font-weight:bold; color: ${color}; font-size:12px;">${item.contractStatus}</span>`;
+                    let color = '#2c3e50'; // Default dark grey
+                    let bg = 'transparent';
+                    
+                    // Sales Funnel Colors
+                    if(item.contractStatus === 'Renewed') { color = '#155724'; bg = '#d4edda'; } // Green
+                    if(item.contractStatus === 'Quote Requested') { color = '#0c5460'; bg = '#d1ecf1'; } // Blue
+                    if(item.contractStatus === 'Call Later') { color = '#856404'; bg = '#fff3cd'; } // Yellow/Orange
+                    if(item.contractStatus === 'No Answer') { color = '#721c24'; bg = '#f8d7da'; } // Red
+                    if(item.contractStatus === 'Not Interested') { color = '#383d41'; bg = '#e2e3e5'; } // Grey
+                    
+                    statusHtml = `<span style="font-weight:700; color: ${color}; background:${bg}; padding: 4px 8px; border-radius: 4px; font-size:11px;">${item.contractStatus}</span>`;
                 }
 
                 let tagsHtml = '';
                 item.tags.forEach(t => {
-                    // All tags now use the generic .tag class without extra coloring
                     tagsHtml += `<span class="tag">${t}</span>`;
                 });
 
@@ -437,13 +444,12 @@
             });
         }
 
-async function saveChanges() {
+        async function saveChanges() {
             const btn = document.getElementById('saveBtn');
             const originalText = btn.textContent;
             btn.textContent = "Saving...";
             btn.disabled = true;
 
-            // Ensure item exists before accessing properties
             const item = db.find(x => x.name === currentEditName);
             if (!item) {
                 alert("Error: Record not found in local data.");
@@ -468,11 +474,9 @@ async function saveChanges() {
             };
 
             try {
-                // REMOVED mode: 'no-cors' to allow reading the response
-                // Content-Type: text/plain prevents CORS preflight failure on Apps Script
                 const response = await fetch(SCRIPT_URL, {
                     method: 'POST',
-                    redirect: "follow", // Explicitly follow the Apps Script 302 redirect
+                    redirect: "follow", 
                     headers: { 'Content-Type': 'text/plain;charset=utf-8' },
                     body: JSON.stringify(payload)
                 });
@@ -487,7 +491,6 @@ async function saveChanges() {
                     throw new Error(result.message || "Unknown error from server");
                 }
                 
-                // Update local data only after server confirmation
                 item.satisfaction = newSat;
                 item.contractStatus = newCallStatus;
                 item.notes = newNotes;
@@ -548,7 +551,6 @@ async function saveChanges() {
             phoneInput.value = item.mobile || "";
 
             document.getElementById('editSat').value = (item.satisfaction === '-' || !item.satisfaction) ? '-' : item.satisfaction;
-            // Handle Default "-" for Call Status
             document.getElementById('editCallStatus').value = (item.contractStatus === '-' || !item.contractStatus) ? '-' : item.contractStatus;
             document.getElementById('editNotes').value = item.notes;
 
