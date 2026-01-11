@@ -264,7 +264,7 @@
 
     <script>
         // *** CONFIGURATION ***
-        const SCRIPT_URL = "https://script.google.com/macros/s/AKfycbwGOMphPx4DRkwKMm91i4ejJ5BsReQNDMLLX9x122UozWRJo1HqIWJa4axRhzELDS8lnA/exec";
+        const SCRIPT_URL = "https://script.google.com/macros/s/AKfycbwhvbSEdhK56SFd-OoGIeS85lgkiX9bcXz5eR7ihi3wSqT7C4uSWMGHvJeD220d4xrAuw/exec";
         
         let db = [];
         let currentEditName = "";
@@ -437,13 +437,20 @@
             });
         }
 
-        async function saveChanges() {
+async function saveChanges() {
             const btn = document.getElementById('saveBtn');
             const originalText = btn.textContent;
             btn.textContent = "Saving...";
             btn.disabled = true;
 
+            // Ensure item exists before accessing properties
             const item = db.find(x => x.name === currentEditName);
+            if (!item) {
+                alert("Error: Record not found in local data.");
+                btn.textContent = originalText;
+                btn.disabled = false;
+                return;
+            }
             
             const newSat = document.getElementById('editSat').value;
             const newCallStatus = document.getElementById('editCallStatus').value;
@@ -461,13 +468,26 @@
             };
 
             try {
-                await fetch(SCRIPT_URL, {
+                // REMOVED mode: 'no-cors' to allow reading the response
+                // Content-Type: text/plain prevents CORS preflight failure on Apps Script
+                const response = await fetch(SCRIPT_URL, {
                     method: 'POST',
-                    mode: 'no-cors',
-                    headers: { 'Content-Type': 'text/plain' },
+                    redirect: "follow", // Explicitly follow the Apps Script 302 redirect
+                    headers: { 'Content-Type': 'text/plain;charset=utf-8' },
                     body: JSON.stringify(payload)
                 });
+
+                if (!response.ok) {
+                    throw new Error(`Server returned ${response.status} ${response.statusText}`);
+                }
+
+                const result = await response.json();
+
+                if (result.result !== "success") {
+                    throw new Error(result.message || "Unknown error from server");
+                }
                 
+                // Update local data only after server confirmation
                 item.satisfaction = newSat;
                 item.contractStatus = newCallStatus;
                 item.notes = newNotes;
@@ -476,15 +496,17 @@
                 
                 closeModal();
                 render(); 
+                alert("Saved successfully.");
 
             } catch (error) {
-                alert("Error saving: " + error);
+                console.error(error);
+                alert("Error saving: " + error.message);
             } finally {
                 btn.textContent = originalText;
                 btn.disabled = false;
             }
         }
-
+        
         function switchView(view) {
             const table = document.getElementById('tableView');
             const grid = document.getElementById('cardView');
