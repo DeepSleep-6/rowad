@@ -48,6 +48,7 @@
         .hidden { display: none !important; }
         .tag { display: inline-flex; align-items: center; padding: 4px 10px; border-radius: 12px; font-size: 11px; font-weight: 600; margin-right: 4px; margin-bottom: 2px; background: #eee; color: #444; border: 1px solid #ddd; }
         .last-updated { font-size: 10px; color: #999; margin-top: 4px; display: block; font-style: italic; }
+        .no-results { text-align: center; padding: 40px; color: var(--text-light); font-style: italic; grid-column: 1 / -1; }
 
         /* --- Loading Spinner --- */
         .loading-container { display: flex; flex-direction: column; align-items: center; justify-content: center; padding: 60px 0; color: var(--text-light); }
@@ -288,7 +289,6 @@
             let chartInstances = {};
             let currentSort = { key: 'contractStatus', asc: true };
 
-            // Utility: Debounce for performance
             function debounce(func, wait) {
                 let timeout;
                 return function(...args) {
@@ -297,7 +297,6 @@
                 };
             }
 
-            // Utility: XSS Protection
             function escapeHtml(text) {
                 if (!text) return '';
                 return String(text)
@@ -308,12 +307,9 @@
                     .replace(/'/g, "&#039;");
             }
 
-            // Expose specific functions to window for HTML event handlers
             window.onload = function() { fetchData(); };
             
-            window.debouncedRender = debounce(() => render(), 300); // 300ms delay for search
-            
-            // --- Core Logic ---
+            window.debouncedRender = debounce(() => render(), 300); 
 
             async function fetchData() {
                 try {
@@ -329,7 +325,7 @@
                         let combinedTags = [...new Set([...autoTags, ...manualTags])];
                         
                         let updatedDate = row['Last Updated'] ? new Date(row['Last Updated']) : null;
-                        let dateStr = updatedDate ? updatedDate.toLocaleDateString() : '';
+                        let dateStr = updatedDate ? updatedDate.toLocaleDateString('en-GB') : '';
 
                         return {
                             id: index,
@@ -433,7 +429,6 @@
                 const tbody = document.getElementById('tableBody');
                 const cardGrid = document.getElementById('cardView');
                 
-                // Clear previous content
                 tbody.innerHTML = '';
                 cardGrid.innerHTML = '';
 
@@ -450,6 +445,16 @@
                     if (filterCity !== 'All' && item.city !== filterCity) return false;
                     return true;
                 });
+
+                // NO RESULTS CHECK
+                if (filtered.length === 0) {
+                    tbody.innerHTML = '<tr><td colspan="6" class="no-results">No results found matching your criteria.</td></tr>';
+                    cardGrid.innerHTML = '<div class="no-results">No results found matching your criteria.</div>';
+                    if(!document.getElementById('chartsView').classList.contains('hidden')) {
+                        renderCharts(); // Charts still show global data
+                    }
+                    return; 
+                }
 
                 filtered.sort((a, b) => {
                     let valA = a[currentSort.key];
@@ -468,7 +473,6 @@
                     return 0;
                 });
 
-                // Performance Optimization: Build HTML strings in memory then inject once
                 const tableRows = filtered.map(item => {
                     let satHtml = '-';
                     if(item.satisfaction && item.satisfaction !== '-' && item.satisfaction !== 'Unknown') {
@@ -522,9 +526,7 @@
 
                 tbody.innerHTML = tableRows;
 
-                // Build Card View (Simplified for length, applying same security/perf logic)
                 const cardHtml = filtered.map(item => {
-                    // Logic repeats mostly from above, simplified for brevity in this example block
                     let cardClass = '';
                     if(item.contractStatus === 'Renewed') cardClass = 'card-renewed';
                     if(item.contractStatus === 'Not Interested') cardClass = 'card-dead';
@@ -555,7 +557,6 @@
             }
 
             function renderCharts() {
-                // Same logic as before, just ensuring we use `db` safely
                 const satCounts = { "Satisfied": 0, "Neutral": 0, "Unsatisfied": 0, "Unknown": 0 };
                 const statusCounts = {};
                 const regionCounts = {};
@@ -586,8 +587,6 @@
                     options: { responsive: true, maintainAspectRatio: false, plugins: { title: { display: true, text: title } }, ...extraOptions }
                 });
             }
-
-            // --- Interactions ---
 
             window.switchView = function(view) {
                 const table = document.getElementById('tableView');
@@ -674,7 +673,6 @@
                 const btn = document.getElementById('saveBtn');
                 const originalText = btn.textContent;
                 
-                // Loading State: Disable UI
                 const modalInputs = document.querySelectorAll('#editModal input, #editModal select, #editModal textarea, #editModal button');
                 modalInputs.forEach(el => el.disabled = true);
                 
@@ -714,13 +712,12 @@
                     const result = await response.json();
                     if (result.result !== "success") throw new Error(result.message || "Unknown error");
                     
-                    // Update Local Data
                     item.satisfaction = newSat;
                     item.contractStatus = newCallStatus;
                     item.notes = newNotes;
                     item.contact = newContactName;
                     item.mobile = newContactMobile;
-                    item.lastUpdated = new Date().toLocaleDateString();
+                    item.lastUpdated = new Date().toLocaleDateString('en-GB');
 
                     closeModal();
                     render(); 
