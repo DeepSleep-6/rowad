@@ -5,6 +5,7 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Rowad Calls Dashboard</title>
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
     <style>
         :root {
             /* Rowad Palette */
@@ -23,7 +24,6 @@
         /* Layout */
         .top-bar { background: var(--surface); padding: 15px 30px; box-shadow: 0 4px 20px rgba(0, 0, 0, 0.05); display: flex; justify-content: space-between; align-items: center; position: sticky; top: 0; z-index: 100; border-bottom: 3px solid var(--accent); }
         
-        /* Logo Image Styling */
         .logo { display: flex; align-items: center; gap: 10px; font-size: 24px; font-weight: 800; color: var(--text-main); }
         .logo img { height: 40px; width: auto; } 
 
@@ -43,7 +43,7 @@
         input, select { padding: 12px; border: 1px solid var(--border); border-radius: 8px; font-size: 14px; width: 100%; box-sizing: border-box; outline: none; transition: 0.2s; }
         input:focus, select:focus { border-color: var(--accent); box-shadow: 0 0 0 2px rgba(191, 161, 95, 0.2); }
         
-        /* Tags - Unified Neutral Style */
+        /* Tags */
         .tag { 
             display: inline-flex; 
             align-items: center; 
@@ -67,7 +67,6 @@
         .data-table td { padding: 15px; border-bottom: 1px solid var(--border); vertical-align: middle; }
         .data-table tr:last-child td { border-bottom: none; }
         
-        /* Table Row Visual States */
         .row-renewed { background-color: #f0fff4; color: #155724; }
         .row-renewed:hover { background-color: #e3f9e9 !important; }
         .row-dead { opacity: 0.6; background-color: #f9f9f9; filter: grayscale(1); }
@@ -76,7 +75,6 @@
         /* Grid */
         .grid-view { display: grid; grid-template-columns: repeat(auto-fill, minmax(300px, 1fr)); gap: 20px; }
         
-        /* Card Styles & Clickability */
         .card { 
             background: var(--surface); 
             padding: 20px; 
@@ -92,7 +90,6 @@
         .card-row { display: flex; justify-content: space-between; margin-bottom: 8px; font-size: 14px; }
         .label { color: var(--text-light); font-size: 12px; }
 
-        /* Card Visual States */
         .card-renewed { background-color: #f0fff4; border-color: #28a745; box-shadow: 0 4px 15px rgba(40, 167, 69, 0.1); }
         .card-renewed h3 { color: #155724; }
         .card-dead { opacity: 0.6; background-color: #f9f9f9; filter: grayscale(1); border-style: dashed; }
@@ -103,15 +100,11 @@
         .sat-Satisfied { background: #28a745; box-shadow: 0 0 5px #28a745; }
         .sat-Neutral { background: #ffc107; }
         .sat-Unsatisfied { background: #dc3545; }
-        .sat-High { background: #28a745; }
-        .sat-Medium { background: #ffc107; }
-        .sat-Low { background: #dc3545; }
         
         /* Buttons */
         .btn-edit { background: var(--accent); color: white; border: none; padding: 6px 14px; border-radius: 6px; cursor: pointer; font-size: 13px; font-weight: 600; }
         .btn-edit:hover { background: var(--accent-dark); }
         
-        /* Footer Credit */
         .footer-credit {
             text-align: center;
             padding: 30px 0;
@@ -120,6 +113,22 @@
             font-weight: 500;
             margin-top: 40px;
             border-top: 1px solid #eee;
+        }
+
+        /* NEW: Charts Area */
+        .charts-container {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(400px, 1fr));
+            gap: 30px;
+            margin-bottom: 30px;
+        }
+        .chart-box {
+            background: white;
+            padding: 20px;
+            border-radius: 12px;
+            border: 1px solid var(--border);
+            box-shadow: 0 4px 15px rgba(0,0,0,0.03);
+            height: 350px;
         }
 
         /* MODAL */
@@ -139,8 +148,6 @@
         .modal-header { display: flex; justify-content: space-between; align-items: flex-start; margin-bottom: 25px; }
         .header-content { display: flex; flex-direction: column; gap: 8px; }
         .modal-title { color: #0f172a; font-size: 24px; font-weight: 700; margin: 0; }
-        
-        /* New Location Subtitle */
         .modal-location { font-size: 14px; color: #777; font-weight: 500; display:flex; align-items:center; gap:6px; }
 
         .bmet-info { font-size: 13px; color: #555; display: flex; align-items: center; gap: 6px; background: #f0f0f0; padding: 4px 10px; border-radius: 4px; align-self: flex-start;}
@@ -188,6 +195,7 @@
             .data-table { display: none; } 
             .grid-view { display: grid !important; }
             .view-toggles { display: none; }
+            .charts-container { grid-template-columns: 1fr; }
         }
     </style>
 </head>
@@ -201,12 +209,13 @@
         <div class="view-toggles">
             <button class="view-btn active" onclick="switchView('table')"><i class="fa-solid fa-table"></i> Table</button>
             <button class="view-btn" onclick="switchView('card')"><i class="fa-solid fa-th-large"></i> Grid</button>
-            <button class="view-btn" onclick="exportToCSV()"><i class="fa-solid fa-file-csv"></i> Export CSV</button>
+            <button class="view-btn" onclick="switchView('charts')"><i class="fa-solid fa-chart-pie"></i> Charts</button>
+            <button class="view-btn" onclick="exportToCSV()"><i class="fa-solid fa-file-csv"></i> CSV</button>
         </div>
     </div>
 
     <div class="container">
-        <div class="controls">
+        <div class="controls" id="mainControls">
             <div class="search-box">
                 <input type="text" id="search" placeholder="Search Hospital or Contact..." onkeyup="render()">
             </div>
@@ -248,6 +257,20 @@
         </table>
 
         <div class="grid-view hidden" id="cardView"></div>
+
+        <div class="hidden" id="chartsView">
+            <div class="charts-container">
+                <div class="chart-box">
+                    <canvas id="satChart"></canvas>
+                </div>
+                <div class="chart-box">
+                    <canvas id="statusChart"></canvas>
+                </div>
+                <div class="chart-box">
+                    <canvas id="regionChart"></canvas>
+                </div>
+            </div>
+        </div>
         
         <div class="footer-credit">
             Developed by Faisal Alzougbi
@@ -318,11 +341,12 @@
     </div>
 
     <script>
-        // *** CONFIGURATION ***
-        const SCRIPT_URL = "https://script.google.com/macros/s/AKfycbwhvbSEdhK56SFd-OoGIeS85lgkiX9bcXz5eR7ihi3wSqT7C4uSWMGHvJeD220d4xrAuw/exec";
+        const SCRIPT_URL = "https://script.google.com/macros/s/AKfycbwNF2dhhpJkxxuvNjg5Hvd2JD-T0cNYNREZF6P1-yY0swHjDphfn8jmPKhXBZsQe22GLA/exec";
         
         let db = [];
-        let currentEditId = -1; 
+        let currentEditId = -1;
+        let chartsInitialized = false;
+        let chartInstances = {};
 
         window.onload = fetchData;
 
@@ -437,7 +461,6 @@
             const filterReg = document.getElementById('filterRegion').value;
             const filterCity = document.getElementById('filterCity').value;
 
-            // 1. FILTER
             let filtered = db.filter(item => {
                 const searchStr = (item.name + item.contact + item.bmetUser).toLowerCase();
                 if (!searchStr.includes(search)) return false;
@@ -447,12 +470,10 @@
                 return true;
             });
 
-            // 2. SORT
             filtered.sort((a, b) => {
                 return getSortWeight(a.contractStatus) - getSortWeight(b.contractStatus);
             });
 
-            // 3. RENDER
             filtered.forEach(item => {
                 let satHtml = '-';
                 if(item.satisfaction && item.satisfaction !== '-' && item.satisfaction !== 'Unknown') {
@@ -510,7 +531,6 @@
                 `;
                 tbody.innerHTML += tr;
 
-                // BMET Row for Card
                 const bmetRow = item.bmetUser ? `
                     <div class="card-row">
                         <span class="label">BMET User</span>
@@ -537,6 +557,86 @@
                     </div>
                 `;
                 cardGrid.innerHTML += card;
+            });
+            
+            // Re-render charts if they are visible
+            if(!document.getElementById('chartsView').classList.contains('hidden')) {
+                renderCharts();
+            }
+        }
+
+        function renderCharts() {
+            // Data Prep
+            const satCounts = { "Satisfied": 0, "Neutral": 0, "Unsatisfied": 0, "Unknown": 0 };
+            const statusCounts = {};
+            const regionCounts = {};
+
+            db.forEach(item => {
+                // Satisfaction
+                if(item.satisfaction === 'High' || item.satisfaction === 'Satisfied') satCounts["Satisfied"]++;
+                else if(item.satisfaction === 'Medium' || item.satisfaction === 'Neutral') satCounts["Neutral"]++;
+                else if(item.satisfaction === 'Low' || item.satisfaction === 'Unsatisfied') satCounts["Unsatisfied"]++;
+                else satCounts["Unknown"]++;
+
+                // Status
+                const s = (item.contractStatus === '-' || !item.contractStatus) ? 'No Status' : item.contractStatus;
+                statusCounts[s] = (statusCounts[s] || 0) + 1;
+
+                // Region
+                const r = item.region || 'Unknown';
+                regionCounts[r] = (regionCounts[r] || 0) + 1;
+            });
+
+            const colors = {
+                sat: ['#28a745', '#ffc107', '#dc3545', '#ccc'],
+                main: '#bfa15f'
+            };
+
+            // 1. Satisfaction Chart
+            const ctxSat = document.getElementById('satChart').getContext('2d');
+            if(chartInstances.sat) chartInstances.sat.destroy();
+            chartInstances.sat = new Chart(ctxSat, {
+                type: 'doughnut',
+                data: {
+                    labels: ['Satisfied', 'Neutral', 'Unsatisfied', 'Unknown'],
+                    datasets: [{
+                        data: Object.values(satCounts),
+                        backgroundColor: colors.sat
+                    }]
+                },
+                options: { responsive: true, maintainAspectRatio: false, plugins: { title: { display: true, text: 'Customer Satisfaction' } } }
+            });
+
+            // 2. Status Chart
+            const ctxStatus = document.getElementById('statusChart').getContext('2d');
+            if(chartInstances.status) chartInstances.status.destroy();
+            chartInstances.status = new Chart(ctxStatus, {
+                type: 'bar',
+                data: {
+                    labels: Object.keys(statusCounts),
+                    datasets: [{
+                        label: 'Hospitals',
+                        data: Object.values(statusCounts),
+                        backgroundColor: '#2d2d2d'
+                    }]
+                },
+                options: { responsive: true, maintainAspectRatio: false, plugins: { title: { display: true, text: 'Call Outcome Status' } } }
+            });
+
+            // 3. Region Chart
+            const ctxRegion = document.getElementById('regionChart').getContext('2d');
+            if(chartInstances.region) chartInstances.region.destroy();
+            chartInstances.region = new Chart(ctxRegion, {
+                type: 'bar',
+                data: {
+                    labels: Object.keys(regionCounts),
+                    datasets: [{
+                        label: 'Hospitals',
+                        data: Object.values(regionCounts),
+                        backgroundColor: colors.main
+                    }]
+                },
+                options: { responsive: true, maintainAspectRatio: false, indexAxis: 'y', plugins: { title: { display: true, text: 'Hospitals by Region' } } }
             });
         }
 
@@ -587,6 +687,7 @@
                     throw new Error(result.message || "Unknown error from server");
                 }
                 
+                // Update Local Data
                 item.satisfaction = newSat;
                 item.contractStatus = newCallStatus;
                 item.notes = newNotes;
@@ -609,23 +710,34 @@
         function switchView(view) {
             const table = document.getElementById('tableView');
             const grid = document.getElementById('cardView');
+            const charts = document.getElementById('chartsView');
+            const controls = document.getElementById('mainControls');
             const btns = document.querySelectorAll('.view-btn');
             
+            // Hide all
+            table.classList.add('hidden');
+            grid.classList.add('hidden');
+            charts.classList.add('hidden');
+            controls.classList.remove('hidden'); // Show controls by default
+            
+            // Remove active class
+            btns.forEach(b => b.classList.remove('active'));
+
             if(view === 'table') {
                 table.classList.remove('hidden');
-                grid.classList.add('hidden');
                 btns[0].classList.add('active');
-                btns[1].classList.remove('active');
-            } else {
-                table.classList.add('hidden');
+            } else if(view === 'card') {
                 grid.classList.remove('hidden');
-                btns[0].classList.remove('active');
                 btns[1].classList.add('active');
+            } else if(view === 'charts') {
+                charts.classList.remove('hidden');
+                btns[2].classList.add('active');
+                controls.classList.add('hidden'); // Hide filters for charts
+                renderCharts();
             }
         }
 
         function openEdit(id) {
-            // UPDATED: Password Protection
             const password = prompt("Please enter the admin password to edit:");
             if(password !== "1234") {
                 alert("Incorrect password.");
@@ -636,8 +748,6 @@
             const item = db[id]; 
             
             document.getElementById('modalTitle').innerText = item.name;
-            
-            // UPDATED: Set Location Text
             document.getElementById('modalLocationText').innerText = `${item.region} / ${item.city}`;
 
             const isWarranty = item.tags.some(tag => tag.toLowerCase().includes('warranty'));
@@ -695,17 +805,14 @@
             document.getElementById('editContactName').focus();
         }
 
-        // UPDATED: CSV Export Function
         function exportToCSV() {
             if(!db || db.length === 0) {
                 alert("No data to export");
                 return;
             }
 
-            // Headers
             const headers = ["Hospital Name", "Direction", "Region", "City", "Contact Name", "Contact Mobile", "BMET User", "Satisfaction", "Contract Status", "Tags", "Notes"];
             
-            // Map data to CSV rows
             const csvRows = db.map(item => {
                 const row = [
                     item.name,
@@ -717,21 +824,17 @@
                     item.bmetUser,
                     item.satisfaction,
                     item.contractStatus,
-                    item.tags.join("; "), // Join tags with semicolon
-                    item.notes.replace(/(\r\n|\n|\r)/gm, " ") // Remove line breaks from notes
+                    item.tags.join("; "),
+                    item.notes.replace(/(\r\n|\n|\r)/gm, " ")
                 ];
                 
-                // Escape quotes and wrap in quotes for CSV safety
                 return row.map(str => {
                     const escaped = String(str).replace(/"/g, '""');
                     return `"${escaped}"`;
                 }).join(",");
             });
 
-            // Combine headers and rows
             const csvContent = [headers.join(","), ...csvRows].join("\n");
-
-            // Trigger Download
             const blob = new Blob([csvContent], { type: 'text/csv;charset=utf-8;' });
             const url = URL.createObjectURL(blob);
             const link = document.createElement("a");
