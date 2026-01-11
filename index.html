@@ -72,8 +72,19 @@
 
         /* Grid */
         .grid-view { display: grid; grid-template-columns: repeat(auto-fill, minmax(300px, 1fr)); gap: 20px; }
-        .card { background: var(--surface); padding: 20px; border-radius: 12px; border: 1px solid var(--border); box-shadow: 0 4px 15px rgba(0,0,0,0.03); transition: transform 0.2s; }
-        .card:hover { transform: translateY(-3px); border-color: var(--accent); }
+        
+        /* Card Styles & Clickability */
+        .card { 
+            background: var(--surface); 
+            padding: 20px; 
+            border-radius: 12px; 
+            border: 1px solid var(--border); 
+            box-shadow: 0 4px 15px rgba(0,0,0,0.03); 
+            transition: transform 0.2s, box-shadow 0.2s; 
+            cursor: pointer; /* Makes it look clickable */
+            position: relative;
+        }
+        .card:hover { transform: translateY(-3px); border-color: var(--accent); box-shadow: 0 8px 25px rgba(0,0,0,0.08); }
         .card h3 { margin: 0 0 10px 0; font-size: 18px; color: var(--text-main); }
         .card-row { display: flex; justify-content: space-between; margin-bottom: 8px; font-size: 14px; }
         .label { color: var(--text-light); font-size: 12px; }
@@ -139,6 +150,8 @@
 
         .contact-name-input { border: none; background: transparent; font-size: 16px; color: var(--text-main); width: 90%; outline: none; font-weight: 500; font-family: inherit; }
         .contact-phone { display: flex; align-items: center; color: #0f172a; font-weight: 700; margin-top: 4px; font-size: 18px; }
+        .contact-phone a { color: inherit; text-decoration: none; border-bottom: 1px dotted #ccc; }
+        .contact-phone a:hover { border-bottom: 1px solid var(--accent); }
         .phone-icon { margin-right: 8px; color: #0f172a; font-size: 14px; }
         
         .edit-icon-btn { position: absolute; right: 15px; top: 50%; transform: translateY(-50%); color: var(--accent); cursor: pointer; background: none; border: none; font-size: 16px; }
@@ -280,7 +293,7 @@
         const SCRIPT_URL = "https://script.google.com/macros/s/AKfycbwhvbSEdhK56SFd-OoGIeS85lgkiX9bcXz5eR7ihi3wSqT7C4uSWMGHvJeD220d4xrAuw/exec";
         
         let db = [];
-        let currentEditName = "";
+        let currentEditId = -1; // Changed to use numeric ID/Index
 
         window.onload = fetchData;
 
@@ -289,7 +302,8 @@
                 const response = await fetch(SCRIPT_URL);
                 const data = await response.json();
                 
-                db = data.map(row => {
+                // MAP DATA AND ASSIGN PERMANENT IDs
+                db = data.map((row, index) => {
                     let autoTags = [];
                     const device = row['Device'] || '';
                     if (device.includes('Surfacide') || device === 'Both') autoTags.push('Surfacide');
@@ -298,6 +312,7 @@
                     let combinedTags = [...new Set([...autoTags, ...manualTags])];
 
                     return {
+                        id: index, // Robust identification
                         name: row['Hospital Name'],
                         direction: row['Direction'] || 'Unknown',
                         region: row['Region'] || 'Unknown',
@@ -375,11 +390,11 @@
         function getSortWeight(status) {
             // Lower number = Higher priority (Top of list)
             if (status === 'Call Later') return 1;
-            if (status === 'Quote Requested') return 1; // Prioritize hot leads same as urgent calls
+            if (status === 'Quote Requested') return 1; 
             if (status === 'No Answer') return 2;
-            if (status === '-' || !status) return 2; // Default pile
-            if (status === 'Renewed') return 3; // Bottom
-            if (status === 'Not Interested') return 4; // Very Bottom
+            if (status === '-' || !status) return 2; 
+            if (status === 'Renewed') return 3; 
+            if (status === 'Not Interested') return 4; 
             return 2;
         }
 
@@ -403,7 +418,7 @@
                 return true;
             });
 
-            // 2. SORT based on Status Weight
+            // 2. SORT
             filtered.sort((a, b) => {
                 return getSortWeight(a.contractStatus) - getSortWeight(b.contractStatus);
             });
@@ -449,6 +464,7 @@
                     tagsHtml += `<span class="tag">${t}</span>`;
                 });
 
+                // NOTE: Passing item.id instead of name for robustness
                 const tr = `
                     <tr class="${rowClass}">
                         <td>
@@ -458,16 +474,17 @@
                         <td>${item.region} / ${item.city}</td>
                         <td>${tagsHtml}</td> <td>${satHtml}</td>
                         <td>${statusHtml}</td>
-                        <td><button class="btn-edit" onclick="openEdit('${item.name.replace(/'/g, "\\'")}')"><i class="fa-solid fa-pen"></i> Edit</button></td>
+                        <td><button class="btn-edit" onclick="openEdit(${item.id})"><i class="fa-solid fa-pen"></i> Edit</button></td>
                     </tr>
                 `;
                 tbody.innerHTML += tr;
 
+                // Card has onClick on the whole wrapper now
                 const card = `
-                    <div class="card ${cardClass}">
+                    <div class="card ${cardClass}" onclick="openEdit(${item.id})">
                         <div style="display:flex; justify-content:space-between; align-items:flex-start">
                             <h3>${item.name}</h3>
-                            <button class="btn-edit" onclick="openEdit('${item.name.replace(/'/g, "\\'")}')"><i class="fa-solid fa-pen"></i></button>
+                            <button class="btn-edit"><i class="fa-solid fa-pen"></i></button>
                         </div>
                         <div style="margin-bottom:10px;">${tagsHtml}</div>
                         <div class="card-row">
@@ -492,7 +509,8 @@
             btn.textContent = "Saving...";
             btn.disabled = true;
 
-            const item = db.find(x => x.name === currentEditName);
+            // Use the numeric ID to find the exact item object in db
+            const item = db[currentEditId];
             if (!item) {
                 alert("Error: Record not found in local data.");
                 btn.textContent = originalText;
@@ -570,9 +588,9 @@
             }
         }
 
-        function openEdit(name) {
-            currentEditName = name;
-            const item = db.find(x => x.name === name);
+        function openEdit(id) {
+            currentEditId = id; // Update global tracking ID
+            const item = db[id]; // Direct array access
             
             document.getElementById('modalTitle').innerText = item.name;
 
@@ -589,8 +607,16 @@
             const phoneDisplay = document.getElementById('displayPhone');
             const phoneInput = document.getElementById('editContactMobile');
             
-            phoneDisplay.innerText = item.mobile || "No Number";
-            phoneInput.value = item.mobile || "";
+            // Logic for clickable phone number
+            const mobile = item.mobile || "";
+            phoneInput.value = mobile;
+            
+            if(mobile) {
+                // If number exists, make it a clickable tel: link
+                phoneDisplay.innerHTML = `<a href="tel:${mobile}">${mobile}</a>`;
+            } else {
+                phoneDisplay.innerHTML = "No Number";
+            }
 
             document.getElementById('editSat').value = (item.satisfaction === '-' || !item.satisfaction) ? '-' : item.satisfaction;
             document.getElementById('editCallStatus').value = (item.contractStatus === '-' || !item.contractStatus) ? '-' : item.contractStatus;
@@ -608,7 +634,12 @@
             
             if(newPhone !== null) {
                 hiddenInput.value = newPhone;
-                display.innerText = newPhone || "No Number";
+                // Update text and link dynamically
+                if(newPhone) {
+                    display.innerHTML = `<a href="tel:${newPhone}">${newPhone}</a>`;
+                } else {
+                    display.innerText = "No Number";
+                }
             }
             document.getElementById('editContactName').focus();
         }
