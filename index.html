@@ -94,7 +94,7 @@
             .page-title { font-size: 16px; padding-left: 10px; margin-left: 10px; }
         }
 
-        /* NEW: Print Styles */
+        /* Print Styles */
         @media print {
             .top-bar, .controls, .view-toggles, .footer-credit, .btn-action, .dashboard-container > button { display: none !important; }
             body, .dashboard-container { background: white; margin: 0; padding: 0; }
@@ -102,7 +102,6 @@
             .data-table { display: table !important; box-shadow: none; border: 1px solid #000; width: 100%; }
             .data-table th { background: #ddd !important; color: #000 !important; font-weight: bold; -webkit-print-color-adjust: exact; }
             .data-table td { border-bottom: 1px solid #000; color: #000; }
-            /* Hide charts and cards when printing, force table */
             #cardView, #chartsView, #exportView, #loading { display: none !important; }
             #tableView { display: table !important; }
         }
@@ -242,7 +241,7 @@
         </div>
 
         <div class="footer-credit">
-            Rowad Calls Dashboard v1.3 • Developed by Faisal Alzougbi
+            Rowad Calls Dashboard v1.0 • Developed by Faisal Alzougbi
             <span class="footer-disclaimer">Disclaimer: This dashboard is an independently developed tool for internal workflow optimization. It is not an official asset of, nor maintained by, Rowad Medical Services.</span>
         </div>
     </div>
@@ -339,7 +338,6 @@
             "Unsatisfied": 7
         };
         
-        // NEW: Helper to prevent XSS attacks when rendering HTML
         const escapeHtml = (unsafe) => {
             if (unsafe === null || unsafe === undefined) return '';
             return String(unsafe)
@@ -395,7 +393,6 @@
                         timestamp: Date.now()
                     }));
 
-                    // Note: Database is no longer returned in login, must fetch separately
                     showDashboard();
                     fetchData();
                 } else {
@@ -429,7 +426,6 @@
 
         async function fetchData() {
             try {
-                // SECURITY FIX: Changed to POST with token to prevent public data access
                 const res = await fetch(SCRIPT_URL, {
                     method: 'POST',
                     body: JSON.stringify({ 
@@ -440,7 +436,6 @@
                 const json = await res.json();
                 
                 if (json.result === 'error') {
-                   // Token likely expired
                    logout();
                    return;
                 }
@@ -455,7 +450,11 @@
                 document.getElementById('loading').style.display = 'none';
                 document.getElementById('tableView').classList.remove('hidden');
                 render();
-            } catch(e) { console.error(e); }
+            } catch(e) { 
+                // FIXED: UI Feedback for connection failure
+                console.error(e);
+                document.getElementById('loading').innerHTML = '<span style="color:var(--text-light)">Connection Failed. <a href="javascript:location.reload()" style="color:var(--accent)">Retry</a></span>';
+            }
         }
 
         const debounce = (fn, ms) => { let t; return (...a) => { clearTimeout(t); t=setTimeout(()=>fn(...a), ms); }};
@@ -493,11 +492,9 @@
 
             const renderTags = (tags) => {
                 if(!tags) return '';
-                // Sanitize tags before rendering
                 return tags.split(',').map(t => `<span class="tag-pill">${escapeHtml(t.trim())}</span>`).join('');
             };
 
-            // NEW: Applied escapeHtml() to all user content to prevent XSS
             tb.innerHTML = flt.map(i => `
                 <tr>
                     <td>
@@ -637,7 +634,6 @@
 
         function downloadCSV() {
             if (!db || !db.length) return alert("No data to export");
-            // NEW: Filter out 'Last Editor' and internal keys from Export
             const headers = Object.keys(db[0]).filter(k => k !== '_rowIndex' && k !== 'Last Editor'); 
             const csvRows = [headers.join(',')];
             
@@ -665,7 +661,6 @@
             const item = db.find(r => r._rowIndex === rowIndex);
             if (!item) return;
 
-            // Secure rendering in modal
             const lastEditor = item["Last Editor"] || "Unknown";
             document.getElementById('modalTitle').innerHTML = `
                 ${escapeHtml(item["Hospital Name"])}
