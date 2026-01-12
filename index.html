@@ -9,7 +9,6 @@
     <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
     <style>
         :root {
-            /* Modified BG to be slightly darker/cooler for better card contrast */
             --primary: #2d2d2d; --accent: #bfa15f; --accent-dark: #a3884d;
             --bg: #f0f2f5; --surface: #ffffff; --text: #2d2d2d; --text-light: #6c757d;
             --border: #e9ecef; 
@@ -42,9 +41,10 @@
         .controls { flex-wrap: wrap; margin-bottom: 25px; }
         .search-box { flex: 2; min-width: 250px; } .filter-box { flex: 1; min-width: 150px; }
 
-        /* Table - Added subtle shadow */
+        /* Table */
         .data-table { width: 100%; border-collapse: separate; border-spacing: 0; background: var(--surface); border-radius: 12px; overflow: hidden; box-shadow: 0 4px 15px rgba(0,0,0,0.05); border: 1px solid var(--border); }
-        .data-table th { text-align: left; padding: 20px; background: #fafafa; color: #8898aa; font-weight: 700; font-size: 11px; letter-spacing: 0.8px; text-transform: uppercase; border-bottom: 1px solid var(--border); }
+        /* CHANGED: Increased font size from 11px to 12px for better readability */
+        .data-table th { text-align: left; padding: 20px; background: #fafafa; color: #8898aa; font-weight: 700; font-size: 12px; letter-spacing: 0.8px; text-transform: uppercase; border-bottom: 1px solid var(--border); }
         .data-table td { padding: 18px 20px; border-bottom: 1px solid var(--border); vertical-align: middle; }
         .data-table tr:last-child td { border-bottom: none; }
         .data-table tr:hover td { background-color: #fcfcfc; }
@@ -60,10 +60,11 @@
 
         /* Info Section in Modal */
         .info-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 20px; margin-bottom: 25px; background: #f8f9fa; padding: 20px; border-radius: 12px; border: 1px solid var(--border); }
-        .info-item label { display: block; font-size: 11px; text-transform: uppercase; color: #999; margin-bottom: 4px; letter-spacing: 0.5px; font-weight: 600; }
+        /* CHANGED: Increased label size slightly */
+        .info-item label { display: block; font-size: 12px; text-transform: uppercase; color: #999; margin-bottom: 4px; letter-spacing: 0.5px; font-weight: 600; }
         .info-item div { font-weight: 600; font-size: 14px; color: #333; }
 
-        /* Secure Inputs (Edit Mode) - MODIFIED: Cleaner Text Look when disabled */
+        /* Secure Inputs */
         .secure-input:disabled { background: transparent; border: none; padding: 0; color: #2d2d2d; font-weight: 600; cursor: text; opacity: 1; -webkit-text-fill-color: #2d2d2d; }
         .secure-input:disabled + .input-icon { display: none; }
         
@@ -84,13 +85,15 @@
         @media (max-width: 768px) { .data-table { display: none; } .grid-view { display: grid !important; } .controls { flex-direction: column; } }
         .grid-view { display: grid; grid-template-columns: repeat(auto-fill, minmax(300px, 1fr)); gap: 20px; }
         
-        /* Card - Modified for better pop */
+        /* Card Styles - CHANGED: Simplified Logic */
         .card { background: var(--surface); padding: 25px; border-radius: 12px; border: 1px solid transparent; box-shadow: 0 4px 15px rgba(0,0,0,0.03); transition: all 0.2s; cursor: pointer; position: relative; overflow: hidden; }
         .card:hover { transform: translateY(-3px); box-shadow: 0 12px 30px rgba(0,0,0,0.08); border-color: transparent; }
+        
+        /* Default Left Border (Grey) */
         .card::before { content: ''; position: absolute; left: 0; top: 0; bottom: 0; width: 4px; background: #e9ecef; transition: 0.2s; }
-        .card[data-status*="Renewed"]::before, .card[data-status*="Satisfied"]::before { background: #27ae60; }
-        .card[data-status*="Unsatisfied"]::before, .card[data-status*="Not"]::before { background: #e74c3c; }
-        .card[data-status*="Quote"]::before { background: #3498db; }
+        
+        /* Gold Accent Left Border if Interacted */
+        .card.interacted::before { background: var(--accent); }
 
         /* Chart Container */
         .chart-wrapper { position: relative; height: 300px; width: 100%; }
@@ -348,7 +351,7 @@
                     <td style="color:#555; font-size:13px;">${i.City}</td>
                     <td>
                         <div style="font-size:13px; font-weight:500;">${i.Device || '-'}</div>
-                        ${i.Tags ? `<div style="font-size:11px; background:#f1f3f5; display:inline-block; padding:2px 6px; border-radius:4px; color:#666; margin-top:4px;">${i.Tags}</div>` : ''}
+                        ${i.Tags ? `<div style="font-size:11px; background:#f1f3f5; display:inline-block; padding:2px 6px; border-radius:4px; color:#2d2d2d; margin-top:4px; font-weight:600">${i.Tags}</div>` : ''}
                     </td>
                     <td><span style="color:${getTextColor(i.Satisfaction)}; font-weight:600; font-size:13px; background:${getTextColor(i.Satisfaction)}15; padding:4px 8px; border-radius:4px;">${i.Satisfaction || '-'}</span></td>
                     <td><span style="color:${getTextColor(i.Status)}; font-weight:600; font-size:13px;">${i.Status || '-'}</span></td>
@@ -356,9 +359,12 @@
                 </tr>
             `).join('');
 
-            // Card View
-            cv.innerHTML = flt.map(i => `
-                <div class="card" onclick="openEdit(${i._rowIndex})" data-status="${i.Status} ${i.Satisfaction}">
+            // Card View - CHANGED: Implemented Grey vs Gold logic
+            cv.innerHTML = flt.map(i => {
+                const s = (i.Status || 'Pending');
+                const isInteracted = s !== 'Pending' && s !== '';
+                return `
+                <div class="card ${isInteracted ? 'interacted' : ''}" onclick="openEdit(${i._rowIndex})">
                     <h3 style="margin:0 0 10px 0; font-size:16px;">${i["Hospital Name"]}</h3>
                     <p style="font-size:12px; color:#666; margin:0 0 15px 0;">
                         <i class="fa-solid fa-location-dot" style="margin-right:5px; color:#adb5bd"></i> ${i.City}
@@ -368,7 +374,7 @@
                         ${i.Contact ? '<i class="fa-solid fa-user" style="color:#dee2e6"></i>' : ''}
                     </div>
                 </div>
-            `).join('');
+            `}).join('');
             
             // If charts are visible, update them
             if(!document.getElementById('chartsView').classList.contains('hidden')) {
@@ -376,13 +382,14 @@
             }
         }
 
-        // ADDED: Text Color Helper including Neutral
+        // ADDED: Text Color Helper including Neutral and CHANGED Unsatisfied Color
         function getTextColor(s) {
             if(!s) return '#adb5bd';
             s = s.toLowerCase();
             if(s.includes('renewed') || s.includes('satisfied')) return '#27ae60'; // Green
             if(s.includes('quote') || s.includes('call')) return '#2980b9'; // Blue
-            if(s.includes('no answer') || s.includes('unsatisfied') || s.includes('not interested')) return '#c0392b'; // Red
+            // CHANGED: Changed Red to Burnt Orange/Terra Cotta for "Unsatisfied/No Answer"
+            if(s.includes('no answer') || s.includes('unsatisfied') || s.includes('not interested')) return '#d35400'; 
             if(s.includes('neutral')) return '#7f8c8d'; // Grey/Slate for Neutral
             return '#666';
         }
@@ -391,7 +398,7 @@
         function renderCharts(data) {
             // Count Statuses
             const statusCounts = {};
-            const satCounts = { 'Satisfied': 0, 'Unsatisfied': 0, 'Neutral': 0, 'Unknown': 0 };
+            const satCounts = { 'Satisfied': 0, 'Unsatisfied': 0, 'Neutral': 0 };
 
             data.forEach(i => {
                 const s = i.Status || 'Pending';
@@ -401,10 +408,10 @@
                 }
                 
                 const sat = i.Satisfaction;
+                // CHANGED: Filter out "Unknown" completely from the object
                 if(sat === 'Satisfied') satCounts['Satisfied']++;
                 else if(sat === 'Unsatisfied') satCounts['Unsatisfied']++;
                 else if(sat === 'Neutral') satCounts['Neutral']++;
-                else satCounts['Unknown']++;
             });
 
             // Destroy old charts
@@ -432,7 +439,7 @@
                 }
             });
 
-            // Render Satisfaction Chart
+            // Render Satisfaction Chart - CHANGED: Removed Unknown color/data
             const ctxSat = document.getElementById('satChart').getContext('2d');
             chartInstances.sat = new Chart(ctxSat, {
                 type: 'doughnut',
@@ -440,7 +447,8 @@
                     labels: Object.keys(satCounts),
                     datasets: [{
                         data: Object.values(satCounts),
-                        backgroundColor: ['#27ae60', '#c0392b', '#95a5a6', '#f1f3f5'],
+                        // CHANGED: Updated colors to match text colors
+                        backgroundColor: ['#27ae60', '#d35400', '#95a5a6'],
                         borderWidth: 0
                     }]
                 },
