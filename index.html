@@ -12,7 +12,6 @@
             --primary: #2d2d2d; --accent: #bfa15f; --accent-dark: #a3884d;
             --bg: #f0f2f5; --surface: #ffffff; --text: #2d2d2d; --text-light: #6c757d;
             --border: #e9ecef; 
-            /* CHANGED: New Color Variable for Active Contract (Steel Blue) */
             --active-contract: #5DADE2;
         }
         body { font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; background: var(--bg); margin: 0; color: var(--text); -webkit-font-smoothing: antialiased; display: flex; flex-direction: column; min-height: 100vh; }
@@ -20,7 +19,7 @@
         .gap-2 { gap: 8px; } .gap-4 { gap: 16px; } .hidden { display: none !important; }
         .p-4 { padding: 16px; } .rounded { border-radius: 8px; }
 
-        /* ADDED: Login Overlay (The Landing Page) */
+        /* Login Overlay */
         #loginOverlay { position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: var(--bg); z-index: 2000; display: flex; justify-content: center; align-items: center; flex-direction: column; }
         .login-card { background: white; padding: 40px; border-radius: 20px; box-shadow: 0 10px 40px rgba(0,0,0,0.05); text-align: center; width: 300px; border-top: 4px solid var(--accent); }
 
@@ -33,7 +32,7 @@
         .user-badge { background: #f1f3f5; padding: 6px 14px; border-radius: 30px; font-size: 13px; font-weight: 600; display: flex; align-items: center; gap: 10px; border: 1px solid var(--border); }
         .role-tag { font-size: 10px; padding: 3px 8px; border-radius: 6px; background: #e9ecef; color: #495057; text-transform: uppercase; letter-spacing: 0.5px; font-weight: 700; }
         .role-admin { background: #e6fcf5; color: #0ca678; border: 1px solid #c3fae8; }
-        .role-rowad { background: #fff4e6; color: #d9480f; border: 1px solid #ffec99; } /* CHANGED: New Style for Internal Viewer */
+        .role-rowad { background: #fff4e6; color: #d9480f; border: 1px solid #ffec99; }
 
         .view-btn { border: 1px solid transparent; background: transparent; padding: 8px 12px; cursor: pointer; border-radius: 6px; color: #adb5bd; transition: 0.2s; }
         .view-btn:hover { color: var(--text); background: #f1f3f5; }
@@ -102,7 +101,6 @@
         .card::before { content: ''; position: absolute; left: 0; top: 0; bottom: 0; width: 4px; background: #e9ecef; transition: 0.2s; }
         
         .card.interacted::before { background: var(--accent); } 
-        /* CHANGED: Use new Steel Blue color for Active Contracts */
         .card[data-active="true"]::before { background: var(--active-contract) !important; }
 
         .chart-wrapper { position: relative; height: 300px; width: 100%; }
@@ -113,15 +111,15 @@
         .footer-credit { text-align: center; font-size: 11px; color: #adb5bd; padding: 20px; margin-top: auto; font-weight: 500; letter-spacing: 0.5px; }
         .footer-disclaimer { display: block; font-size: 10px; color: #ced4da; margin-top: 5px; font-style: italic; opacity: 0.7; }
         
-        /* ADDED: Hidden Class for Dashboard before Login */
-        .dashboard-container { display: none; }
+        /* FIX: Dashboard Container needs column direction to stack header, content, and footer */
+        .dashboard-container { display: none; flex-direction: column; flex: 1; }
     </style>
 </head>
 <body>
 
     <div id="loginOverlay">
         <div class="login-card">
-            <img src="https://alrowad-ksa.com/wp-content/uploads/2022/10/Rowad-Medical-Services_Horizontal_Logo.svg" alt="Rowad Logo" style="height: 50px; margin-bottom: 20px;">
+            <img src="https://alrowad-ksa.com/wp-content/uploads/2022/10/Rowad-Medical-Services_Horizontal_Logo.svg" alt="Rowad Logo" style="height: 50px; margin-bottom: 20px; display: block; margin-left: auto; margin-right: auto;">
             <h2 style="margin: 0 0 10px 0; font-size: 18px; color: var(--text);">Internal Calls Dashboard</h2>
             <p style="margin: 0 0 25px 0; color: var(--text-light); font-size: 13px;">Secure Access • Authorized Personnel Only</p>
             
@@ -314,7 +312,6 @@
         let db = [], currentEditIndex = -1;
         let currentUser = { email: null, token: null, role: 'Public' };
         let chartInstances = {};
-        // ADDED: 9 Hours in milliseconds
         const SESSION_DURATION = 9 * 60 * 60 * 1000; 
 
         const priorityMap = {
@@ -329,7 +326,6 @@
             "Unsatisfied": 7
         };
 
-        // ADDED: Init Session on Load
         window.onload = function() {
             checkSession();
             document.getElementById('viewControls').addEventListener('click', (e) => {
@@ -338,21 +334,23 @@
             });
         };
 
-        // ADDED: Logic to check LocalStorage
         function checkSession() {
             const saved = localStorage.getItem('rowad_user');
             if (saved) {
-                const session = JSON.parse(saved);
-                const age = Date.now() - session.timestamp;
-                if (age < SESSION_DURATION) {
-                    // Restore session
-                    currentUser = session.user;
-                    showDashboard();
-                    fetchData(); // Load DB
-                    return;
+                try {
+                    const session = JSON.parse(saved);
+                    const age = Date.now() - session.timestamp;
+                    if (age < SESSION_DURATION) {
+                        currentUser = session.user;
+                        showDashboard();
+                        fetchData(); 
+                        return;
+                    }
+                } catch (e) {
+                    // Safety: corrupt data cleanup
+                    localStorage.removeItem('rowad_user');
                 }
             }
-            // If no valid session, show login
             document.getElementById('loginOverlay').style.display = 'flex';
         }
 
@@ -369,7 +367,6 @@
                     currentUser.email = json.email;
                     currentUser.role = json.role; 
                     
-                    // ADDED: Save Session
                     localStorage.setItem('rowad_user', JSON.stringify({
                         user: currentUser,
                         timestamp: Date.now()
@@ -384,16 +381,15 @@
             } catch (e) { console.error(e); alert("Connection failed."); }
         };
 
-        // ADDED: Transition from Login to Dashboard
         function showDashboard() {
             document.getElementById('loginOverlay').style.display = 'none';
             const dbDiv = document.getElementById('mainDashboard');
-            dbDiv.style.display = 'flex'; // Unhide dashboard
+            dbDiv.style.display = 'flex'; 
             
             document.getElementById('userNameDisplay').innerText = currentUser.email.split('@')[0];
             const tag = document.getElementById('roleLabel');
             tag.innerText = currentUser.role;
-            // CHANGED: Styling for Rowad Role
+            
             if (currentUser.role === 'Rowad') {
                 tag.className = 'role-tag role-rowad';
             } else if (currentUser.role === 'Admin' || currentUser.role === 'Editor') {
@@ -403,7 +399,6 @@
             }
         }
 
-        // ADDED: Logout
         window.logout = function() {
             localStorage.removeItem('rowad_user');
             location.reload();
@@ -507,7 +502,6 @@
             s = s.toLowerCase();
             if(s.includes('renewed') || s.includes('satisfied')) return '#27ae60'; 
             if(s.includes('quote') || s.includes('call')) return '#2980b9'; 
-            // CHANGED: Active Contract Color to Steel Blue
             if(s.includes('active contract')) return '#5DADE2'; 
             if(s.includes('no answer') || s.includes('unsatisfied') || s.includes('not interested')) return '#d35400'; 
             if(s.includes('neutral')) return '#7f8c8d'; 
@@ -517,13 +511,11 @@
         function renderCharts(data) {
             const statusCounts = {};
             const satCounts = { 'Satisfied': 0, 'Unsatisfied': 0, 'Neutral': 0 };
-            // ADDED: Device Counts
             let surfCount = 0;
             let accuCount = 0;
 
             data.forEach(i => {
                 const s = i.Status || 'Pending';
-                // CHANGED: Exclude 'Active Contract' from Outcomes Chart
                 if (s !== 'Pending' && s !== 'Active Contract') {
                     statusCounts[s] = (statusCounts[s] || 0) + 1;
                 }
@@ -532,7 +524,6 @@
                 else if(sat === 'Unsatisfied') satCounts['Unsatisfied']++;
                 else if(sat === 'Neutral') satCounts['Neutral']++;
 
-                // ADDED: Count Devices (Splitting 'Both')
                 const d = (i.Device || '').toLowerCase();
                 if(d.includes('surfacide') || d.includes('both')) surfCount++;
                 if(d.includes('accufit') || d.includes('both')) accuCount++;
@@ -542,9 +533,7 @@
             if(chartInstances.sat) chartInstances.sat.destroy();
             if(chartInstances.dev) chartInstances.dev.destroy();
 
-            // CHART 1: Outcomes
             const ctxStatus = document.getElementById('statusChart').getContext('2d');
-            // ADDED: Map keys to colors
             const statusColors = Object.keys(statusCounts).map(k => getTextColor(k));
             
             chartInstances.status = new Chart(ctxStatus, {
@@ -554,7 +543,7 @@
                     datasets: [{
                         label: 'Hospitals',
                         data: Object.values(statusCounts),
-                        backgroundColor: statusColors, // CHANGED: Matched Colors
+                        backgroundColor: statusColors,
                         borderRadius: 4
                     }]
                 },
@@ -566,7 +555,6 @@
                 }
             });
 
-            // CHART 2: Satisfaction
             const ctxSat = document.getElementById('satChart').getContext('2d');
             chartInstances.sat = new Chart(ctxSat, {
                 type: 'doughnut',
@@ -585,7 +573,6 @@
                 }
             });
 
-            // ADDED: CHART 3: Device Ownership
             const ctxDev = document.getElementById('deviceChart').getContext('2d');
             chartInstances.dev = new Chart(ctxDev, {
                 type: 'bar',
@@ -594,7 +581,7 @@
                     datasets: [{
                         label: 'Installations',
                         data: [surfCount, accuCount],
-                        backgroundColor: ['#bfa15f', '#2d2d2d'], // Gold vs Dark
+                        backgroundColor: ['#bfa15f', '#2d2d2d'], 
                         borderRadius: 4,
                         barThickness: 40
                     }]
@@ -638,8 +625,6 @@
             if (!item) return;
 
             const lastEditor = item["Last Editor"] || "Unknown";
-            // CHANGED: Format Date to dd/mm/yyyy if possible
-            const today = new Date().toLocaleDateString('en-GB'); 
             
             document.getElementById('modalTitle').innerHTML = `
                 ${item["Hospital Name"]}
@@ -713,8 +698,7 @@
             const originalText = btn.innerText;
             btn.innerText = "Saving...";
             
-            // CHANGED: Insert Date into Last Editor string (Client Side Visual)
-            const dateStr = new Date().toLocaleDateString('en-GB'); // dd/mm/yyyy
+            const dateStr = new Date().toLocaleDateString('en-GB'); 
             const editorStr = `${currentUser.email} on ${dateStr}`;
 
             const updates = {
