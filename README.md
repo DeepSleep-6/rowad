@@ -1,49 +1,42 @@
 # Rowad Medical Services - Calls Dashboard
 
-This project is a centralized dashboard designed to track, manage, and visualize outreach calls to hospitals. It replaces raw spreadsheet data with a user-friendly interface, allowing the team to monitor call outcomes, satisfaction ratings, and device details in real-time.
+A serverless dashboard application for managing hospital outreach, tracking medical device interactions, and visualizing call outcomes.
 
-## What It Does
+## Project Description
 
-* **Visual Tracking:** Displays hospitals as cards.
-    * **Gold Border:** Indicates interaction has occurred (Call Later, Quote Requested, etc.).
-    * **Grey Border:** Indicates the call is still "Pending."
-* **Data Visualization:** Includes charts to instantly view:
-    * Call Outcomes (excluding pending calls for better scale).
-    * Satisfaction Rates (Satisfied vs. Unsatisfied vs. Neutral).
-* **Search & Filter:** Instantly filter hospitals by "Direction" or search by name, city, or contact number.
-* **Editing:** Authorized users (Admins/Editors) can click any card to update contact info, status, notes, and tags directly.
-* **Export:** One-click download of the entire database to CSV.
+This Single Page Application (SPA) provides a graphical interface for the Rowad Medical Services team to interact with their outreach database. It replaces direct spreadsheet manipulation with a secure, user-friendly UI that enforces data integrity and provides real-time analytics.
 
-## Technical Overview
+## Features
 
-The application runs on a serverless architecture, using Google services to handle the backend and database, ensuring zero hosting costs and high availability.
+### Dashboard & Visualization
+* **Kanban-Style Card View:** Visualizes hospital status with binary color coding (Gold for interacted, Grey for pending).
+* **Data Table:** High-density view for quick scanning and sorting.
+* **Analytics:** Real-time charts via Chart.js displaying:
+    * Call Outcomes (Quote Requested, Call Later, Not Interested).
+    * Satisfaction Metrics (Satisfied vs. Unsatisfied vs. Neutral).
 
-* **Frontend:** A single HTML file (`index.html`) containing all CSS styling and JavaScript logic.
+### Data Management
+* **CRUD Operations:** Full read/write capabilities for hospital records, including contact details, notes, and tagging.
+* **Search & Filtering:** Client-side filtering by geographical direction and multi-field text search.
+* **Export:** Client-side generation of CSV exports for external reporting.
+
+### Access Control
+* **Role-Based Access:** * **Admin/Editor:** Full write access.
+    * **Public/Viewer:** Read-only access.
+* **Authentication:** Integration with Google Identity Services (OAuth 2.0).
+
+## Technology Stack
+
+* **Frontend:** HTML5, CSS3, JavaScript (ES6+).
+* **Backend:** Google Apps Script (Web App deployment).
 * **Database:** Google Sheets.
-* **Backend API:** Google Apps Script (GAS) acts as the bridge between the frontend and the spreadsheet.
-* **Authentication:** Google Sign-In (OAuth 2.0) handles user identity and access control.
+* **Dependencies:** Chart.js, FontAwesome.
 
-## Setup Instructions
+## Configuration & Setup
 
-If you need to deploy this dashboard from scratch, follow these steps:
+### Prerequisites
+1.  **Google Sheet:** A structured spreadsheet containing hospital data.
+2.  **Google Cloud Platform:** A project configured with an OAuth 2.0 Client ID.
 
-### 1. The Database (Google Sheets)
-Create a new Google Sheet with these exact headers in the first row:
-`Hospital Name`, `Region`, `City`, `Direction`, `Device`, `Surfacide SN`, `AccuFIT SN`, `Surfacide Username`, `Contact`, `Contact Mobile Number`, `Satisfaction`, `Status`, `Tags`, `Notes`.
-
-### 2. The Backend (Apps Script)
-1.  In your Google Sheet, go to **Extensions > Apps Script**.
-2.  Paste the backend code (provided separately).
-3.  Deploy as a **Web App**.
-    * *Execute as:* Me.
-    * *Who has access:* Anyone. (Security is handled by the Token in the frontend).
-4.  Copy the generated **Web App URL**.
-
-### 3. The Frontend Configuration
-Open `index.html` and update the following variables:
-1.  **SCRIPT_URL:** Paste your Web App URL here.
-2.  **data-client_id:** Paste your Google Cloud OAuth Client ID here.
-
-## Usage Rights
-
-This software is developed for the internal use of Rowad Medical Services. Access to write/edit data is restricted to authorized email accounts.
+## Usage
+Open `index.html` in any modern web browser. The application handles authentication via the "Sign In" button in the navigation bar.
