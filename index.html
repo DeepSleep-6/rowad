@@ -93,6 +93,19 @@
             .modal-card { width: 95%; margin: 10px; max-height: 85vh; }
             .page-title { font-size: 16px; padding-left: 10px; margin-left: 10px; }
         }
+
+        /* NEW: Print Styles */
+        @media print {
+            .top-bar, .controls, .view-toggles, .footer-credit, .btn-action, .dashboard-container > button { display: none !important; }
+            body, .dashboard-container { background: white; margin: 0; padding: 0; }
+            .container { max-width: 100%; margin: 0; padding: 0; }
+            .data-table { display: table !important; box-shadow: none; border: 1px solid #000; width: 100%; }
+            .data-table th { background: #ddd !important; color: #000 !important; font-weight: bold; -webkit-print-color-adjust: exact; }
+            .data-table td { border-bottom: 1px solid #000; color: #000; }
+            /* Hide charts and cards when printing, force table */
+            #cardView, #chartsView, #exportView, #loading { display: none !important; }
+            #tableView { display: table !important; }
+        }
         
         .grid-view { display: grid; grid-template-columns: repeat(auto-fill, minmax(300px, 1fr)); gap: 20px; }
         
@@ -111,7 +124,6 @@
         .footer-credit { text-align: center; font-size: 11px; color: #adb5bd; padding: 20px; margin-top: auto; font-weight: 500; letter-spacing: 0.5px; }
         .footer-disclaimer { display: block; font-size: 10px; color: #ced4da; margin-top: 5px; font-style: italic; opacity: 0.7; }
         
-        /* FIX: Dashboard Container needs column direction to stack header, content, and footer */
         .dashboard-container { display: none; flex-direction: column; flex: 1; }
     </style>
 </head>
@@ -224,12 +236,13 @@
                     <h2 style="margin: 0 0 10px 0;">Export Database</h2>
                     <p style="color: var(--text-light); margin-bottom: 30px; line-height: 1.5;">Download the complete dataset in CSV format, including all hospital records and contact details.</p>
                     <button onclick="downloadCSV()" class="btn-save" style="margin:0"><i class="fa-solid fa-download" style="margin-right:8px"></i> Download Full CSV</button>
+                    <button onclick="window.print()" class="btn-action" style="margin-top: 15px; width: 100%;"><i class="fa-solid fa-print" style="margin-right:8px"></i> Print Current View</button>
                 </div>
             </div>
         </div>
 
         <div class="footer-credit">
-            Rowad Calls Dashboard v1.2 • Developed by Faisal Alzougbi
+            Rowad Calls Dashboard v1.3 • Developed by Faisal Alzougbi
             <span class="footer-disclaimer">Disclaimer: This dashboard is an independently developed tool for internal workflow optimization. It is not an official asset of, nor maintained by, Rowad Medical Services.</span>
         </div>
     </div>
@@ -325,6 +338,17 @@
             "Not Interested": 7,
             "Unsatisfied": 7
         };
+        
+        // NEW: Helper to prevent XSS attacks when rendering HTML
+        const escapeHtml = (unsafe) => {
+            if (unsafe === null || unsafe === undefined) return '';
+            return String(unsafe)
+                 .replace(/&/g, "&amp;")
+                 .replace(/</g, "&lt;")
+                 .replace(/>/g, "&gt;")
+                 .replace(/"/g, "&quot;")
+                 .replace(/'/g, "&#039;");
+        };
 
         window.onload = function() {
             checkSession();
@@ -347,7 +371,6 @@
                         return;
                     }
                 } catch (e) {
-                    // Safety: corrupt data cleanup
                     localStorage.removeItem('rowad_user');
                 }
             }
@@ -372,9 +395,9 @@
                         timestamp: Date.now()
                     }));
 
-                    db = json.data; 
+                    // Note: Database is no longer returned in login, must fetch separately
                     showDashboard();
-                    render();
+                    fetchData();
                 } else {
                     alert("Login Failed: " + json.message);
                 }
@@ -406,8 +429,23 @@
 
         async function fetchData() {
             try {
-                const res = await fetch(SCRIPT_URL);
-                db = await res.json(); 
+                // SECURITY FIX: Changed to POST with token to prevent public data access
+                const res = await fetch(SCRIPT_URL, {
+                    method: 'POST',
+                    body: JSON.stringify({ 
+                        action: 'fetch_data', 
+                        token: currentUser.token 
+                    })
+                });
+                const json = await res.json();
+                
+                if (json.result === 'error') {
+                   // Token likely expired
+                   logout();
+                   return;
+                }
+
+                db = json.data; 
                 
                 const dirs = [...new Set(db.map(r => r.Direction))].filter(Boolean).sort();
                 const s = document.getElementById('filterDirection');
@@ -455,22 +493,24 @@
 
             const renderTags = (tags) => {
                 if(!tags) return '';
-                return tags.split(',').map(t => `<span class="tag-pill">${t.trim()}</span>`).join('');
+                // Sanitize tags before rendering
+                return tags.split(',').map(t => `<span class="tag-pill">${escapeHtml(t.trim())}</span>`).join('');
             };
 
+            // NEW: Applied escapeHtml() to all user content to prevent XSS
             tb.innerHTML = flt.map(i => `
                 <tr>
                     <td>
-                        <div style="font-weight:600; color:#2d2d2d">${i["Hospital Name"]}</div>
-                        <div style="color:#888; font-size:12px; margin-top:2px;">${i.Contact || ''}</div>
+                        <div style="font-weight:600; color:#2d2d2d">${escapeHtml(i["Hospital Name"])}</div>
+                        <div style="color:#888; font-size:12px; margin-top:2px;">${escapeHtml(i.Contact)}</div>
                     </td>
-                    <td style="color:#555; font-size:13px;">${i.City}</td>
+                    <td style="color:#555; font-size:13px;">${escapeHtml(i.City)}</td>
                     <td>
-                        <div style="font-size:13px; font-weight:500;">${i.Device || '-'}</div>
+                        <div style="font-size:13px; font-weight:500;">${escapeHtml(i.Device || '-')}</div>
                         <div style="margin-top:4px;">${renderTags(i.Tags)}</div>
                     </td>
-                    <td><span style="color:${getTextColor(i.Satisfaction)}; font-weight:600; font-size:13px; background:${getTextColor(i.Satisfaction)}15; padding:4px 8px; border-radius:4px;">${i.Satisfaction || '-'}</span></td>
-                    <td><span style="color:${getTextColor(i.Status)}; font-weight:600; font-size:13px;">${i.Status || '-'}</span></td>
+                    <td><span style="color:${getTextColor(i.Satisfaction)}; font-weight:600; font-size:13px; background:${getTextColor(i.Satisfaction)}15; padding:4px 8px; border-radius:4px;">${escapeHtml(i.Satisfaction || '-')}</span></td>
+                    <td><span style="color:${getTextColor(i.Status)}; font-weight:600; font-size:13px;">${escapeHtml(i.Status || '-')}</span></td>
                     <td style="text-align:right"><button class="btn-action" onclick="openEdit(${i._rowIndex})"><i class="fa-solid fa-pen"></i></button></td>
                 </tr>
             `).join('');
@@ -481,12 +521,12 @@
                 const isActive = s === 'Active Contract'; 
                 return `
                 <div class="card ${isInteracted ? 'interacted' : ''}" data-active="${isActive}" onclick="openEdit(${i._rowIndex})">
-                    <h3 style="margin:0 0 10px 0; font-size:16px;">${i["Hospital Name"]}</h3>
+                    <h3 style="margin:0 0 10px 0; font-size:16px;">${escapeHtml(i["Hospital Name"])}</h3>
                     <p style="font-size:12px; color:#666; margin:0 0 15px 0;">
-                        <i class="fa-solid fa-location-dot" style="margin-right:5px; color:#adb5bd"></i> ${i.City}
+                        <i class="fa-solid fa-location-dot" style="margin-right:5px; color:#adb5bd"></i> ${escapeHtml(i.City)}
                     </p>
                     <div style="display:flex; justify-content:space-between; align-items:center; border-top:1px solid #f1f3f5; padding-top:15px;">
-                        <span style="color:${getTextColor(i.Status)}; font-weight:600; font-size:12px;">${i.Status || 'Pending'}</span>
+                        <span style="color:${getTextColor(i.Status)}; font-weight:600; font-size:12px;">${escapeHtml(i.Status || 'Pending')}</span>
                         ${i.Contact ? '<i class="fa-solid fa-user" style="color:#dee2e6"></i>' : ''}
                     </div>
                 </div>
@@ -597,7 +637,8 @@
 
         function downloadCSV() {
             if (!db || !db.length) return alert("No data to export");
-            const headers = Object.keys(db[0]).filter(k => k !== '_rowIndex'); 
+            // NEW: Filter out 'Last Editor' and internal keys from Export
+            const headers = Object.keys(db[0]).filter(k => k !== '_rowIndex' && k !== 'Last Editor'); 
             const csvRows = [headers.join(',')];
             
             for (const row of db) {
@@ -624,11 +665,11 @@
             const item = db.find(r => r._rowIndex === rowIndex);
             if (!item) return;
 
+            // Secure rendering in modal
             const lastEditor = item["Last Editor"] || "Unknown";
-            
             document.getElementById('modalTitle').innerHTML = `
-                ${item["Hospital Name"]}
-                <div style="font-size:10px; color:#adb5bd; font-weight:400; margin-top:4px;">Last updated by: ${lastEditor}</div>
+                ${escapeHtml(item["Hospital Name"])}
+                <div style="font-size:10px; color:#adb5bd; font-weight:400; margin-top:4px;">Last updated by: ${escapeHtml(lastEditor)}</div>
             `;
             
             document.getElementById('dispRegion').innerText = item.Region || '-';
