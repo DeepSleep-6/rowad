@@ -21,7 +21,9 @@
         /* Top Bar */
         .top-bar { background: var(--surface); padding: 15px 30px; box-shadow: 0 4px 20px rgba(0,0,0,0.05); border-bottom: 3px solid var(--accent); position: sticky; top: 0; z-index: 100; flex-wrap: wrap; gap: 15px; }
         .logo-img { height: 45px; width: auto; } 
-        .page-title { font-size: 20px; font-weight: 700; padding-left: 20px; border-left: 2px solid #eee; margin-left: 20px; letter-spacing: -0.5px; }
+        
+        /* FIX #2: Mobile Title Responsive */
+        .page-title { font-size: 20px; font-weight: 700; padding-left: 20px; border-left: 2px solid #eee; margin-left: 20px; letter-spacing: -0.5px; white-space: nowrap; }
         
         /* Login UI */
         .user-badge { background: #f1f3f5; padding: 6px 14px; border-radius: 30px; font-size: 13px; font-weight: 600; display: flex; align-items: center; gap: 10px; border: 1px solid var(--border); }
@@ -95,6 +97,9 @@
             .top-bar { justify-content: center; padding: 15px 20px; }
             .top-bar > div { width: 100%; justify-content: space-between; }
             .modal-card { width: 95%; margin: 10px; max-height: 85vh; }
+            
+            /* FIX #2: Resize page title on mobile to prevent cutoff */
+            .page-title { font-size: 16px; padding-left: 10px; margin-left: 10px; }
         }
         
         /* Desktop Grid */
@@ -105,7 +110,7 @@
         .card:hover { transform: translateY(-3px); box-shadow: 0 12px 30px rgba(0,0,0,0.08); border-color: transparent; }
         .card::before { content: ''; position: absolute; left: 0; top: 0; bottom: 0; width: 4px; background: #e9ecef; transition: 0.2s; }
         
-        /* Modified Logic: Grey for Pending, Gold for Action, Purple for Active Contract */
+        /* Logic: Grey for Pending, Gold for Action, Purple for Active Contract */
         .card.interacted::before { background: var(--accent); } 
         .card[data-active="true"]::before { background: #8e44ad !important; }
 
@@ -302,7 +307,6 @@
         let currentUser = { email: null, token: null, role: 'Public' };
         let chartInstances = {};
 
-        // UPDATED: Priority Map (Active Contract pushed to bottom)
         const priorityMap = {
             "Quote Requested": 1,
             "Call Later": 2,
@@ -406,10 +410,8 @@
                 return true;
             });
 
-            // Helper to render Tags
             const renderTags = (tags) => {
                 if(!tags) return '';
-                // Split by comma and map to pills
                 return tags.split(',').map(t => `<span class="tag-pill">${t.trim()}</span>`).join('');
             };
 
@@ -433,7 +435,7 @@
             cv.innerHTML = flt.map(i => {
                 const s = (i.Status || 'Pending');
                 const isInteracted = s !== 'Pending' && s !== '';
-                const isActive = s === 'Active Contract'; // Check for special purple status
+                const isActive = s === 'Active Contract'; 
                 return `
                 <div class="card ${isInteracted ? 'interacted' : ''}" data-active="${isActive}" onclick="openEdit(${i._rowIndex})">
                     <h3 style="margin:0 0 10px 0; font-size:16px;">${i["Hospital Name"]}</h3>
@@ -452,13 +454,12 @@
             }
         }
 
-        // UPDATED: Added Active Contract Color
         function getTextColor(s) {
             if(!s) return '#adb5bd';
             s = s.toLowerCase();
             if(s.includes('renewed') || s.includes('satisfied')) return '#27ae60'; 
             if(s.includes('quote') || s.includes('call')) return '#2980b9'; 
-            if(s.includes('active contract')) return '#8e44ad'; // Purple
+            if(s.includes('active contract')) return '#8e44ad'; 
             if(s.includes('no answer') || s.includes('unsatisfied') || s.includes('not interested')) return '#d35400'; 
             if(s.includes('neutral')) return '#7f8c8d'; 
             return '#666';
@@ -580,7 +581,6 @@
             if (isUncensored) {
                 wa.classList.remove('hidden');
                 
-                // UPDATED: Logic to find FIRST valid number in text blob
                 const match = mobile.match(/(05\d{8})/);
                 if (match) {
                     let waNum = '966' + match[0].substring(1);
@@ -588,10 +588,10 @@
                     const encodedMsg = encodeURIComponent(message);
                     wa.href = `https://wa.me/${waNum}?text=${encodedMsg}`;
                 } else {
-                    wa.classList.add('hidden'); // Hide if no valid 05 number found
+                    wa.classList.add('hidden'); 
                 }
                 
-                display.innerHTML = mobile; // Show full text (multi-contact)
+                display.innerHTML = mobile; 
             } else {
                 wa.classList.add('hidden');
             }
@@ -618,7 +618,7 @@
             }
         };
 
-        // UPDATED: Silent Save Logic
+        // FIX #1: Removed "Hospital Name" from payload to prevent DB corruption
         window.saveChanges = async function() {
             if (currentUser.role !== 'Admin' && currentUser.role !== 'Editor') return;
             const btn = document.getElementById('saveBtn');
@@ -627,14 +627,13 @@
             
             const updates = {
                 _rowIndex: currentEditIndex,
-                "Hospital Name": document.getElementById('modalTitle').innerText.split('<')[0].trim(),
+                // "Hospital Name": REMOVED to prevent overwriting
                 "Contact": document.getElementById('editContactName').value,
                 "Contact Mobile Number": document.getElementById('editContactMobile').value,
                 "Status": document.getElementById('editStatus').value,
                 "Satisfaction": document.getElementById('editSat').value,
                 "Tags": document.getElementById('editTags').value,
                 "Notes": document.getElementById('editNotes').value,
-                // UPDATED: Manually injecting Last Editor into the update payload
                 "Last Editor": currentUser.email 
             };
 
@@ -650,20 +649,16 @@
                 });
                 const res = await r.json();
                 if(res.result === "success") {
-                    // Update Local Data immediately including Editor
                     const localItem = db.find(i => i._rowIndex === currentEditIndex);
                     if(localItem) {
                         Object.assign(localItem, updates);
                     }
                     
-                    // Trigger Background Render (Real-time update)
                     render();
                     
-                    // UX: Success State
                     btn.classList.add('success');
                     btn.innerHTML = '<i class="fa-solid fa-check"></i> Saved';
                     
-                    // UX: Revert button after 2 seconds
                     setTimeout(() => {
                         btn.classList.remove('success');
                         btn.innerText = originalText;
