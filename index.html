@@ -40,7 +40,6 @@
         .container { max-width: 1400px; margin: 30px auto; padding: 0 20px; flex: 1; width: 100%; box-sizing: border-box; }
         .controls { flex-wrap: wrap; margin-bottom: 25px; }
         .search-box { flex: 2; min-width: 250px; } 
-        /* UPDATED: Filter box sizing for multiple filters */
         .filter-box { flex: 1; min-width: 150px; }
 
         /* Table */
@@ -78,9 +77,15 @@
         .btn-save:hover { background: var(--accent-dark); transform: translateY(-1px); box-shadow: 0 4px 12px rgba(191, 161, 95, 0.3); }
         .btn-save:disabled { background: #e9ecef; color: #adb5bd; cursor: not-allowed; box-shadow: none; transform: none; }
         
+        /* New Success State for Save Button */
+        .btn-save.success { background: #27ae60; pointer-events: none; }
+
         .loading-container { text-align: center; padding: 80px 0; color: var(--text-light); }
         .spinner { width: 40px; height: 40px; border: 3px solid #e9ecef; border-top-color: var(--accent); border-radius: 50%; animation: spin 0.8s linear infinite; margin: 0 auto 20px; }
         @keyframes spin { to { transform: rotate(360deg); } }
+
+        /* Tag Pill Style */
+        .tag-pill { font-size: 11px; background: #f1f3f5; padding: 3px 8px; border-radius: 12px; color: #495057; display: inline-block; margin-right: 4px; border: 1px solid #dee2e6; font-weight: 600; margin-bottom: 2px; }
 
         /* Mobile Adjustments */
         @media (max-width: 768px) { 
@@ -99,7 +104,10 @@
         .card { background: var(--surface); padding: 25px; border-radius: 12px; border: 1px solid transparent; box-shadow: 0 4px 15px rgba(0,0,0,0.03); transition: all 0.2s; cursor: pointer; position: relative; overflow: hidden; }
         .card:hover { transform: translateY(-3px); box-shadow: 0 12px 30px rgba(0,0,0,0.08); border-color: transparent; }
         .card::before { content: ''; position: absolute; left: 0; top: 0; bottom: 0; width: 4px; background: #e9ecef; transition: 0.2s; }
-        .card.interacted::before { background: var(--accent); }
+        
+        /* Modified Logic: Grey for Pending, Gold for Action, Purple for Active Contract */
+        .card.interacted::before { background: var(--accent); } 
+        .card[data-active="true"]::before { background: #8e44ad !important; }
 
         /* Chart Container */
         .chart-wrapper { position: relative; height: 300px; width: 100%; }
@@ -109,8 +117,6 @@
 
         /* Footer Credit */
         .footer-credit { text-align: center; font-size: 11px; color: #adb5bd; padding: 20px; margin-top: auto; font-weight: 500; letter-spacing: 0.5px; }
-        
-        /* ADDED: Disclaimer Style */
         .footer-disclaimer { display: block; font-size: 10px; color: #ced4da; margin-top: 5px; font-style: italic; opacity: 0.7; }
     </style>
 </head>
@@ -159,6 +165,7 @@
                     <option value="Call Later">Call Later</option>
                     <option value="No Answer">No Answer</option>
                     <option value="Renewed">Renewed</option>
+                    <option value="Active Contract">Active Contract</option>
                     <option value="Not Interested">Not Interested</option>
                 </select>
             </div>
@@ -266,6 +273,7 @@
                             <option value="Quote Requested">Quote Requested</option>
                             <option value="Not Interested">Not Interested</option>
                             <option value="Renewed">Renewed</option>
+                            <option value="Active Contract">Active Contract</option>
                         </select>
                     </div>
                 </div>
@@ -294,12 +302,17 @@
         let currentUser = { email: null, token: null, role: 'Public' };
         let chartInstances = {};
 
-        // ADDED: Priority Map for Sorting
+        // UPDATED: Priority Map (Active Contract pushed to bottom)
         const priorityMap = {
             "Quote Requested": 1,
             "Call Later": 2,
             "No Answer": 3,
-            "Pending": 4
+            "Pending": 4,
+            "Renewed": 5,
+            "Satisfied": 5,
+            "Active Contract": 6,
+            "Not Interested": 7,
+            "Unsatisfied": 7
         };
 
         window.onload = function() {
@@ -367,16 +380,13 @@
             const tb = document.getElementById('tableBody');
             const search = document.getElementById('search').value.toLowerCase();
             const fDir = document.getElementById('filterDirection').value;
-            // ADDED: Capture new filter values
             const fStat = document.getElementById('filterStatus').value;
             const fSat = document.getElementById('filterSat').value;
-            
             const cv = document.getElementById('cardView');
             
             tb.innerHTML = '';
             cv.innerHTML = '';
 
-            // ADDED: Sort DB by Priority before filtering
             db.sort((a, b) => {
                 const sA = a.Status || "Pending";
                 const sB = b.Status || "Pending";
@@ -389,13 +399,19 @@
                 const term = (i["Hospital Name"] + " " + (i.Contact||"") + " " + (i.City||"")).toLowerCase();
                 if (!term.includes(search)) return false;
 
-                // ADDED: AND logic for all filters
                 if(fDir !== 'All' && i.Direction !== fDir) return false;
                 if(fStat !== 'All' && (i.Status || 'Pending') !== fStat) return false;
                 if(fSat !== 'All' && (i.Satisfaction || '') !== fSat) return false;
 
                 return true;
             });
+
+            // Helper to render Tags
+            const renderTags = (tags) => {
+                if(!tags) return '';
+                // Split by comma and map to pills
+                return tags.split(',').map(t => `<span class="tag-pill">${t.trim()}</span>`).join('');
+            };
 
             tb.innerHTML = flt.map(i => `
                 <tr>
@@ -406,7 +422,7 @@
                     <td style="color:#555; font-size:13px;">${i.City}</td>
                     <td>
                         <div style="font-size:13px; font-weight:500;">${i.Device || '-'}</div>
-                        ${i.Tags ? `<div style="font-size:11px; background:#f1f3f5; display:inline-block; padding:2px 6px; border-radius:4px; color:#2d2d2d; margin-top:4px; font-weight:600">${i.Tags}</div>` : ''}
+                        <div style="margin-top:4px;">${renderTags(i.Tags)}</div>
                     </td>
                     <td><span style="color:${getTextColor(i.Satisfaction)}; font-weight:600; font-size:13px; background:${getTextColor(i.Satisfaction)}15; padding:4px 8px; border-radius:4px;">${i.Satisfaction || '-'}</span></td>
                     <td><span style="color:${getTextColor(i.Status)}; font-weight:600; font-size:13px;">${i.Status || '-'}</span></td>
@@ -417,8 +433,9 @@
             cv.innerHTML = flt.map(i => {
                 const s = (i.Status || 'Pending');
                 const isInteracted = s !== 'Pending' && s !== '';
+                const isActive = s === 'Active Contract'; // Check for special purple status
                 return `
-                <div class="card ${isInteracted ? 'interacted' : ''}" onclick="openEdit(${i._rowIndex})">
+                <div class="card ${isInteracted ? 'interacted' : ''}" data-active="${isActive}" onclick="openEdit(${i._rowIndex})">
                     <h3 style="margin:0 0 10px 0; font-size:16px;">${i["Hospital Name"]}</h3>
                     <p style="font-size:12px; color:#666; margin:0 0 15px 0;">
                         <i class="fa-solid fa-location-dot" style="margin-right:5px; color:#adb5bd"></i> ${i.City}
@@ -435,11 +452,13 @@
             }
         }
 
+        // UPDATED: Added Active Contract Color
         function getTextColor(s) {
             if(!s) return '#adb5bd';
             s = s.toLowerCase();
             if(s.includes('renewed') || s.includes('satisfied')) return '#27ae60'; 
             if(s.includes('quote') || s.includes('call')) return '#2980b9'; 
+            if(s.includes('active contract')) return '#8e44ad'; // Purple
             if(s.includes('no answer') || s.includes('unsatisfied') || s.includes('not interested')) return '#d35400'; 
             if(s.includes('neutral')) return '#7f8c8d'; 
             return '#666';
@@ -531,7 +550,6 @@
             const item = db.find(r => r._rowIndex === rowIndex);
             if (!item) return;
 
-            // UPDATED: Header to include Last Editor
             const lastEditor = item["Last Editor"] || "Unknown";
             document.getElementById('modalTitle').innerHTML = `
                 ${item["Hospital Name"]}
@@ -561,15 +579,19 @@
             
             if (isUncensored) {
                 wa.classList.remove('hidden');
-                let waNum = mobile.replace(/\D/g,'');
-                if(waNum.startsWith('0')) waNum = '966' + waNum.substring(1);
                 
-                // ADDED: Encoded Arabic Message
-                const message = "يرجى المشاركة في هذا التقييم كجزء من جهودنا المستمرة لخدمتكم بشكل أفضل: https://forms.gle/DfmEtq8LftRDrAqz5";
-                const encodedMsg = encodeURIComponent(message);
-                wa.href = `https://wa.me/${waNum}?text=${encodedMsg}`;
+                // UPDATED: Logic to find FIRST valid number in text blob
+                const match = mobile.match(/(05\d{8})/);
+                if (match) {
+                    let waNum = '966' + match[0].substring(1);
+                    const message = "يرجى المشاركة في هذا التقييم كجزء من جهودنا المستمرة لخدمتكم بشكل أفضل: https://forms.gle/DfmEtq8LftRDrAqz5";
+                    const encodedMsg = encodeURIComponent(message);
+                    wa.href = `https://wa.me/${waNum}?text=${encodedMsg}`;
+                } else {
+                    wa.classList.add('hidden'); // Hide if no valid 05 number found
+                }
                 
-                display.innerHTML = `<a href="tel:${mobile}">${mobile}</a>`;
+                display.innerHTML = mobile; // Show full text (multi-contact)
             } else {
                 wa.classList.add('hidden');
             }
@@ -588,28 +610,32 @@
         };
 
         window.promptPhoneUpdate = function() {
-            const newNum = prompt("Enter new 05xxxxxxxx number:");
-            if(newNum) {
-                if(!/^05\d{8}$/.test(newNum)) return alert("Invalid format. Must be 05xxxxxxxx");
+            const current = document.getElementById('editContactMobile').value;
+            const newNum = prompt("Update Contact Numbers (comma separated):", current);
+            if(newNum !== null) {
                 document.getElementById('editContactMobile').value = newNum;
                 document.getElementById('displayPhone').innerText = newNum;
             }
         };
 
+        // UPDATED: Silent Save Logic
         window.saveChanges = async function() {
             if (currentUser.role !== 'Admin' && currentUser.role !== 'Editor') return;
             const btn = document.getElementById('saveBtn');
+            const originalText = btn.innerText;
             btn.innerText = "Saving...";
             
             const updates = {
                 _rowIndex: currentEditIndex,
-                "Hospital Name": document.getElementById('modalTitle').innerText.split('<')[0].trim(), // Clean title from HTML
+                "Hospital Name": document.getElementById('modalTitle').innerText.split('<')[0].trim(),
                 "Contact": document.getElementById('editContactName').value,
                 "Contact Mobile Number": document.getElementById('editContactMobile').value,
                 "Status": document.getElementById('editStatus').value,
                 "Satisfaction": document.getElementById('editSat').value,
                 "Tags": document.getElementById('editTags').value,
-                "Notes": document.getElementById('editNotes').value
+                "Notes": document.getElementById('editNotes').value,
+                // UPDATED: Manually injecting Last Editor into the update payload
+                "Last Editor": currentUser.email 
             };
 
             try {
@@ -624,25 +650,34 @@
                 });
                 const res = await r.json();
                 if(res.result === "success") {
-                    alert("Saved Successfully!");
-                    
+                    // Update Local Data immediately including Editor
                     const localItem = db.find(i => i._rowIndex === currentEditIndex);
                     if(localItem) {
                         Object.assign(localItem, updates);
-                        // Update local editor immediately for UX
-                        localItem["Last Editor"] = currentUser.email; 
                     }
                     
-                    closeModal();
+                    // Trigger Background Render (Real-time update)
                     render();
+                    
+                    // UX: Success State
+                    btn.classList.add('success');
+                    btn.innerHTML = '<i class="fa-solid fa-check"></i> Saved';
+                    
+                    // UX: Revert button after 2 seconds
+                    setTimeout(() => {
+                        btn.classList.remove('success');
+                        btn.innerText = originalText;
+                    }, 2000);
+
                 } else {
                     alert("Error: " + res.message);
+                    btn.innerText = originalText;
                 }
             } catch(e) { 
                 alert("Save failed. Check console."); 
                 console.error(e); 
+                btn.innerText = originalText;
             }
-            btn.innerText = "Save Updates";
         };
 
         window.closeModal = function() { document.getElementById('editModal').style.display = 'none'; };
