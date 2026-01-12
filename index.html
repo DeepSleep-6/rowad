@@ -11,360 +11,321 @@
         :root {
             --primary: #2d2d2d; --accent: #bfa15f; --accent-dark: #a3884d;
             --bg: #f4f4f4; --surface: #ffffff; --text: #2d2d2d; --text-light: #666;
-            --border: #e0e0e0; --success-bg: #f0fff4; --success-text: #155724;
-            --danger-bg: #f8d7da; --danger-text: #721c24;
+            --border: #e0e0e0;
         }
         body { font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; background: var(--bg); margin: 0; color: var(--text); }
         .flex { display: flex; } .items-center { align-items: center; } .justify-between { justify-content: space-between; }
-        .gap-2 { gap: 8px; } .gap-4 { gap: 16px; } .hidden { display: none !important; }
-        .p-4 { padding: 16px; } .rounded { border-radius: 8px; }
-
-        /* Top Bar */
-        .top-bar { background: var(--surface); padding: 15px 30px; box-shadow: 0 4px 20px rgba(0,0,0,0.05); border-bottom: 3px solid var(--accent); position: sticky; top: 0; z-index: 100; }
-        .logo-img { height: 45px; width: auto; } 
-        .page-title { font-size: 20px; font-weight: 700; padding-left: 15px; border-left: 2px solid #eee; margin-left: 15px; }
+        .gap-2 { gap: 0.5rem; } .gap-4 { gap: 1rem; } .p-4 { padding: 1rem; } .w-full { width: 100%; }
         
-        /* Login UI */
-        .user-badge { background: #f0f0f0; padding: 6px 12px; border-radius: 20px; font-size: 13px; font-weight: 600; display: flex; align-items: center; gap: 8px; }
-        .role-tag { font-size: 10px; padding: 2px 6px; border-radius: 4px; background: #ccc; color: #333; text-transform: uppercase; }
-        .role-admin { background: #e8f5e9; color: #1b5e20; border: 1px solid #c8e6c9; }
-        .role-rowad { background: #e3f2fd; color: #0d47a1; border: 1px solid #bbdefb; }
-
-        /* Controls */
-        .view-btn { border: none; background: #eee; padding: 8px 12px; cursor: pointer; border-radius: 6px; color: var(--text-light); transition: 0.2s; }
-        .view-btn.active { background: white; color: var(--accent-dark); font-weight: bold; box-shadow: 0 1px 3px rgba(0,0,0,0.1); }
-        input, select, textarea { padding: 12px; border: 1px solid var(--border); border-radius: 8px; width: 100%; box-sizing: border-box; outline: none; background: #fff; font-family: inherit; }
-        .container { max-width: 1400px; margin: 30px auto; padding: 0 20px; min-height: 80vh; }
-        .controls { flex-wrap: wrap; margin-bottom: 25px; }
-        .search-box { flex: 2; min-width: 250px; } .filter-box { flex: 1; min-width: 150px; }
-
+        /* Navbar */
+        nav { background: var(--primary); color: white; padding: 1rem 2rem; box-shadow: 0 2px 4px rgba(0,0,0,0.1); }
+        .nav-content { max-width: 1400px; margin: 0 auto; display: flex; justify-content: space-between; align-items: center; }
+        .logo { font-size: 1.5rem; font-weight: bold; color: var(--accent); }
+        .btn { padding: 0.5rem 1rem; border: none; border-radius: 4px; cursor: pointer; font-weight: 500; transition: 0.2s; }
+        .btn-primary { background: var(--accent); color: var(--primary); }
+        .btn-primary:hover { background: var(--accent-dark); }
+        
+        /* Main Layout */
+        main { max-width: 1400px; margin: 2rem auto; padding: 0 1rem; }
+        
         /* Table */
-        .data-table { width: 100%; border-collapse: separate; border-spacing: 0; background: var(--surface); border-radius: 12px; overflow: hidden; box-shadow: 0 4px 15px rgba(0,0,0,0.03); }
-        .data-table th { text-align: left; padding: 18px 15px; background: #fafafa; color: var(--text-light); font-weight: 700; text-transform: uppercase; border-bottom: 2px solid var(--border); cursor: pointer; }
-        .data-table td { padding: 15px; border-bottom: 1px solid var(--border); }
-        .tag { padding: 4px 10px; border-radius: 12px; font-size: 11px; background: #eee; border: 1px solid #ddd; display: inline-block; margin: 0 4px 2px 0; }
-        .btn-action { background: var(--accent); color: white; border: none; padding: 6px 14px; border-radius: 6px; cursor: pointer; font-weight: 600; }
+        .card { background: var(--surface); border-radius: 8px; box-shadow: 0 2px 4px rgba(0,0,0,0.05); overflow: hidden; }
+        table { width: 100%; border-collapse: collapse; }
+        th { background: #f8f9fa; padding: 1rem; text-align: left; font-weight: 600; color: var(--text-light); border-bottom: 2px solid var(--border); }
+        td { padding: 1rem; border-bottom: 1px solid var(--border); }
+        tr:hover { background: #fcfcfc; }
+        .status-badge { padding: 0.25rem 0.75rem; border-radius: 20px; font-size: 0.85rem; font-weight: 500; display: inline-block; }
         
         /* Modal */
-        .modal-overlay { position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.6); display: none; justify-content: center; align-items: center; z-index: 1000; backdrop-filter: blur(2px); }
-        .modal-card { background: var(--surface); width: 100%; max-width: 500px; padding: 30px; border-radius: 12px; border-top: 5px solid var(--accent); }
-        .contact-box { background: #fcfcfc; border: 1px solid var(--border); padding: 12px; position: relative; }
-        .wa-btn { background: #25D366; color: white; border: none; border-radius: 50%; width: 32px; height: 32px; display: flex; align-items: center; justify-content: center; cursor: pointer; text-decoration: none; font-size: 16px; margin-left: auto; }
-        .btn-save { width: 100%; padding: 14px; margin-top: 10px; background: var(--accent); color: white; border: none; border-radius: 8px; cursor: pointer; font-size: 16px; font-weight: 600; }
-        .btn-save:disabled { background: #ccc; cursor: not-allowed; }
+        .modal-overlay { display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.5); z-index: 1000; justify-content: center; align-items: center; }
+        .modal { background: var(--surface); width: 90%; max-width: 600px; border-radius: 12px; box-shadow: 0 10px 25px rgba(0,0,0,0.2); max-height: 90vh; overflow-y: auto; display: flex; flex-direction: column; }
+        .modal-header { background: var(--primary); color: white; padding: 1.5rem; border-radius: 12px 12px 0 0; }
+        .modal-body { padding: 1.5rem; display: flex; flex-direction: column; gap: 1rem; }
+        .info-group { background: #f8f9fa; padding: 1rem; border-radius: 8px; border: 1px solid var(--border); }
+        .info-label { font-size: 0.75rem; text-transform: uppercase; color: var(--text-light); letter-spacing: 0.5px; margin-bottom: 0.25rem; }
+        .info-value { font-weight: 600; color: var(--text); }
+        .form-group label { display: block; margin-bottom: 0.5rem; font-weight: 500; color: var(--text-light); }
+        .form-group input, .form-group select, .form-group textarea { width: 100%; padding: 0.75rem; border: 1px solid var(--border); border-radius: 6px; font-family: inherit; box-sizing: border-box; }
+        .form-group textarea { resize: vertical; min-height: 80px; }
         
-        .loading-container { text-align: center; padding: 60px 0; color: var(--text-light); }
-        .spinner { width: 40px; height: 40px; border: 4px solid #e0e0e0; border-top-color: var(--accent); border-radius: 50%; animation: spin 1s linear infinite; margin: 0 auto 15px; }
-        @keyframes spin { to { transform: rotate(360deg); } }
-
-        @media (max-width: 768px) { .data-table { display: none; } .grid-view { display: grid !important; } .controls { flex-direction: column; } }
-        .grid-view { display: grid; grid-template-columns: repeat(auto-fill, minmax(300px, 1fr)); gap: 20px; }
-        .card { background: var(--surface); padding: 20px; border: 1px solid var(--border); transition: transform 0.2s; cursor: pointer; }
+        .hidden { display: none !important; }
     </style>
 </head>
 <body>
-    <div class="top-bar flex items-center justify-between">
-        <div class="flex items-center">
-            <img src="https://alrowad-ksa.com/wp-content/uploads/2022/10/Rowad-Medical-Services_Horizontal_Logo.svg" alt="Rowad Logo" class="logo-img">
-            <span class="page-title">Calls Dashboard</span>
-        </div>
-        <div class="flex items-center gap-4">
-            <div id="g_id_onload"
-                 data-client_id="174253379694-95msalgnm4kbpjlftil4vm8o26c7h7cc.apps.googleusercontent.com"
-                 data-callback="handleCredentialResponse"
-                 data-auto_prompt="false">
-            </div>
-            <div class="g_id_signin" data-type="standard" data-shape="pill" data-theme="outline" data-text="signin_with" data-size="medium" data-logo_alignment="left" id="loginBtn"></div>
-            
-            <div id="userBadge" class="user-badge hidden">
-                <i class="fa-solid fa-user-circle"></i>
-                <span id="userNameDisplay">User</span>
-                <span id="roleLabel" class="role-tag">Public</span>
-            </div>
 
-            <div class="view-toggles flex gap-2" id="viewControls">
-                <button class="view-btn active" data-view="table"><i class="fa-solid fa-table"></i></button>
-                <button class="view-btn" data-view="card"><i class="fa-solid fa-th-large"></i></button>
-                <button class="view-btn" data-view="charts"><i class="fa-solid fa-chart-pie"></i></button>
+    <nav>
+        <div class="nav-content">
+            <div class="logo"><i class="fas fa-hospital-alt"></i> ROWAD Portal</div>
+            <div id="authBtn"></div>
+        </div>
+    </nav>
+
+    <main>
+        <div class="flex justify-between items-center" style="margin-bottom: 1.5rem;">
+            <div class="flex gap-2">
+                <input type="text" id="searchInput" placeholder="Search hospitals..." style="padding: 0.5rem 1rem; border: 1px solid var(--border); border-radius: 4px; width: 300px;">
+            </div>
+            <div class="flex gap-2">
+                <button class="btn" onclick="render('table')"><i class="fas fa-list"></i></button>
+                <button class="btn" onclick="render('card')"><i class="fas fa-th-large"></i></button>
             </div>
         </div>
-    </div>
 
-    <div class="container">
-        <div class="controls flex gap-4">
-            <div class="search-box"><input type="text" id="search" placeholder="Search Hospital, Contact..." onkeyup="debouncedRender()"></div>
-            <div class="filter-box"><select id="filterDirection" onchange="debouncedRender()"><option value="All">All Directions</option></select></div>
+        <div id="loading" style="text-align: center; padding: 3rem;">
+            <i class="fas fa-spinner fa-spin fa-2x" style="color: var(--accent);"></i>
         </div>
 
-        <div id="loading" class="loading-container"><div class="spinner"></div><span>Loading Database...</span></div>
+        <div id="tableView" class="card hidden">
+            <table>
+                <thead>
+                    <tr>
+                        <th>Region</th>
+                        <th>City</th>
+                        <th>Hospital Name</th>
+                        <th>Device</th>
+                        <th>Status</th>
+                        <th>Action</th>
+                    </tr>
+                </thead>
+                <tbody id="tableBody"></tbody>
+            </table>
+        </div>
+    </main>
 
-        <table class="data-table hidden" id="tableView">
-            <thead>
-                <tr>
-                    <th width="30%">Hospital</th> <th>Location</th> <th>Tags</th> <th>Sat</th> <th>Status</th> <th>Action</th>
-                </tr>
-            </thead>
-            <tbody id="tableBody"></tbody>
-        </table>
-        
-        <div class="grid-view hidden" id="cardView"></div>
-        <div class="hidden" id="chartsView"><canvas id="statusChart" style="max-height:400px"></canvas></div>
-    </div>
-
-    <div class="modal-overlay" id="editModal">
-        <div class="modal-card">
-            <div class="flex justify-between items-start mb-4">
-                <h2 style="margin:0; font-size:24px;" id="modalTitle">Hospital</h2>
-                <button onclick="closeModal()" style="border:none; background:none; font-size:24px; cursor:pointer;">&times;</button>
+    <div id="editModal" class="modal-overlay">
+        <div class="modal">
+            <div class="modal-header">
+                <div style="font-size: 0.9rem; opacity: 0.8; margin-bottom: 0.25rem;">
+                    <span id="mRegion"></span> &bull; <span id="mCity"></span>
+                </div>
+                <h2 id="mHospital" style="margin:0; font-size: 1.5rem;">Hospital Name</h2>
             </div>
-
-            <div class="mb-4">
-                <label class="block mb-2 font-bold" style="font-size:14px; color:#666;">Contact</label>
-                <div class="contact-box rounded">
-                    <input type="text" id="editContactName" class="secure-input" disabled placeholder="Name">
-                    <div class="flex items-center mt-2">
-                        <i class="fa-solid fa-phone" style="margin-right:8px; color:#666;"></i> 
-                        <span id="displayPhone">***</span>
-                        <a id="waLink" class="wa-btn hidden" target="_blank"><i class="fa-brands fa-whatsapp"></i></a>
+            <div class="modal-body">
+                <div class="info-group flex gap-4">
+                    <div style="flex:1">
+                        <div class="info-label">Device Type</div>
+                        <div class="info-value" id="mDevice">-</div>
                     </div>
-                    <input type="hidden" id="editContactMobile">
-                    <button id="editPhoneBtn" onclick="promptPhoneUpdate()" class="hidden" style="margin-top:5px; color:var(--accent); border:none; background:none; cursor:pointer; font-size:12px;">Change Number</button>
+                    <div style="flex:1">
+                        <div class="info-label">Surfacide SN</div>
+                        <div class="info-value" id="mSurfSN">-</div>
+                    </div>
+                    <div style="flex:1">
+                        <div class="info-label">AccuFIT SN</div>
+                        <div class="info-value" id="mAccuSN">-</div>
+                    </div>
+                </div>
+                <div class="info-group">
+                    <div class="info-label">Surfacide Username</div>
+                    <div class="info-value" id="mSurfUser">-</div>
+                </div>
+
+                <div class="flex gap-4">
+                    <div class="form-group" style="flex:1">
+                        <label>Contact Name</label>
+                        <input type="text" id="eContact">
+                    </div>
+                    <div class="form-group" style="flex:1">
+                        <label>Mobile</label>
+                        <input type="text" id="eMobile">
+                    </div>
+                </div>
+
+                <div class="flex gap-4">
+                     <div class="form-group" style="flex:1">
+                        <label>Status</label>
+                        <select id="eStatus">
+                            <option value="">- Select -</option>
+                            <option value="Active">Active</option>
+                            <option value="Pending">Pending</option>
+                            <option value="Expired">Expired</option>
+                            <option value="No Contract">No Contract</option>
+                        </select>
+                    </div>
+                    <div class="form-group" style="flex:1">
+                        <label>Satisfaction</label>
+                        <select id="eSat">
+                            <option value="">- Select -</option>
+                            <option value="High">High</option>
+                            <option value="Medium">Medium</option>
+                            <option value="Low">Low</option>
+                        </select>
+                    </div>
+                </div>
+
+                <div class="form-group">
+                    <label>Tags</label>
+                    <input type="text" id="eTags" placeholder="VIP, New, etc.">
+                </div>
+
+                <div class="form-group">
+                    <label>Notes</label>
+                    <textarea id="eNotes"></textarea>
+                </div>
+
+                <div class="flex justify-between" style="margin-top: 1rem;">
+                    <button class="btn" onclick="closeModal()" style="background: #e2e8f0;">Cancel</button>
+                    <button class="btn btn-primary" id="saveBtn" onclick="saveChanges()">Save Updates</button>
                 </div>
             </div>
-
-            <div class="grid gap-4 mb-4">
-                <div><label class="block mb-2 font-bold">Satisfaction</label>
-                <select id="editSat" class="secure-input" disabled><option value="-">-</option><option value="Satisfied">Satisfied</option><option value="Neutral">Neutral</option><option value="Unsatisfied">Unsatisfied</option></select></div>
-                <div><label class="block mb-2 font-bold">Status</label>
-                <select id="editCallStatus" class="secure-input" disabled><option value="-">-</option><option value="No Answer">No Answer</option><option value="Call Later">Call Later</option><option value="Quote Requested">Quote Requested</option><option value="Not Interested">Not Interested</option><option value="Renewed">Renewed</option></select></div>
-            </div>
-
-            <div class="mb-4">
-                <label class="block mb-2 font-bold">Notes</label>
-                <textarea id="editNotes" class="secure-input" disabled style="resize:vertical; min-height:80px;" placeholder="Add notes..."></textarea>
-            </div>
-            
-            <button class="btn-save" id="saveBtn" onclick="saveChanges()" disabled>Login to Edit</button>
-            <div id="loginPrompt" style="text-align:center; font-size:12px; color:#666; margin-top:5px;" class="hidden">Only Editors can save changes.</div>
         </div>
     </div>
 
     <script>
-        // --- PASTE YOUR DEPLOYED SCRIPT URL HERE ---
-        const SCRIPT_URL = "https://script.google.com/macros/s/AKfycbwaush-5NL-MH3OXm7mqXdj4Gy9M9Wlv8qh8Pe7UmlaH5k7jcb4T218DDpHfD4r4B3asA/exec"; 
+        // PASTE YOUR DEPLOYED WEB APP URL HERE
+        const SCRIPT_URL = 'INSERT_YOUR_APPS_SCRIPT_URL_HERE';
         
-        let db = [], currentEditId = -1;
-        let currentUser = { email: null, token: null, role: 'Public' };
+        let db = [];
+        let currentUser = null;
+        let currentEditItem = null;
 
-        // 1. INIT
+        // Init Google Auth
         window.onload = function() {
-            fetchData();
-            document.getElementById('viewControls').addEventListener('click', (e) => {
-                const btn = e.target.closest('button');
-                if(btn) switchView(btn.dataset.view);
+            google.accounts.id.initialize({
+                client_id: "YOUR_GOOGLE_CLIENT_ID", // Keep your existing Client ID
+                callback: handleCredentialResponse
             });
+            google.accounts.id.renderButton(
+                document.getElementById("authBtn"),
+                { theme: "outline", size: "large" }
+            );
+            // Load public data initially
+            fetchData();
         };
 
-        // 2. LOGIN HANDLER
-        window.handleCredentialResponse = async function(response) {
-            currentUser.token = response.credential;
-            document.getElementById('loginBtn').style.opacity = '0.5';
-
-            try {
-                // Exchange token for Privileged Data
-                const res = await fetch(SCRIPT_URL, {
-                    method: 'POST',
-                    body: JSON.stringify({ action: 'login', token: currentUser.token })
-                });
-                const json = await res.json();
-
-                if (json.result === 'success') {
-                    // Update Identity
-                    currentUser.email = json.email;
-                    currentUser.role = json.role; 
-                    processData(json.data); // Reload DB with uncensored data
-                    render();
-                    updateUserUI(json);
-                } else {
-                    alert("Login Failed: " + json.message);
-                }
-            } catch (e) { console.error(e); alert("Connection failed."); }
-        };
-
-        function updateUserUI(json) {
-            document.getElementById('loginBtn').classList.add('hidden');
-            const badge = document.getElementById('userBadge');
-            badge.classList.remove('hidden');
-            document.getElementById('userNameDisplay').innerText = json.email.split('@')[0];
-            const tag = document.getElementById('roleLabel');
-            tag.innerText = json.role;
-            tag.className = 'role-tag ' + (json.role === 'Admin' || json.role === 'Editor' ? 'role-admin' : 'role-rowad');
+        async function handleCredentialResponse(response) {
+            const res = await fetch(SCRIPT_URL, {
+                method: 'POST',
+                body: JSON.stringify({ action: 'login', token: response.credential })
+            });
+            const data = await res.json();
+            if(data.result === 'success') {
+                currentUser = data.email;
+                db = data.data; // Load uncensored data
+                document.getElementById("authBtn").innerHTML = `<span style="font-weight:bold;">${currentUser}</span>`;
+                render();
+            } else {
+                alert(data.message);
+            }
         }
 
-        // 3. FETCH & RENDER
         async function fetchData() {
+            document.getElementById('loading').classList.remove('hidden');
             try {
                 const res = await fetch(SCRIPT_URL);
-                const data = await res.json();
-                processData(data);
-                document.getElementById('loading').style.display = 'none';
-                document.getElementById('tableView').classList.remove('hidden');
+                db = await res.json();
                 render();
             } catch(e) { console.error(e); }
+            document.getElementById('loading').classList.add('hidden');
         }
 
-        function processData(rawData) {
-            db = rawData.map((row, idx) => ({
-                id: idx,
-                name: row['Hospital Name'] || 'Unknown',
-                region: row['Region'] || 'Unknown',
-                city: row['City'] || 'Unknown',
-                contact: row['Contact'] || '',
-                mobile: row['Contact Mobile Number'] || '',
-                satisfaction: row['Satisfaction'] || '-',
-                contractStatus: row['ContractStatus'] || '-',
-                notes: row['Notes'] || '',
-                tags: row['Tags'] ? row['Tags'].split(',') : []
-            }));
+        function render(viewType = 'table') {
+            document.getElementById('tableView').classList.remove('hidden');
+            const tbody = document.getElementById('tableBody');
+            tbody.innerHTML = '';
             
-            // Filters
-            const dirs = [...new Set(rawData.map(r => r.Direction))].filter(Boolean).sort();
-            const s = document.getElementById('filterDirection');
-            s.innerHTML = '<option value="All">All Directions</option>';
-            dirs.forEach(d => s.add(new Option(d, d)));
-        }
-
-        const debounce = (fn, ms) => { let t; return (...a) => { clearTimeout(t); t=setTimeout(()=>fn(...a), ms); }};
-        window.debouncedRender = debounce(() => render(), 300);
-
-        function render() {
-            const tb = document.getElementById('tableBody');
-            const search = document.getElementById('search').value.toLowerCase();
-            const fDir = document.getElementById('filterDirection').value;
+            const term = document.getElementById('searchInput').value.toLowerCase();
             
-            tb.innerHTML = '';
-            // Render Cards cleared
-            document.getElementById('cardView').innerHTML = '';
-
-            const flt = db.filter(i => {
-                if(fDir !== 'All' && i.region !== fDir && i.direction !== fDir) return true; 
-                return (i.name + i.contact).toLowerCase().includes(search);
+            db.filter(item => 
+                (item["Hospital Name"] && item["Hospital Name"].toLowerCase().includes(term)) ||
+                (item.City && item.City.toLowerCase().includes(term))
+            ).forEach(item => {
+                const tr = document.createElement('tr');
+                // Use bracket notation matching CSV Headers exactly
+                tr.innerHTML = `
+                    <td>${item.Region || ''}</td>
+                    <td>${item.City || ''}</td>
+                    <td style="font-weight:600">${item["Hospital Name"] || ''}</td>
+                    <td>${item.Device || ''}</td>
+                    <td><span class="status-badge" style="background:${getStatusColor(item.Status)}">${item.Status || '-'}</span></td>
+                    <td><button class="btn btn-primary" onclick="openModal(${item._rowIndex})">Edit</button></td>
+                `;
+                tbody.appendChild(tr);
             });
-
-            // Table View
-            tb.innerHTML = flt.map(i => `
-                <tr>
-                    <td><strong>${i.name}</strong><br><small style="color:#888">${i.contact}</small></td>
-                    <td>${i.city}</td>
-                    <td>${i.tags.map(t => `<span class="tag">${t}</span>`).join('')}</td>
-                    <td>${i.satisfaction}</td>
-                    <td><span class="tag" style="background:#e3f2fd">${i.contractStatus}</span></td>
-                    <td><button class="btn-action" onclick="openEdit(${i.id})"><i class="fa-solid fa-pen"></i></button></td>
-                </tr>
-            `).join('');
-
-            // Card View
-            document.getElementById('cardView').innerHTML = flt.map(i => `
-                <div class="card" onclick="openEdit(${i.id})">
-                    <h3 style="margin:0 0 10px 0">${i.name}</h3>
-                    <p style="font-size:12px; color:#666">${i.city} | ${i.contact}</p>
-                    <div style="margin-top:10px;">
-                        <span class="tag">${i.contractStatus}</span>
-                        <span class="tag">${i.satisfaction}</span>
-                    </div>
-                </div>
-            `).join('');
         }
 
-        // 4. MODAL & EDIT
-        window.openEdit = function(id) {
-            currentEditId = id; 
-            const i = db[id];
-            
-            document.getElementById('modalTitle').innerText = i.name;
-            document.getElementById('editContactName').value = i.contact;
-            document.getElementById('editContactMobile').value = i.mobile;
-            document.getElementById('editSat').value = (['Satisfied','Neutral','Unsatisfied'].includes(i.satisfaction)) ? i.satisfaction : '-';
-            document.getElementById('editCallStatus').value = i.contractStatus || '-';
-            document.getElementById('editNotes').value = i.notes;
-            
-            // Logic: Is this an uncensored number?
-            const isUncensored = i.mobile && !i.mobile.includes('*');
-            const display = document.getElementById('displayPhone');
-            const wa = document.getElementById('waLink');
-            
-            display.innerText = i.mobile || "No Number";
-            
-            if (isUncensored) {
-                wa.classList.remove('hidden');
-                wa.href = `https://wa.me/966${i.mobile.substring(1)}`;
-                display.innerHTML = `<a href="tel:${i.mobile}">${i.mobile}</a>`;
-            } else {
-                wa.classList.add('hidden');
-            }
+        function getStatusColor(status) {
+            if(!status) return '#eee';
+            const s = status.toLowerCase();
+            if(s.includes('active')) return '#d1fae5'; // Green
+            if(s.includes('expired')) return '#fee2e2'; // Red
+            return '#fff3cd'; // Yellow
+        }
 
-            // PERMISSIONS
-            const canEdit = currentUser.role === 'Admin' || currentUser.role === 'Editor';
-            
-            document.querySelectorAll('.secure-input').forEach(el => el.disabled = !canEdit);
-            document.getElementById('saveBtn').disabled = !canEdit;
-            document.getElementById('editPhoneBtn').classList.toggle('hidden', !canEdit);
-            
-            const btn = document.getElementById('saveBtn');
-            btn.innerText = canEdit ? "Save Updates" : "Login to Edit";
-            document.getElementById('loginPrompt').classList.toggle('hidden', canEdit);
+        window.openModal = function(rowIndex) {
+            currentEditItem = db.find(i => i._rowIndex === rowIndex);
+            if(!currentEditItem) return;
+
+            // Populate Read-Only
+            document.getElementById('mHospital').innerText = currentEditItem["Hospital Name"];
+            document.getElementById('mRegion').innerText = currentEditItem.Region;
+            document.getElementById('mCity').innerText = currentEditItem.City;
+            document.getElementById('mDevice').innerText = currentEditItem.Device;
+            document.getElementById('mSurfSN').innerText = currentEditItem["Surfacide SN"] || '-';
+            document.getElementById('mAccuSN').innerText = currentEditItem["AccuFIT SN"] || '-';
+            document.getElementById('mSurfUser').innerText = currentEditItem["Surfacide Username"] || '-';
+
+            // Populate Form (Using Headers as keys)
+            document.getElementById('eContact').value = currentEditItem.Contact || '';
+            document.getElementById('eMobile').value = currentEditItem["Contact Mobile Number"] || ''; // Note the header name
+            document.getElementById('eStatus').value = currentEditItem.Status || '';
+            document.getElementById('eSat').value = currentEditItem.Satisfaction || '';
+            document.getElementById('eTags').value = currentEditItem.Tags || '';
+            document.getElementById('eNotes').value = currentEditItem.Notes || '';
 
             document.getElementById('editModal').style.display = 'flex';
         };
 
-        window.promptPhoneUpdate = function() {
-            const newNum = prompt("Enter new 05xxxxxxxx number:");
-            if(newNum) {
-                if(!/^05\d{8}$/.test(newNum)) return alert("Invalid format. Must be 05xxxxxxxx");
-                document.getElementById('editContactMobile').value = newNum;
-                document.getElementById('displayPhone').innerText = newNum;
-            }
+        window.closeModal = function() {
+            document.getElementById('editModal').style.display = 'none';
         };
 
         window.saveChanges = async function() {
-            if (currentUser.role !== 'Admin' && currentUser.role !== 'Editor') return;
+            if(!currentUser) { alert("Please log in to edit."); return; }
+            
             const btn = document.getElementById('saveBtn');
             btn.innerText = "Saving...";
-            
-            const pld = {
-                action: 'save',
-                token: currentUser.token,
-                data: {
-                    hospitalName: db[currentEditId].name,
-                    satisfaction: document.getElementById('editSat').value,
-                    contractStatus: document.getElementById('editCallStatus').value,
-                    notes: document.getElementById('editNotes').value,
-                    contactName: document.getElementById('editContactName').value,
-                    contactMobile: document.getElementById('editContactMobile').value
-                }
+
+            // Construct payload using EXACT CSV Headers as keys
+            const updates = {
+                _rowIndex: currentEditItem._rowIndex,
+                "Hospital Name": currentEditItem["Hospital Name"], // For logging
+                "Contact": document.getElementById('eContact').value,
+                "Contact Mobile Number": document.getElementById('eMobile').value,
+                "Status": document.getElementById('eStatus').value,
+                "Satisfaction": document.getElementById('eSat').value,
+                "Tags": document.getElementById('eTags').value,
+                "Notes": document.getElementById('eNotes').value
             };
 
             try {
-                const r = await fetch(SCRIPT_URL, { method:'POST', body:JSON.stringify(pld) });
-                const res = await r.json();
-                if(res.result === "success") {
-                    alert("Saved!");
-                    Object.assign(db[currentEditId], pld.data);
+                const res = await fetch(SCRIPT_URL, {
+                    method: 'POST',
+                    body: JSON.stringify({
+                        action: 'update',
+                        userEmail: currentUser,
+                        data: updates
+                    })
+                });
+                const result = await res.json();
+                
+                if(result.result === 'success') {
+                    // Update local DB to reflect changes immediately
+                    Object.assign(currentEditItem, updates);
                     closeModal();
                     render();
+                    alert("Saved successfully!");
                 } else {
-                    alert("Error: " + res.message);
+                    alert("Error: " + result.message);
                 }
-            } catch(e) { alert("Save failed"); }
+            } catch(e) {
+                alert("Connection failed");
+            }
             btn.innerText = "Save Updates";
         };
 
-        window.closeModal = function() { document.getElementById('editModal').style.display = 'none'; };
-        window.switchView = function(v) { 
-            document.getElementById('tableView').classList.toggle('hidden', v!=='table');
-            document.getElementById('cardView').classList.toggle('hidden', v!=='card');
-            document.querySelectorAll('.view-btn').forEach(b => b.classList.toggle('active', b.dataset.view===v));
-        };
+        // Simple search listener
+        document.getElementById('searchInput').addEventListener('keyup', () => render());
     </script>
 </body>
 </html>
