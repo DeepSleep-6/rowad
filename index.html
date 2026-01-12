@@ -16,379 +16,461 @@
         body { font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; background: var(--bg); margin: 0; color: var(--text); }
         .flex { display: flex; } .items-center { align-items: center; } .justify-between { justify-content: space-between; }
         .gap-2 { gap: 8px; } .gap-4 { gap: 16px; } .hidden { display: none !important; }
-        .p-4 { padding: 16px; } .rounded { border-radius: 8px; }
-
-        /* Top Bar */
-        .top-bar { background: var(--surface); padding: 15px 30px; box-shadow: 0 4px 20px rgba(0,0,0,0.05); border-bottom: 3px solid var(--accent); position: sticky; top: 0; z-index: 100; }
-        .logo-img { height: 45px; width: auto; } 
-        .page-title { font-size: 20px; font-weight: 700; padding-left: 15px; border-left: 2px solid #eee; margin-left: 15px; }
+        .p-4 { padding: 16px; } .rounded { border-radius: 8px; } .shadow { box-shadow: 0 2px 4px rgba(0,0,0,0.1); }
         
-        /* Login UI */
-        .user-badge { background: #f0f0f0; padding: 6px 12px; border-radius: 20px; font-size: 13px; font-weight: 600; display: flex; align-items: center; gap: 8px; }
-        .role-tag { font-size: 10px; padding: 2px 6px; border-radius: 4px; background: #ccc; color: #333; text-transform: uppercase; }
-        .role-admin { background: #e8f5e9; color: #1b5e20; border: 1px solid #c8e6c9; }
-        .role-rowad { background: #e3f2fd; color: #0d47a1; border: 1px solid #bbdefb; }
+        /* Layout */
+        .sidebar { width: 250px; background: var(--surface); height: 100vh; position: fixed; border-right: 1px solid var(--border); display: flex; flex-direction: column; }
+        .main-content { margin-left: 250px; padding: 24px; }
+        
+        /* Components */
+        .btn { padding: 8px 16px; border: none; border-radius: 6px; cursor: pointer; font-weight: 500; transition: 0.2s; }
+        .btn-primary { background: var(--accent); color: white; } .btn-primary:hover { background: var(--accent-dark); }
+        .btn-outline { background: transparent; border: 1px solid var(--border); } .btn-outline:hover { background: #f5f5f5; }
+        .btn.active { background: var(--primary); color: white; border-color: var(--primary); }
 
-        /* Controls */
-        .view-btn { border: none; background: #eee; padding: 8px 12px; cursor: pointer; border-radius: 6px; color: var(--text-light); transition: 0.2s; }
-        .view-btn.active { background: white; color: var(--accent-dark); font-weight: bold; box-shadow: 0 1px 3px rgba(0,0,0,0.1); }
-        input, select, textarea { padding: 12px; border: 1px solid var(--border); border-radius: 8px; width: 100%; box-sizing: border-box; outline: none; background: #fff; font-family: inherit; }
-        .container { max-width: 1400px; margin: 30px auto; padding: 0 20px; min-height: 80vh; }
-        .controls { flex-wrap: wrap; margin-bottom: 25px; }
-        .search-box { flex: 2; min-width: 250px; } .filter-box { flex: 1; min-width: 150px; }
-
+        .card { background: var(--surface); padding: 20px; border-radius: 12px; box-shadow: 0 2px 8px rgba(0,0,0,0.05); }
+        input, select { padding: 10px; border: 1px solid var(--border); border-radius: 6px; width: 100%; box-sizing: border-box; }
+        
         /* Table */
-        .data-table { width: 100%; border-collapse: separate; border-spacing: 0; background: var(--surface); border-radius: 12px; overflow: hidden; box-shadow: 0 4px 15px rgba(0,0,0,0.03); }
-        .data-table th { text-align: left; padding: 18px 15px; background: #fafafa; color: var(--text-light); font-weight: 700; text-transform: uppercase; border-bottom: 2px solid var(--border); cursor: pointer; }
-        .data-table td { padding: 15px; border-bottom: 1px solid var(--border); }
-        .tag { padding: 4px 10px; border-radius: 12px; font-size: 11px; background: #eee; border: 1px solid #ddd; display: inline-block; margin: 0 4px 2px 0; }
-        .btn-action { background: var(--accent); color: white; border: none; padding: 6px 14px; border-radius: 6px; cursor: pointer; font-weight: 600; }
+        table { width: 100%; border-collapse: collapse; }
+        th, td { text-align: left; padding: 12px; border-bottom: 1px solid var(--border); font-size: 14px; }
+        th { font-weight: 600; color: var(--text-light); background: #fafafa; }
+        tr:hover { background: #f8f9fa; }
         
+        /* Text Colors */
+        .text-green { color: #27ae60; font-weight: 600; }
+        .text-red { color: #c0392b; font-weight: 600; }
+        .text-orange { color: #d35400; font-weight: 600; }
+        .text-blue { color: #2980b9; font-weight: 600; }
+        .text-gray { color: #7f8c8d; }
+
         /* Modal */
-        .modal-overlay { position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.6); display: none; justify-content: center; align-items: center; z-index: 1000; backdrop-filter: blur(2px); }
-        .modal-card { background: var(--surface); width: 100%; max-width: 500px; padding: 30px; border-radius: 12px; border-top: 5px solid var(--accent); max-height: 90vh; overflow-y: auto; }
+        .modal-overlay { position: fixed; top: 0; left: 0; right: 0; bottom: 0; background: rgba(0,0,0,0.5); display: flex; justify-content: center; align-items: center; z-index: 1000; }
+        .modal { background: var(--surface); padding: 24px; border-radius: 12px; width: 500px; max-width: 90%; max-height: 90vh; overflow-y: auto; }
         
-        /* New Info Section in Modal */
-        .info-section { background: #f8f9fa; padding: 15px; border-radius: 8px; margin-bottom: 20px; border: 1px solid var(--border); }
-        .info-row { display: flex; gap: 10px; margin-bottom: 8px; }
-        .info-item { flex: 1; }
-        .info-label { font-size: 10px; text-transform: uppercase; color: #888; letter-spacing: 0.5px; }
-        .info-val { font-weight: 600; font-size: 14px; color: #333; }
-
-        .contact-box { background: #fcfcfc; border: 1px solid var(--border); padding: 12px; position: relative; }
-        .wa-btn { background: #25D366; color: white; border: none; border-radius: 50%; width: 32px; height: 32px; display: flex; align-items: center; justify-content: center; cursor: pointer; text-decoration: none; font-size: 16px; margin-left: auto; }
-        .btn-save { width: 100%; padding: 14px; margin-top: 10px; background: var(--accent); color: white; border: none; border-radius: 8px; cursor: pointer; font-size: 16px; font-weight: 600; }
-        .btn-save:disabled { background: #ccc; cursor: not-allowed; }
+        /* Grid for Cards */
+        .grid-cards { display: grid; grid-template-columns: repeat(auto-fill, minmax(300px, 1fr)); gap: 20px; }
         
-        .loading-container { text-align: center; padding: 60px 0; color: var(--text-light); }
-        .spinner { width: 40px; height: 40px; border: 4px solid #e0e0e0; border-top-color: var(--accent); border-radius: 50%; animation: spin 1s linear infinite; margin: 0 auto 15px; }
-        @keyframes spin { to { transform: rotate(360deg); } }
-
-        @media (max-width: 768px) { .data-table { display: none; } .grid-view { display: grid !important; } .controls { flex-direction: column; } }
-        .grid-view { display: grid; grid-template-columns: repeat(auto-fill, minmax(300px, 1fr)); gap: 20px; }
-        .card { background: var(--surface); padding: 20px; border: 1px solid var(--border); transition: transform 0.2s; cursor: pointer; }
+        /* Chart Containers */
+        .chart-container { position: relative; height: 300px; width: 100%; }
     </style>
 </head>
 <body>
-    <div class="top-bar flex items-center justify-between">
-        <div class="flex items-center">
-            <img src="https://alrowad-ksa.com/wp-content/uploads/2022/10/Rowad-Medical-Services_Horizontal_Logo.svg" alt="Rowad Logo" class="logo-img">
-            <span class="page-title">Calls Dashboard</span>
+
+    <div class="sidebar">
+        <div class="p-4 border-b" style="border-color: var(--border);">
+            <h2 style="margin:0; color: var(--accent);">Rowad Calls</h2>
+            <p style="margin: 4px 0 0 0; font-size: 12px; color: var(--text-light);">Hospital Dashboard</p>
         </div>
-        <div class="flex items-center gap-4">
-            <div id="g_id_onload"
-                 data-client_id="174253379694-95msalgnm4kbpjlftil4vm8o26c7h7cc.apps.googleusercontent.com"
-                 data-callback="handleCredentialResponse"
-                 data-auto_prompt="false">
-            </div>
-            <div class="g_id_signin" data-type="standard" data-shape="pill" data-theme="outline" data-text="signin_with" data-size="medium" data-logo_alignment="left" id="loginBtn"></div>
-            
-            <div id="userBadge" class="user-badge hidden">
-                <i class="fa-solid fa-user-circle"></i>
-                <span id="userNameDisplay">User</span>
-                <span id="roleLabel" class="role-tag">Public</span>
-            </div>
-
-            <div class="view-toggles flex gap-2" id="viewControls">
-                <button class="view-btn active" data-view="table"><i class="fa-solid fa-table"></i></button>
-                <button class="view-btn" data-view="card"><i class="fa-solid fa-th-large"></i></button>
-            </div>
-        </div>
-    </div>
-
-    <div class="container">
-        <div class="controls flex gap-4">
-            <div class="search-box"><input type="text" id="search" placeholder="Search Hospital, Contact..." onkeyup="debouncedRender()"></div>
-            <div class="filter-box"><select id="filterDirection" onchange="debouncedRender()"><option value="All">All Directions</option></select></div>
-        </div>
-
-        <div id="loading" class="loading-container"><div class="spinner"></div><span>Loading Database...</span></div>
-
-        <table class="data-table hidden" id="tableView">
-            <thead>
-                <tr>
-                    <th width="30%">Hospital</th> <th>Location</th> <th>Tags</th> <th>Sat</th> <th>Status</th> <th>Action</th>
-                </tr>
-            </thead>
-            <tbody id="tableBody"></tbody>
-        </table>
-        
-        <div class="grid-view hidden" id="cardView"></div>
-    </div>
-
-    <div class="modal-overlay" id="editModal">
-        <div class="modal-card">
-            <div class="flex justify-between items-start mb-4">
-                <h2 style="margin:0; font-size:24px;" id="modalTitle">Hospital</h2>
-                <button onclick="closeModal()" style="border:none; background:none; font-size:24px; cursor:pointer;">&times;</button>
-            </div>
-
-            <div class="info-section">
-                <div class="info-row" style="border-bottom:1px solid #eee; padding-bottom:8px;">
-                    <div class="info-item"><div class="info-label">Region</div><div class="info-val" id="dispRegion">-</div></div>
-                    <div class="info-item"><div class="info-label">City</div><div class="info-val" id="dispCity">-</div></div>
-                </div>
-                <div class="info-row">
-                    <div class="info-item"><div class="info-label">Device</div><div class="info-val" id="dispDevice">-</div></div>
-                    <div class="info-item"><div class="info-label">Surfacide SN</div><div class="info-val" id="dispSurfSN">-</div></div>
-                    <div class="info-item"><div class="info-label">AccuFIT SN</div><div class="info-val" id="dispAccuSN">-</div></div>
-                </div>
-                <div class="info-row" style="margin-bottom:0">
-                    <div class="info-item"><div class="info-label">Surfacide Username</div><div class="info-val" id="dispSurfUser">-</div></div>
-                </div>
-            </div>
-
-            <div class="mb-4" style="margin-bottom: 16px;">
-                <label class="block mb-2 font-bold" style="font-size:14px; color:#666;">Contact</label>
-                <div class="contact-box rounded">
-                    <input type="text" id="editContactName" class="secure-input" disabled placeholder="Name">
-                    <div class="flex items-center mt-2">
-                        <i class="fa-solid fa-phone" style="margin-right:8px; color:#666;"></i> 
-                        <span id="displayPhone">***</span>
-                        <a id="waLink" class="wa-btn hidden" target="_blank"><i class="fa-brands fa-whatsapp"></i></a>
-                    </div>
-                    <input type="hidden" id="editContactMobile">
-                    <button id="editPhoneBtn" onclick="promptPhoneUpdate()" class="hidden" style="margin-top:5px; color:var(--accent); border:none; background:none; cursor:pointer; font-size:12px;">Change Number</button>
-                </div>
-            </div>
-
-            <div class="flex gap-4" style="margin-bottom:16px;">
-                <div style="flex:1"><label class="block mb-2 font-bold">Satisfaction</label>
-                <select id="editSat" class="secure-input" disabled><option value="">-</option><option value="Satisfied">Satisfied</option><option value="Neutral">Neutral</option><option value="Unsatisfied">Unsatisfied</option></select></div>
+        <div class="p-4 flex-grow">
+            <div class="flex flex-col gap-4">
+                <input type="text" id="searchInput" placeholder="Search hospitals..." onkeyup="render()">
                 
-                <div style="flex:1"><label class="block mb-2 font-bold">Status</label>
-                <select id="editStatus" class="secure-input" disabled>
-                    <option value="">-</option>
-                    <option value="Active">Active</option>
-                    <option value="Pending">Pending</option>
-                    <option value="Expired">Expired</option>
-                    <option value="No Contract">No Contract</option>
-                </select></div>
-            </div>
+                <div>
+                    <label style="font-size: 12px; font-weight: 600; color: var(--text-light);">REGION</label>
+                    <select id="filterRegion" onchange="render()" style="margin-top: 4px;">
+                        <option value="">All Regions</option>
+                    </select>
+                </div>
 
-            <div style="margin-bottom:16px;">
-                <label class="block mb-2 font-bold">Tags</label>
-                <input type="text" id="editTags" class="secure-input" disabled placeholder="VIP, New...">
+                <div>
+                    <label style="font-size: 12px; font-weight: 600; color: var(--text-light);">STATUS</label>
+                    <select id="filterStatus" onchange="render()" style="margin-top: 4px;">
+                        <option value="">All Statuses</option>
+                    </select>
+                </div>
             </div>
+        </div>
+        <div class="p-4 border-t" style="border-color: var(--border);">
+            <div id="userInfo" class="hidden">
+                <div class="flex items-center gap-2 mb-2">
+                    <div style="width: 32px; height: 32px; background: var(--accent); border-radius: 50%; display: flex; align-items: center; justify-content: center; color: white; font-weight: bold;" id="userInitial">U</div>
+                    <div style="overflow: hidden;">
+                        <div id="userName" style="font-weight: 500; font-size: 14px;">User</div>
+                        <div id="userRole" style="font-size: 11px; color: var(--text-light);">Viewer</div>
+                    </div>
+                </div>
+            </div>
+            <div id="g_id_onload" data-client_id="YOUR_GOOGLE_CLIENT_ID" data-callback="handleCredentialResponse"></div>
+            <div class="g_id_signin" data-type="standard"></div>
+        </div>
+    </div>
 
-            <div class="mb-4">
-                <label class="block mb-2 font-bold">Notes</label>
-                <textarea id="editNotes" class="secure-input" disabled style="resize:vertical; min-height:80px;" placeholder="Add notes..."></textarea>
+    <div class="main-content">
+        <div class="flex justify-between items-center mb-6">
+            <h1 style="margin:0; font-size: 24px;">Hospital Database</h1>
+            
+            <div class="flex gap-2 bg-white p-1 rounded shadow">
+                <button class="view-btn btn active" data-view="table" onclick="switchView('table')"><i class="fas fa-table"></i> Table</button>
+                <button class="view-btn btn btn-outline" data-view="card" onclick="switchView('card')"><i class="fas fa-th-large"></i> Cards</button>
+                <button class="view-btn btn btn-outline" data-view="charts" onclick="switchView('charts')"><i class="fas fa-chart-pie"></i> Charts</button>
+                <button class="view-btn btn btn-outline" data-view="export" onclick="switchView('export')"><i class="fas fa-file-export"></i> Export</button>
+            </div>
+        </div>
+
+        <div id="tableView" class="card" style="padding: 0; overflow: hidden;">
+            <div style="overflow-x: auto;">
+                <table>
+                    <thead>
+                        <tr>
+                            <th width="40">#</th>
+                            <th>Hospital Name</th>
+                            <th>Region</th>
+                            <th>Devices</th>
+                            <th>Status</th>
+                            <th>Satisfaction</th>
+                            <th>Contact</th>
+                            <th width="50"></th>
+                        </tr>
+                    </thead>
+                    <tbody id="tableBody"></tbody>
+                </table>
+            </div>
+        </div>
+
+        <div id="cardView" class="grid-cards hidden"></div>
+
+        <div id="chartsView" class="hidden">
+            <div class="flex gap-4">
+                <div class="card" style="flex: 1;">
+                    <h3 class="mb-4">Call Outcomes</h3>
+                    <div class="chart-container">
+                        <canvas id="statusChart"></canvas>
+                    </div>
+                </div>
+                <div class="card" style="flex: 1;">
+                    <h3 class="mb-4">Customer Satisfaction</h3>
+                    <div class="chart-container">
+                        <canvas id="satisfactionChart"></canvas>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <div id="exportView" class="hidden">
+            <div class="card flex flex-col items-center justify-center" style="min-height: 300px;">
+                <h2 class="mb-4">Export Data</h2>
+                <p class="text-light mb-6">Download the complete database as a CSV file for external reporting.</p>
+                <button class="btn btn-primary" onclick="downloadCSV()" style="font-size: 16px; padding: 12px 24px;">
+                    <i class="fas fa-download"></i> Download Full Database (CSV)
+                </button>
+            </div>
+        </div>
+
+    </div>
+
+    <div id="editModal" class="modal-overlay hidden">
+        <div class="modal">
+            <div class="flex justify-between items-center mb-4">
+                <h2 style="margin:0">Update Hospital</h2>
+                <button onclick="closeModal()" style="background:none; border:none; font-size: 20px; cursor:pointer;">&times;</button>
             </div>
             
-            <button class="btn-save" id="saveBtn" onclick="saveChanges()" disabled>Login to Edit</button>
-            <div id="loginPrompt" style="text-align:center; font-size:12px; color:#666; margin-top:5px;" class="hidden">Only Editors can save changes.</div>
+            <div class="flex flex-col gap-4">
+                <div style="background: #f8f9fa; padding: 12px; border-radius: 6px;">
+                    <div id="editHospitalName" style="font-weight: bold; margin-bottom: 4px;"></div>
+                    <div id="editRegion" style="font-size: 12px; color: var(--text-light);"></div>
+                </div>
+
+                <div>
+                    <label class="block mb-1 text-sm font-bold">Status</label>
+                    <select id="editStatus">
+                        <option value="">- Select -</option>
+                        <option value="No Answer">No Answer</option>
+                        <option value="Call Later">Call Later</option>
+                        <option value="Quote Requested">Quote Requested</option>
+                        <option value="Not Interested">Not Interested</option>
+                        <option value="Renewed">Renewed</option>
+                    </select>
+                </div>
+
+                <div>
+                    <label class="block mb-1 text-sm font-bold">Satisfaction</label>
+                    <select id="editSatisfaction">
+                        <option value="">- Select -</option>
+                        <option value="Satisfied">Satisfied</option>
+                        <option value="Unsatisfied">Unsatisfied</option>
+                    </select>
+                </div>
+
+                <div>
+                    <label class="block mb-1 text-sm font-bold">Notes</label>
+                    <textarea id="editNotes" rows="3" style="width: 100%; border: 1px solid var(--border); border-radius: 6px; padding: 8px;"></textarea>
+                </div>
+
+                <div>
+                    <label class="block mb-1 text-sm font-bold">Contact Person</label>
+                    <input type="text" id="editContact">
+                </div>
+                 
+                <div>
+                    <label class="block mb-1 text-sm font-bold">Mobile Number</label>
+                    <input type="text" id="editMobile">
+                </div>
+
+                <button id="saveBtn" class="btn btn-primary" style="margin-top: 10px;" onclick="saveChanges()">Save Updates</button>
+            </div>
         </div>
     </div>
 
     <script>
-        // --- PASTE YOUR DEPLOYED APPS SCRIPT URL HERE ---
-        const SCRIPT_URL = "https://script.google.com/macros/s/AKfycbwaush-5NL-MH3OXm7mqXdj4Gy9M9Wlv8qh8Pe7UmlaH5k7jcb4T218DDpHfD4r4B3asA/exec"; 
+        const SCRIPT_URL = 'YOUR_APPS_SCRIPT_URL_HERE'; // Replace with deployment URL
         
-        let db = [], currentEditIndex = -1;
-        let currentUser = { email: null, token: null, role: 'Public' };
+        // State
+        let db = [];
+        let filteredDb = [];
+        let currentUser = null;
+        let currentEditIndex = -1;
+        let charts = { status: null, satisfaction: null };
 
-        // 1. INIT
-        window.onload = function() {
-            fetchData();
-            document.getElementById('viewControls').addEventListener('click', (e) => {
-                const btn = e.target.closest('button');
-                if(btn) switchView(btn.dataset.view);
-            });
-        };
-
-        // 2. LOGIN HANDLER
-        window.handleCredentialResponse = async function(response) {
-            currentUser.token = response.credential;
-            document.getElementById('loginBtn').style.opacity = '0.5';
-
-            try {
-                const res = await fetch(SCRIPT_URL, {
-                    method: 'POST',
-                    body: JSON.stringify({ action: 'login', token: currentUser.token })
-                });
-                const json = await res.json();
-
-                if (json.result === 'success') {
-                    currentUser.email = json.email;
-                    currentUser.role = json.role; 
-                    db = json.data; // Load Uncensored Data
-                    render();
-                    updateUserUI(json);
-                } else {
-                    alert("Login Failed: " + json.message);
-                }
-            } catch (e) { console.error(e); alert("Connection failed."); }
-        };
-
-        function updateUserUI(json) {
-            document.getElementById('loginBtn').classList.add('hidden');
-            const badge = document.getElementById('userBadge');
-            badge.classList.remove('hidden');
-            document.getElementById('userNameDisplay').innerText = json.email.split('@')[0];
-            const tag = document.getElementById('roleLabel');
-            tag.innerText = json.role;
-            tag.className = 'role-tag ' + (json.role === 'Admin' || json.role === 'Editor' ? 'role-admin' : 'role-rowad');
+        // Initialization
+        async function init() {
+            // Check local storage for basic auth persistence (demo only)
+            const savedUser = localStorage.getItem('rowad_user');
+            if(savedUser) handleLoginSuccess(JSON.parse(savedUser));
             
-            // Re-render to enable edit buttons
-            render();
+            // Initial public fetch
+            await fetchData();
         }
-
-        // 3. FETCH & RENDER
+        
         async function fetchData() {
             try {
                 const res = await fetch(SCRIPT_URL);
-                db = await res.json(); 
-                
-                // Populate Filter
-                const dirs = [...new Set(db.map(r => r.Direction))].filter(Boolean).sort();
-                const s = document.getElementById('filterDirection');
-                s.innerHTML = '<option value="All">All Directions</option>';
-                dirs.forEach(d => s.add(new Option(d, d)));
-
-                document.getElementById('loading').style.display = 'none';
-                document.getElementById('tableView').classList.remove('hidden');
+                const json = await res.json();
+                db = json.data;
+                populateFilters();
                 render();
             } catch(e) { console.error(e); }
         }
 
-        const debounce = (fn, ms) => { let t; return (...a) => { clearTimeout(t); t=setTimeout(()=>fn(...a), ms); }};
-        window.debouncedRender = debounce(() => render(), 300);
-
-        function render() {
-            const tb = document.getElementById('tableBody');
-            const search = document.getElementById('search').value.toLowerCase();
-            const fDir = document.getElementById('filterDirection').value;
-            const cv = document.getElementById('cardView');
+        function populateFilters() {
+            const regions = [...new Set(db.map(i => i.Region))].filter(Boolean).sort();
+            const statuses = [...new Set(db.map(i => i.Status))].filter(Boolean).sort();
             
-            tb.innerHTML = '';
-            cv.innerHTML = '';
+            const rSelect = document.getElementById('filterRegion');
+            regions.forEach(r => rSelect.add(new Option(r, r)));
+            
+            const sSelect = document.getElementById('filterStatus');
+            statuses.forEach(s => sSelect.add(new Option(s, s)));
+        }
 
-            const flt = db.filter(i => {
-                if(fDir !== 'All' && i.Direction !== fDir) return false; 
-                // Search in Name, Contact, City
-                const term = (i["Hospital Name"] + " " + (i.Contact||"") + " " + (i.City||"")).toLowerCase();
-                return term.includes(search);
+        // Logic
+        function render() {
+            const search = document.getElementById('searchInput').value.toLowerCase();
+            const region = document.getElementById('filterRegion').value;
+            const status = document.getElementById('filterStatus').value;
+            
+            filteredDb = db.filter(item => {
+                const matchSearch = (item['Hospital Name'] || '').toLowerCase().includes(search);
+                const matchRegion = !region || item.Region === region;
+                const matchStatus = !status || item.Status === status;
+                return matchSearch && matchRegion && matchStatus;
             });
 
-            // Table View
-            tb.innerHTML = flt.map(i => `
-                <tr>
-                    <td><strong>${i["Hospital Name"]}</strong><br><small style="color:#888">${i.Contact || ''}</small></td>
-                    <td>${i.City}</td>
-                    <td>${(i.Tags || '').split(',').map(t => `<span class="tag">${t}</span>`).join('')}</td>
-                    <td>${i.Satisfaction || '-'}</td>
-                    <td><span class="tag" style="background:${getStatusColor(i.Status)}">${i.Status || '-'}</span></td>
-                    <td><button class="btn-action" onclick="openEdit(${i._rowIndex})"><i class="fa-solid fa-pen"></i></button></td>
+            const currentView = document.querySelector('.view-btn.active').dataset.view;
+            
+            if (currentView === 'table') renderTable();
+            else if (currentView === 'card') renderCards();
+            else if (currentView === 'charts') renderCharts();
+        }
+
+        // Helper for Colors
+        function getStatusClass(text) {
+            if (!text) return 'text-gray';
+            const t = text.toLowerCase();
+            if (t.includes('renewed') || t.includes('satisfied')) return 'text-green';
+            if (t.includes('quote') || t.includes('call')) return 'text-blue'; // Call Later / Quote
+            if (t.includes('no answer') || t.includes('unsatisfied') || t.includes('not interested')) return 'text-red';
+            return 'text-gray';
+        }
+
+        function renderTable() {
+            const tbody = document.getElementById('tableBody');
+            tbody.innerHTML = filteredDb.map((item, idx) => `
+                <tr onclick="openEdit(${item._rowIndex})">
+                    <td class="text-light">${idx + 1}</td>
+                    <td style="font-weight: 500">${item['Hospital Name']}</td>
+                    <td>${item.Region}</td>
+                    <td><span style="background: #eef2f5; padding: 2px 6px; border-radius: 4px; font-size: 12px;">${item.Device || ''} ${item.Tags || ''}</span></td>
+                    <td class="${getStatusClass(item.Status)}">${item.Status || '-'}</td>
+                    <td class="${getStatusClass(item.Satisfaction)}">${item.Satisfaction || '-'}</td>
+                    <td>
+                        <div style="font-size: 12px;">${item.Contact || ''}</div>
+                        <div style="font-size: 11px; color: var(--text-light);">${item['Contact Mobile Number'] || ''}</div>
+                    </td>
+                    <td><button class="btn btn-outline" style="padding: 4px 8px;"><i class="fas fa-pen"></i></button></td>
                 </tr>
             `).join('');
+        }
 
-            // Card View
-            cv.innerHTML = flt.map(i => `
-                <div class="card" onclick="openEdit(${i._rowIndex})">
-                    <h3 style="margin:0 0 10px 0">${i["Hospital Name"]}</h3>
-                    <p style="font-size:12px; color:#666">${i.City} | ${i.Contact || 'No Contact'}</p>
-                    <div style="margin-top:10px;">
-                        <span class="tag" style="background:${getStatusColor(i.Status)}">${i.Status || '-'}</span>
+        function renderCards() {
+            const container = document.getElementById('cardView');
+            container.innerHTML = filteredDb.map(item => `
+                <div class="card">
+                    <div class="flex justify-between items-start mb-2">
+                        <div style="font-size: 11px; color: var(--accent); font-weight: bold; text-transform: uppercase;">${item.Region}</div>
+                        <div class="${getStatusClass(item.Status)}" style="font-size: 12px;">${item.Status || 'Unknown'}</div>
                     </div>
+                    <h3 style="margin: 0 0 8px 0; font-size: 16px;">${item['Hospital Name']}</h3>
+                    <div style="font-size: 13px; color: var(--text-light); margin-bottom: 12px;">
+                         ${item.Device || ''} ${item.Tags || ''}
+                    </div>
+                    <div style="border-top: 1px solid #eee; padding-top: 8px; margin-top: 8px; font-size: 12px;">
+                        <i class="fas fa-user-circle text-light"></i> ${item.Contact || 'No Contact'}
+                    </div>
+                    <button class="btn btn-outline" style="width: 100%; margin-top: 12px;" onclick="openEdit(${item._rowIndex})">Update</button>
                 </div>
             `).join('');
         }
 
-        function getStatusColor(s) {
-            if(!s) return '#eee';
-            s = s.toLowerCase();
-            if(s.includes('active')) return '#d1fae5';
-            if(s.includes('expired')) return '#fee2e2';
-            return '#fff3cd';
+        function renderCharts() {
+            // Prepare Data
+            const statusCounts = {};
+            const satisfactionCounts = { 'Satisfied': 0, 'Unsatisfied': 0, 'Unknown': 0 };
+
+            filteredDb.forEach(i => {
+                // Status Stats
+                const s = i.Status || 'Pending';
+                statusCounts[s] = (statusCounts[s] || 0) + 1;
+
+                // Satisfaction Stats
+                const sat = i.Satisfaction;
+                if (sat === 'Satisfied') satisfactionCounts['Satisfied']++;
+                else if (sat === 'Unsatisfied') satisfactionCounts['Unsatisfied']++;
+                else satisfactionCounts['Unknown']++;
+            });
+
+            const ctxStatus = document.getElementById('statusChart').getContext('2d');
+            const ctxSat = document.getElementById('satisfactionChart').getContext('2d');
+
+            // Destroy previous if exists
+            if (charts.status) charts.status.destroy();
+            if (charts.satisfaction) charts.satisfaction.destroy();
+
+            // Status Bar Chart
+            charts.status = new Chart(ctxStatus, {
+                type: 'bar',
+                data: {
+                    labels: Object.keys(statusCounts),
+                    datasets: [{
+                        label: '# of Hospitals',
+                        data: Object.values(statusCounts),
+                        backgroundColor: '#bfa15f'
+                    }]
+                },
+                options: { responsive: true, maintainAspectRatio: false }
+            });
+
+            // Satisfaction Doughnut Chart
+            charts.satisfaction = new Chart(ctxSat, {
+                type: 'doughnut',
+                data: {
+                    labels: Object.keys(satisfactionCounts),
+                    datasets: [{
+                        data: Object.values(satisfactionCounts),
+                        backgroundColor: ['#27ae60', '#c0392b', '#ecf0f1']
+                    }]
+                },
+                options: { responsive: true, maintainAspectRatio: false }
+            });
         }
 
-        // 4. MODAL & EDIT
-        window.openEdit = function(rowIndex) {
-            currentEditIndex = rowIndex; 
-            const item = db.find(r => r._rowIndex === rowIndex);
-            if (!item) return;
+        function downloadCSV() {
+            if (!db || !db.length) return;
+            const headers = Object.keys(db[0]);
+            const csvRows = [];
+            
+            // Header
+            csvRows.push(headers.join(','));
+            
+            // Rows
+            for (const row of db) {
+                const values = headers.map(header => {
+                    const escaped = ('' + (row[header] || '')).replace(/"/g, '\\"');
+                    return `"${escaped}"`;
+                });
+                csvRows.push(values.join(','));
+            }
+            
+            const blob = new Blob([csvRows.join('\n')], { type: 'text/csv' });
+            const url = window.URL.createObjectURL(blob);
+            const a = document.createElement('a');
+            a.setAttribute('hidden', '');
+            a.setAttribute('href', url);
+            a.setAttribute('download', 'hospital_db_full.csv');
+            document.body.appendChild(a);
+            a.click();
+            document.body.removeChild(a);
+        }
 
-            // Header & Read-Only Info
-            document.getElementById('modalTitle').innerText = item["Hospital Name"];
-            document.getElementById('dispRegion').innerText = item.Region || '-';
-            document.getElementById('dispCity').innerText = item.City || '-';
-            document.getElementById('dispDevice').innerText = item.Device || '-';
-            document.getElementById('dispSurfSN').innerText = item["Surfacide SN"] || '-';
-            document.getElementById('dispAccuSN').innerText = item["AccuFIT SN"] || '-';
-            document.getElementById('dispSurfUser').innerText = item["Surfacide Username"] || '-';
+        // Auth & Actions
+        function handleCredentialResponse(response) {
+            const payload = JSON.parse(atob(response.credential.split('.')[1]));
+            
+            fetch(SCRIPT_URL, {
+                method: 'POST',
+                body: JSON.stringify({ action: 'login', token: response.credential })
+            })
+            .then(r => r.json())
+            .then(res => {
+                if(res.result === 'success') {
+                    db = res.data; // Update with full data
+                    handleLoginSuccess({ ...payload, role: res.role });
+                    render();
+                } else {
+                    alert(res.message);
+                }
+            });
+        }
 
-            // Editable Forms
-            document.getElementById('editContactName').value = item.Contact || '';
-            document.getElementById('editContactMobile').value = item["Contact Mobile Number"] || '';
-            document.getElementById('editSat').value = item.Satisfaction || '';
-            document.getElementById('editStatus').value = item.Status || ''; 
-            document.getElementById('editTags').value = item.Tags || '';
+        function handleLoginSuccess(user) {
+            currentUser = user;
+            localStorage.setItem('rowad_user', JSON.stringify(user));
+            
+            document.getElementById('userInfo').classList.remove('hidden');
+            document.querySelector('.g_id_signin').classList.add('hidden');
+            document.getElementById('userInitial').innerText = user.name.charAt(0);
+            document.getElementById('userName').innerText = user.name;
+            document.getElementById('userRole').innerText = user.role || 'User';
+        }
+
+        function openEdit(rowIndex) {
+            if(!currentUser || currentUser.role === 'Viewer') {
+                alert("You need to log in with Editor permissions to modify data.");
+                return;
+            }
+
+            const item = db.find(i => i._rowIndex === rowIndex);
+            if(!item) return;
+
+            currentEditIndex = rowIndex;
+            document.getElementById('editHospitalName').innerText = item['Hospital Name'];
+            document.getElementById('editRegion').innerText = item.Region;
+            document.getElementById('editStatus').value = item.Status || '';
+            document.getElementById('editSatisfaction').value = item.Satisfaction || '';
             document.getElementById('editNotes').value = item.Notes || '';
+            document.getElementById('editContact').value = item.Contact || '';
+            document.getElementById('editMobile').value = item['Contact Mobile Number'] || '';
             
-            // Logic: Is this an uncensored number?
-            const mobile = item["Contact Mobile Number"];
-            const isUncensored = mobile && !mobile.includes('HIDDEN') && mobile.length > 5;
-            const display = document.getElementById('displayPhone');
-            const wa = document.getElementById('waLink');
-            
-            display.innerText = mobile || "No Number";
-            
-            if (isUncensored) {
-                wa.classList.remove('hidden');
-                // Format for WhatsApp (assuming 05xxxxxxxx -> 9665xxxxxxxx)
-                let waNum = mobile.replace(/\D/g,'');
-                if(waNum.startsWith('0')) waNum = '966' + waNum.substring(1);
-                wa.href = `https://wa.me/${waNum}`;
-                display.innerHTML = `<a href="tel:${mobile}">${mobile}</a>`;
-            } else {
-                wa.classList.add('hidden');
-            }
-
-            // PERMISSIONS
-            const canEdit = currentUser.role === 'Admin' || currentUser.role === 'Editor';
-            
-            document.querySelectorAll('.secure-input').forEach(el => el.disabled = !canEdit);
-            document.getElementById('saveBtn').disabled = !canEdit;
-            document.getElementById('editPhoneBtn').classList.toggle('hidden', !canEdit);
-            
-            const btn = document.getElementById('saveBtn');
-            btn.innerText = canEdit ? "Save Updates" : "Login to Edit";
-            document.getElementById('loginPrompt').classList.toggle('hidden', canEdit);
-
             document.getElementById('editModal').style.display = 'flex';
-        };
+        }
 
-        window.promptPhoneUpdate = function() {
-            const newNum = prompt("Enter new 05xxxxxxxx number:");
-            if(newNum) {
-                if(!/^05\d{8}$/.test(newNum)) return alert("Invalid format. Must be 05xxxxxxxx");
-                document.getElementById('editContactMobile').value = newNum;
-                document.getElementById('displayPhone').innerText = newNum;
-            }
-        };
-
-        // --- UPDATED SAVE FUNCTION ---
         window.saveChanges = async function() {
-            if (currentUser.role !== 'Admin' && currentUser.role !== 'Editor') return;
             const btn = document.getElementById('saveBtn');
             btn.innerText = "Saving...";
             
-            // Construct payload
             const updates = {
-                _rowIndex: currentEditIndex,
-                "Hospital Name": document.getElementById('modalTitle').innerText,
-                "Contact": document.getElementById('editContactName').value,
-                "Contact Mobile Number": document.getElementById('editContactMobile').value,
-                "Status": document.getElementById('editStatus').value,
-                "Satisfaction": document.getElementById('editSat').value,
-                "Tags": document.getElementById('editTags').value,
-                "Notes": document.getElementById('editNotes').value
+                'Status': document.getElementById('editStatus').value,
+                'Satisfaction': document.getElementById('editSatisfaction').value,
+                'Notes': document.getElementById('editNotes').value,
+                'Contact': document.getElementById('editContact').value,
+                'Contact Mobile Number': document.getElementById('editMobile').value,
+                '_rowIndex': currentEditIndex
             };
 
             try {
-                const r = await fetch(SCRIPT_URL, { 
-                    method: 'POST', 
+                const r = await fetch(SCRIPT_URL, {
+                    method: 'POST',
                     body: JSON.stringify({
                         action: 'save',
                         token: currentUser.token, // Sends token for validation
@@ -420,8 +502,15 @@
         window.switchView = function(v) { 
             document.getElementById('tableView').classList.toggle('hidden', v!=='table');
             document.getElementById('cardView').classList.toggle('hidden', v!=='card');
+            document.getElementById('chartsView').classList.toggle('hidden', v!=='charts');
+            document.getElementById('exportView').classList.toggle('hidden', v!=='export');
+            
             document.querySelectorAll('.view-btn').forEach(b => b.classList.toggle('active', b.dataset.view===v));
+            // Trigger render to update charts if switching to them
+            if (v === 'charts') renderCharts();
         };
+
+        init();
     </script>
 </body>
 </html>
