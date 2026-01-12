@@ -9,8 +9,9 @@
     <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
     <style>
         :root {
+            /* Modified BG to be slightly darker/cooler for better card contrast */
             --primary: #2d2d2d; --accent: #bfa15f; --accent-dark: #a3884d;
-            --bg: #f8f9fa; --surface: #ffffff; --text: #2d2d2d; --text-light: #6c757d;
+            --bg: #f0f2f5; --surface: #ffffff; --text: #2d2d2d; --text-light: #6c757d;
             --border: #e9ecef; 
         }
         body { font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; background: var(--bg); margin: 0; color: var(--text); -webkit-font-smoothing: antialiased; }
@@ -19,7 +20,7 @@
         .p-4 { padding: 16px; } .rounded { border-radius: 8px; }
 
         /* Top Bar */
-        .top-bar { background: var(--surface); padding: 15px 30px; box-shadow: 0 2px 10px rgba(0,0,0,0.03); border-bottom: 3px solid var(--accent); position: sticky; top: 0; z-index: 100; }
+        .top-bar { background: var(--surface); padding: 15px 30px; box-shadow: 0 4px 20px rgba(0,0,0,0.05); border-bottom: 3px solid var(--accent); position: sticky; top: 0; z-index: 100; }
         .logo-img { height: 45px; width: auto; } 
         .page-title { font-size: 20px; font-weight: 700; padding-left: 20px; border-left: 2px solid #eee; margin-left: 20px; letter-spacing: -0.5px; }
         
@@ -41,9 +42,9 @@
         .controls { flex-wrap: wrap; margin-bottom: 25px; }
         .search-box { flex: 2; min-width: 250px; } .filter-box { flex: 1; min-width: 150px; }
 
-        /* Table */
-        .data-table { width: 100%; border-collapse: separate; border-spacing: 0; background: var(--surface); border-radius: 12px; overflow: hidden; box-shadow: 0 2px 12px rgba(0,0,0,0.03); border: 1px solid var(--border); }
-        .data-table th { text-align: left; padding: 20px; background: #fcfcfc; color: var(--text-light); font-weight: 600; font-size: 12px; letter-spacing: 1px; text-transform: uppercase; border-bottom: 1px solid var(--border); }
+        /* Table - Added subtle shadow */
+        .data-table { width: 100%; border-collapse: separate; border-spacing: 0; background: var(--surface); border-radius: 12px; overflow: hidden; box-shadow: 0 4px 15px rgba(0,0,0,0.05); border: 1px solid var(--border); }
+        .data-table th { text-align: left; padding: 20px; background: #fafafa; color: #8898aa; font-weight: 700; font-size: 11px; letter-spacing: 0.8px; text-transform: uppercase; border-bottom: 1px solid var(--border); }
         .data-table td { padding: 18px 20px; border-bottom: 1px solid var(--border); vertical-align: middle; }
         .data-table tr:last-child td { border-bottom: none; }
         .data-table tr:hover td { background-color: #fcfcfc; }
@@ -62,8 +63,8 @@
         .info-item label { display: block; font-size: 11px; text-transform: uppercase; color: #999; margin-bottom: 4px; letter-spacing: 0.5px; font-weight: 600; }
         .info-item div { font-weight: 600; font-size: 14px; color: #333; }
 
-        /* Secure Inputs (Edit Mode) */
-        .secure-input:disabled { background: transparent; border-color: transparent; padding: 0; color: #333; font-weight: 500; cursor: default; }
+        /* Secure Inputs (Edit Mode) - MODIFIED: Cleaner Text Look when disabled */
+        .secure-input:disabled { background: transparent; border: none; padding: 0; color: #2d2d2d; font-weight: 600; cursor: text; opacity: 1; -webkit-text-fill-color: #2d2d2d; }
         .secure-input:disabled + .input-icon { display: none; }
         
         .contact-box { background: #fff; border: 1px solid var(--border); padding: 15px; border-radius: 10px; transition: 0.2s; }
@@ -83,8 +84,9 @@
         @media (max-width: 768px) { .data-table { display: none; } .grid-view { display: grid !important; } .controls { flex-direction: column; } }
         .grid-view { display: grid; grid-template-columns: repeat(auto-fill, minmax(300px, 1fr)); gap: 20px; }
         
-        .card { background: var(--surface); padding: 25px; border-radius: 12px; border: 1px solid var(--border); transition: all 0.2s; cursor: pointer; position: relative; overflow: hidden; }
-        .card:hover { transform: translateY(-3px); box-shadow: 0 10px 20px rgba(0,0,0,0.04); border-color: var(--accent); }
+        /* Card - Modified for better pop */
+        .card { background: var(--surface); padding: 25px; border-radius: 12px; border: 1px solid transparent; box-shadow: 0 4px 15px rgba(0,0,0,0.03); transition: all 0.2s; cursor: pointer; position: relative; overflow: hidden; }
+        .card:hover { transform: translateY(-3px); box-shadow: 0 12px 30px rgba(0,0,0,0.08); border-color: transparent; }
         .card::before { content: ''; position: absolute; left: 0; top: 0; bottom: 0; width: 4px; background: #e9ecef; transition: 0.2s; }
         .card[data-status*="Renewed"]::before, .card[data-status*="Satisfied"]::before { background: #27ae60; }
         .card[data-status*="Unsatisfied"]::before, .card[data-status*="Not"]::before { background: #e74c3c; }
@@ -94,7 +96,7 @@
         .chart-wrapper { position: relative; height: 300px; width: 100%; }
         .chart-card { background: var(--surface); padding: 30px; border-radius: 16px; border: 1px solid var(--border); flex: 1; box-shadow: 0 4px 12px rgba(0,0,0,0.02); }
         
-        label.block { color: var(--text-light); font-size: 13px; text-transform: uppercase; font-weight: 700; margin-bottom: 8px; display: block; }
+        label.block { color: #adb5bd; font-size: 11px; text-transform: uppercase; font-weight: 700; margin-bottom: 8px; display: block; letter-spacing: 0.5px; }
     </style>
 </head>
 <body>
@@ -152,7 +154,7 @@
         <div id="chartsView" class="hidden">
             <div class="flex gap-4" style="flex-wrap: wrap;">
                 <div class="chart-card">
-                    <h3 style="margin-top:0; color:var(--text); font-weight:600">Call Outcomes</h3>
+                    <h3 style="margin-top:0; color:var(--text); font-weight:600">Call Outcomes (Excl. Pending)</h3>
                     <div class="chart-wrapper"><canvas id="statusChart"></canvas></div>
                 </div>
                 <div class="chart-card">
@@ -393,7 +395,10 @@
 
             data.forEach(i => {
                 const s = i.Status || 'Pending';
-                statusCounts[s] = (statusCounts[s] || 0) + 1;
+                // MODIFIED: Filter out Pending from the visual chart to prevent scaling issues
+                if (s !== 'Pending') {
+                    statusCounts[s] = (statusCounts[s] || 0) + 1;
+                }
                 
                 const sat = i.Satisfaction;
                 if(sat === 'Satisfied') satCounts['Satisfied']++;
