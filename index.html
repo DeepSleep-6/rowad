@@ -18,7 +18,7 @@
         .gap-2 { gap: 8px; } .gap-4 { gap: 16px; } .hidden { display: none !important; }
         .p-4 { padding: 16px; } .rounded { border-radius: 8px; }
 
-        /* Top Bar - Modified for Mobile Wrapping */
+        /* Top Bar */
         .top-bar { background: var(--surface); padding: 15px 30px; box-shadow: 0 4px 20px rgba(0,0,0,0.05); border-bottom: 3px solid var(--accent); position: sticky; top: 0; z-index: 100; flex-wrap: wrap; gap: 15px; }
         .logo-img { height: 45px; width: auto; } 
         .page-title { font-size: 20px; font-weight: 700; padding-left: 20px; border-left: 2px solid #eee; margin-left: 20px; letter-spacing: -0.5px; }
@@ -39,7 +39,9 @@
         
         .container { max-width: 1400px; margin: 30px auto; padding: 0 20px; flex: 1; width: 100%; box-sizing: border-box; }
         .controls { flex-wrap: wrap; margin-bottom: 25px; }
-        .search-box { flex: 2; min-width: 250px; } .filter-box { flex: 1; min-width: 150px; }
+        .search-box { flex: 2; min-width: 250px; } 
+        /* UPDATED: Filter box sizing for multiple filters */
+        .filter-box { flex: 1; min-width: 150px; }
 
         /* Table */
         .data-table { width: 100%; border-collapse: separate; border-spacing: 0; background: var(--surface); border-radius: 12px; overflow: hidden; box-shadow: 0 4px 15px rgba(0,0,0,0.05); border: 1px solid var(--border); }
@@ -80,10 +82,10 @@
         .spinner { width: 40px; height: 40px; border: 3px solid #e9ecef; border-top-color: var(--accent); border-radius: 50%; animation: spin 0.8s linear infinite; margin: 0 auto 20px; }
         @keyframes spin { to { transform: rotate(360deg); } }
 
-        /* Mobile Adjustments - Surgical Fixes */
+        /* Mobile Adjustments */
         @media (max-width: 768px) { 
             .data-table { display: none; } 
-            .grid-view { display: grid !important; grid-template-columns: 1fr; } /* Force single column on mobile */
+            .grid-view { display: grid !important; grid-template-columns: 1fr; }
             .controls { flex-direction: column; } 
             .top-bar { justify-content: center; padding: 15px 20px; }
             .top-bar > div { width: 100%; justify-content: space-between; }
@@ -96,11 +98,7 @@
         /* Card Styles */
         .card { background: var(--surface); padding: 25px; border-radius: 12px; border: 1px solid transparent; box-shadow: 0 4px 15px rgba(0,0,0,0.03); transition: all 0.2s; cursor: pointer; position: relative; overflow: hidden; }
         .card:hover { transform: translateY(-3px); box-shadow: 0 12px 30px rgba(0,0,0,0.08); border-color: transparent; }
-        
-        /* Default Left Border (Grey) */
         .card::before { content: ''; position: absolute; left: 0; top: 0; bottom: 0; width: 4px; background: #e9ecef; transition: 0.2s; }
-        
-        /* Gold Accent Left Border if Interacted */
         .card.interacted::before { background: var(--accent); }
 
         /* Chart Container */
@@ -111,6 +109,9 @@
 
         /* Footer Credit */
         .footer-credit { text-align: center; font-size: 11px; color: #adb5bd; padding: 20px; margin-top: auto; font-weight: 500; letter-spacing: 0.5px; }
+        
+        /* ADDED: Disclaimer Style */
+        .footer-disclaimer { display: block; font-size: 10px; color: #ced4da; margin-top: 5px; font-style: italic; opacity: 0.7; }
     </style>
 </head>
 <body>
@@ -149,6 +150,25 @@
             </div>
             <div class="filter-box">
                 <select id="filterDirection" onchange="debouncedRender()"><option value="All">All Directions</option></select>
+            </div>
+            <div class="filter-box">
+                <select id="filterStatus" onchange="debouncedRender()">
+                    <option value="All">All Statuses</option>
+                    <option value="Pending">Pending</option>
+                    <option value="Quote Requested">Quote Requested</option>
+                    <option value="Call Later">Call Later</option>
+                    <option value="No Answer">No Answer</option>
+                    <option value="Renewed">Renewed</option>
+                    <option value="Not Interested">Not Interested</option>
+                </select>
+            </div>
+            <div class="filter-box">
+                <select id="filterSat" onchange="debouncedRender()">
+                    <option value="All">All Satisfaction</option>
+                    <option value="Satisfied">Satisfied</option>
+                    <option value="Unsatisfied">Unsatisfied</option>
+                    <option value="Neutral">Neutral</option>
+                </select>
             </div>
         </div>
 
@@ -190,7 +210,10 @@
         </div>
     </div>
 
-    <div class="footer-credit">Rowad Calls Dashboard v1.0 • Developed by Faisal Alzougbi</div>
+    <div class="footer-credit">
+        Rowad Calls Dashboard v1.1 • Developed by Faisal Alzougbi
+        <span class="footer-disclaimer">Disclaimer: This dashboard is an independently developed tool for internal workflow optimization. It is not an official asset of, nor maintained by, Rowad Medical Services.</span>
+    </div>
 
     <div class="modal-overlay" id="editModal">
         <div class="modal-card">
@@ -271,7 +294,14 @@
         let currentUser = { email: null, token: null, role: 'Public' };
         let chartInstances = {};
 
-        // 1. INIT
+        // ADDED: Priority Map for Sorting
+        const priorityMap = {
+            "Quote Requested": 1,
+            "Call Later": 2,
+            "No Answer": 3,
+            "Pending": 4
+        };
+
         window.onload = function() {
             fetchData();
             document.getElementById('viewControls').addEventListener('click', (e) => {
@@ -280,7 +310,6 @@
             });
         };
 
-        // 2. LOGIN HANDLER
         window.handleCredentialResponse = async function(response) {
             currentUser.token = response.credential;
             document.getElementById('loginBtn').style.opacity = '0.5';
@@ -295,7 +324,7 @@
                 if (json.result === 'success') {
                     currentUser.email = json.email;
                     currentUser.role = json.role; 
-                    db = json.data; // Load Uncensored Data
+                    db = json.data; 
                     render();
                     updateUserUI(json);
                 } else {
@@ -312,18 +341,14 @@
             const tag = document.getElementById('roleLabel');
             tag.innerText = json.role;
             tag.className = 'role-tag ' + (json.role === 'Admin' || json.role === 'Editor' ? 'role-admin' : 'role-rowad');
-            
-            // Re-render to enable edit buttons
             render();
         }
 
-        // 3. FETCH & RENDER
         async function fetchData() {
             try {
                 const res = await fetch(SCRIPT_URL);
                 db = await res.json(); 
                 
-                // Populate Filter
                 const dirs = [...new Set(db.map(r => r.Direction))].filter(Boolean).sort();
                 const s = document.getElementById('filterDirection');
                 s.innerHTML = '<option value="All">All Directions</option>';
@@ -342,19 +367,36 @@
             const tb = document.getElementById('tableBody');
             const search = document.getElementById('search').value.toLowerCase();
             const fDir = document.getElementById('filterDirection').value;
+            // ADDED: Capture new filter values
+            const fStat = document.getElementById('filterStatus').value;
+            const fSat = document.getElementById('filterSat').value;
+            
             const cv = document.getElementById('cardView');
             
             tb.innerHTML = '';
             cv.innerHTML = '';
 
-            const flt = db.filter(i => {
-                if(fDir !== 'All' && i.Direction !== fDir) return false; 
-                // Search in Name, Contact, City
-                const term = (i["Hospital Name"] + " " + (i.Contact||"") + " " + (i.City||"")).toLowerCase();
-                return term.includes(search);
+            // ADDED: Sort DB by Priority before filtering
+            db.sort((a, b) => {
+                const sA = a.Status || "Pending";
+                const sB = b.Status || "Pending";
+                const pA = priorityMap[sA] || 5;
+                const pB = priorityMap[sB] || 5;
+                return pA - pB;
             });
 
-            // Table View
+            const flt = db.filter(i => {
+                const term = (i["Hospital Name"] + " " + (i.Contact||"") + " " + (i.City||"")).toLowerCase();
+                if (!term.includes(search)) return false;
+
+                // ADDED: AND logic for all filters
+                if(fDir !== 'All' && i.Direction !== fDir) return false;
+                if(fStat !== 'All' && (i.Status || 'Pending') !== fStat) return false;
+                if(fSat !== 'All' && (i.Satisfaction || '') !== fSat) return false;
+
+                return true;
+            });
+
             tb.innerHTML = flt.map(i => `
                 <tr>
                     <td>
@@ -372,7 +414,6 @@
                 </tr>
             `).join('');
 
-            // Card View - CHANGED: Implemented Grey vs Gold logic
             cv.innerHTML = flt.map(i => {
                 const s = (i.Status || 'Pending');
                 const isInteracted = s !== 'Pending' && s !== '';
@@ -389,49 +430,39 @@
                 </div>
             `}).join('');
             
-            // If charts are visible, update them
             if(!document.getElementById('chartsView').classList.contains('hidden')) {
                 renderCharts(flt);
             }
         }
 
-        // ADDED: Text Color Helper including Neutral and CHANGED Unsatisfied Color
         function getTextColor(s) {
             if(!s) return '#adb5bd';
             s = s.toLowerCase();
-            if(s.includes('renewed') || s.includes('satisfied')) return '#27ae60'; // Green
-            if(s.includes('quote') || s.includes('call')) return '#2980b9'; // Blue
-            // CHANGED: Changed Red to Burnt Orange/Terra Cotta for "Unsatisfied/No Answer"
+            if(s.includes('renewed') || s.includes('satisfied')) return '#27ae60'; 
+            if(s.includes('quote') || s.includes('call')) return '#2980b9'; 
             if(s.includes('no answer') || s.includes('unsatisfied') || s.includes('not interested')) return '#d35400'; 
-            if(s.includes('neutral')) return '#7f8c8d'; // Grey/Slate for Neutral
+            if(s.includes('neutral')) return '#7f8c8d'; 
             return '#666';
         }
 
-        // ADDED: Charts Logic including Neutral
         function renderCharts(data) {
-            // Count Statuses
             const statusCounts = {};
             const satCounts = { 'Satisfied': 0, 'Unsatisfied': 0, 'Neutral': 0 };
 
             data.forEach(i => {
                 const s = i.Status || 'Pending';
-                // MODIFIED: Filter out Pending from the visual chart to prevent scaling issues
                 if (s !== 'Pending') {
                     statusCounts[s] = (statusCounts[s] || 0) + 1;
                 }
-                
                 const sat = i.Satisfaction;
-                // CHANGED: Filter out "Unknown" completely from the object
                 if(sat === 'Satisfied') satCounts['Satisfied']++;
                 else if(sat === 'Unsatisfied') satCounts['Unsatisfied']++;
                 else if(sat === 'Neutral') satCounts['Neutral']++;
             });
 
-            // Destroy old charts
             if(chartInstances.status) chartInstances.status.destroy();
             if(chartInstances.sat) chartInstances.sat.destroy();
 
-            // Render Status Chart
             const ctxStatus = document.getElementById('statusChart').getContext('2d');
             chartInstances.status = new Chart(ctxStatus, {
                 type: 'bar',
@@ -452,7 +483,6 @@
                 }
             });
 
-            // Render Satisfaction Chart - CHANGED: Removed Unknown color/data
             const ctxSat = document.getElementById('satChart').getContext('2d');
             chartInstances.sat = new Chart(ctxSat, {
                 type: 'doughnut',
@@ -460,7 +490,6 @@
                     labels: Object.keys(satCounts),
                     datasets: [{
                         data: Object.values(satCounts),
-                        // CHANGED: Updated colors to match text colors
                         backgroundColor: ['#27ae60', '#d35400', '#95a5a6'],
                         borderWidth: 0
                     }]
@@ -473,10 +502,9 @@
             });
         }
 
-        // ADDED: Export Logic
         function downloadCSV() {
             if (!db || !db.length) return alert("No data to export");
-            const headers = Object.keys(db[0]).filter(k => k !== '_rowIndex'); // Exclude internal index
+            const headers = Object.keys(db[0]).filter(k => k !== '_rowIndex'); 
             const csvRows = [headers.join(',')];
             
             for (const row of db) {
@@ -498,14 +526,18 @@
             document.body.removeChild(a);
         }
 
-        // 4. MODAL & EDIT
         window.openEdit = function(rowIndex) {
             currentEditIndex = rowIndex; 
             const item = db.find(r => r._rowIndex === rowIndex);
             if (!item) return;
 
-            // Header & Read-Only Info
-            document.getElementById('modalTitle').innerText = item["Hospital Name"];
+            // UPDATED: Header to include Last Editor
+            const lastEditor = item["Last Editor"] || "Unknown";
+            document.getElementById('modalTitle').innerHTML = `
+                ${item["Hospital Name"]}
+                <div style="font-size:10px; color:#adb5bd; font-weight:400; margin-top:4px;">Last updated by: ${lastEditor}</div>
+            `;
+            
             document.getElementById('dispRegion').innerText = item.Region || '-';
             document.getElementById('dispCity').innerText = item.City || '-';
             document.getElementById('dispDevice').innerText = item.Device || '-';
@@ -513,7 +545,6 @@
             document.getElementById('dispAccuSN').innerText = item["AccuFIT SN"] || '-';
             document.getElementById('dispSurfUser').innerText = item["Surfacide Username"] || '-';
 
-            // Editable Forms
             document.getElementById('editContactName').value = item.Contact || '';
             document.getElementById('editContactMobile').value = item["Contact Mobile Number"] || '';
             document.getElementById('editSat').value = item.Satisfaction || '';
@@ -521,7 +552,6 @@
             document.getElementById('editTags').value = item.Tags || '';
             document.getElementById('editNotes').value = item.Notes || '';
             
-            // Logic: Is this an uncensored number?
             const mobile = item["Contact Mobile Number"];
             const isUncensored = mobile && !mobile.includes('HIDDEN') && mobile.length > 5;
             const display = document.getElementById('displayPhone');
@@ -531,16 +561,19 @@
             
             if (isUncensored) {
                 wa.classList.remove('hidden');
-                // Format for WhatsApp (assuming 05xxxxxxxx -> 9665xxxxxxxx)
                 let waNum = mobile.replace(/\D/g,'');
                 if(waNum.startsWith('0')) waNum = '966' + waNum.substring(1);
-                wa.href = `https://wa.me/${waNum}`;
+                
+                // ADDED: Encoded Arabic Message
+                const message = "يرجى المشاركة في هذا التقييم كجزء من جهودنا المستمرة لخدمتكم بشكل أفضل: https://forms.gle/DfmEtq8LftRDrAqz5";
+                const encodedMsg = encodeURIComponent(message);
+                wa.href = `https://wa.me/${waNum}?text=${encodedMsg}`;
+                
                 display.innerHTML = `<a href="tel:${mobile}">${mobile}</a>`;
             } else {
                 wa.classList.add('hidden');
             }
 
-            // PERMISSIONS
             const canEdit = currentUser.role === 'Admin' || currentUser.role === 'Editor';
             
             document.querySelectorAll('.secure-input').forEach(el => el.disabled = !canEdit);
@@ -563,16 +596,14 @@
             }
         };
 
-        // --- UPDATED SAVE FUNCTION ---
         window.saveChanges = async function() {
             if (currentUser.role !== 'Admin' && currentUser.role !== 'Editor') return;
             const btn = document.getElementById('saveBtn');
             btn.innerText = "Saving...";
             
-            // Construct payload
             const updates = {
                 _rowIndex: currentEditIndex,
-                "Hospital Name": document.getElementById('modalTitle').innerText,
+                "Hospital Name": document.getElementById('modalTitle').innerText.split('<')[0].trim(), // Clean title from HTML
                 "Contact": document.getElementById('editContactName').value,
                 "Contact Mobile Number": document.getElementById('editContactMobile').value,
                 "Status": document.getElementById('editStatus').value,
@@ -586,7 +617,7 @@
                     method: 'POST', 
                     body: JSON.stringify({
                         action: 'save',
-                        token: currentUser.token, // Sends token for validation
+                        token: currentUser.token, 
                         userEmail: currentUser.email,
                         data: updates
                     }) 
@@ -595,9 +626,12 @@
                 if(res.result === "success") {
                     alert("Saved Successfully!");
                     
-                    // Update Local Data immediately
                     const localItem = db.find(i => i._rowIndex === currentEditIndex);
-                    if(localItem) Object.assign(localItem, updates);
+                    if(localItem) {
+                        Object.assign(localItem, updates);
+                        // Update local editor immediately for UX
+                        localItem["Last Editor"] = currentUser.email; 
+                    }
                     
                     closeModal();
                     render();
@@ -613,7 +647,6 @@
 
         window.closeModal = function() { document.getElementById('editModal').style.display = 'none'; };
         
-        // MODIFIED: Updated switchView to handle new views and trigger chart rendering
         window.switchView = function(v) { 
             document.getElementById('tableView').classList.toggle('hidden', v!=='table');
             document.getElementById('cardView').classList.toggle('hidden', v!=='card');
@@ -622,7 +655,6 @@
             
             document.querySelectorAll('.view-btn').forEach(b => b.classList.toggle('active', b.dataset.view===v));
             
-            // Trigger render to update charts if switching to them
             if(v === 'charts') render();
         };
     </script>
