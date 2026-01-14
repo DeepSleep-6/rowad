@@ -19,15 +19,18 @@
         .gap-2 { gap: 8px; } .gap-4 { gap: 16px; } .hidden { display: none !important; }
         .p-4 { padding: 16px; } .rounded { border-radius: 8px; }
 
-        /* Login Overlay */
+        /* Login Overlay - CHANGED: Simplified for v1.1 */
         #loginOverlay { position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: var(--bg); z-index: 2000; display: flex; justify-content: center; align-items: center; flex-direction: column; }
-        .login-card { background: white; padding: 40px; border-radius: 20px; box-shadow: 0 10px 40px rgba(0,0,0,0.05); text-align: center; width: 300px; border-top: 4px solid var(--accent); }
+        .login-card { background: white; padding: 40px; border-radius: 20px; box-shadow: 0 10px 40px rgba(0,0,0,0.05); text-align: center; width: 300px; border-top: 4px solid var(--accent); display: flex; flex-direction: column; align-items: center; }
 
         /* Top Bar */
         .top-bar { background: var(--surface); padding: 15px 30px; box-shadow: 0 4px 20px rgba(0,0,0,0.05); border-bottom: 3px solid var(--accent); position: sticky; top: 0; z-index: 100; flex-wrap: wrap; gap: 15px; }
         .logo-img { height: 45px; width: auto; } 
         .page-title { font-size: 20px; font-weight: 700; padding-left: 20px; border-left: 2px solid #eee; margin-left: 20px; letter-spacing: -0.5px; white-space: nowrap; }
         
+        /* NEW: Vertical Divider */
+        .vertical-divider { width: 1px; height: 24px; background: #dee2e6; margin: 0 10px; }
+
         /* User UI */
         .user-badge { background: #f1f3f5; padding: 6px 14px; border-radius: 30px; font-size: 13px; font-weight: 600; display: flex; align-items: center; gap: 10px; border: 1px solid var(--border); }
         .role-tag { font-size: 10px; padding: 3px 8px; border-radius: 6px; background: #e9ecef; color: #495057; text-transform: uppercase; letter-spacing: 0.5px; font-weight: 700; }
@@ -88,13 +91,14 @@
             .data-table { display: none; } 
             .grid-view { display: grid !important; grid-template-columns: 1fr; }
             .controls { flex-direction: column; } 
+            /* CHANGED: Mobile Stack Fix */
             .top-bar { justify-content: center; padding: 15px 20px; }
-            .top-bar > div { width: 100%; justify-content: space-between; }
+            .top-bar > div { width: 100%; justify-content: center; flex-direction: column; align-items: center; gap: 10px; }
+            .page-title { border: none; margin: 0; padding: 0; font-size: 18px; }
+            .vertical-divider { display: none; }
             .modal-card { width: 95%; margin: 10px; max-height: 85vh; }
-            .page-title { font-size: 16px; padding-left: 10px; margin-left: 10px; }
         }
 
-        /* Print Styles */
         @media print {
             .top-bar, .controls, .view-toggles, .footer-credit, .btn-action, .dashboard-container > button { display: none !important; }
             body, .dashboard-container { background: white; margin: 0; padding: 0; }
@@ -124,15 +128,19 @@
         .footer-disclaimer { display: block; font-size: 10px; color: #ced4da; margin-top: 5px; font-style: italic; opacity: 0.7; }
         
         .dashboard-container { display: none; flex-direction: column; flex: 1; }
+
+        /* NEW: Column Picker Styles */
+        .checkbox-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(180px, 1fr)); gap: 15px; text-align: left; margin: 25px 0; }
+        .checkbox-item { background: #f8f9fa; padding: 10px 15px; border-radius: 8px; border: 1px solid #e9ecef; display: flex; align-items: center; gap: 10px; cursor: pointer; transition: 0.2s; }
+        .checkbox-item:hover { border-color: var(--accent); background: #fff; }
+        .checkbox-item input { width: auto; margin: 0; }
     </style>
 </head>
 <body>
 
     <div id="loginOverlay">
         <div class="login-card">
-            <img src="https://alrowad-ksa.com/wp-content/uploads/2022/10/Rowad-Medical-Services_Horizontal_Logo.svg" alt="Rowad Logo" style="height: 50px; margin-bottom: 20px; display: block; margin-left: auto; margin-right: auto;">
-            <h2 style="margin: 0 0 10px 0; font-size: 18px; color: var(--text);">Internal Calls Dashboard</h2>
-            <p style="margin: 0 0 25px 0; color: var(--text-light); font-size: 13px;">Secure Access • Authorized Personnel Only</p>
+            <h2 style="margin: 0 0 25px 0; font-size: 22px; color: var(--text);">Rowad Calls Dashboard</h2>
             
             <div id="g_id_onload"
                  data-client_id="174253379694-95msalgnm4kbpjlftil4vm8o26c7h7cc.apps.googleusercontent.com"
@@ -158,6 +166,8 @@
                 
                 <button onclick="logout()" style="border:none; background:none; color:#adb5bd; cursor:pointer; font-size:12px;"><i class="fa-solid fa-sign-out-alt"></i></button>
 
+                <div class="vertical-divider"></div>
+
                 <div class="view-toggles flex gap-2" id="viewControls">
                     <button class="view-btn active" data-view="table"><i class="fa-solid fa-table"></i></button>
                     <button class="view-btn" data-view="card"><i class="fa-solid fa-th-large"></i></button>
@@ -170,10 +180,13 @@
         <div class="container">
             <div class="controls flex gap-4">
                 <div class="search-box">
-                    <input type="text" id="search" placeholder="Search Hospital, Contact, City..." onkeyup="debouncedRender()">
+                    <input type="text" id="search" placeholder="Search Hospital, Contact..." onkeyup="debouncedRender()">
                 </div>
                 <div class="filter-box">
-                    <select id="filterDirection" onchange="debouncedRender()"><option value="All">All Directions</option></select>
+                    <select id="filterRegion" onchange="handleRegionChange()"><option value="All">All Regions</option></select>
+                </div>
+                <div class="filter-box">
+                    <select id="filterCity" onchange="debouncedRender()"><option value="All">All Cities</option></select>
                 </div>
                 <div class="filter-box">
                     <select id="filterStatus" onchange="debouncedRender()">
@@ -185,14 +198,6 @@
                         <option value="Renewed">Renewed</option>
                         <option value="Active Contract">Active Contract</option>
                         <option value="Not Interested">Not Interested</option>
-                    </select>
-                </div>
-                <div class="filter-box">
-                    <select id="filterSat" onchange="debouncedRender()">
-                        <option value="All">All Satisfaction</option>
-                        <option value="Satisfied">Satisfied</option>
-                        <option value="Unsatisfied">Unsatisfied</option>
-                        <option value="Neutral">Neutral</option>
                     </select>
                 </div>
             </div>
@@ -212,36 +217,37 @@
 
             <div id="chartsView" class="hidden">
                 <div class="flex gap-4" style="flex-wrap: wrap;">
-                    <div class="chart-card">
-                        <h3 style="margin-top:0; color:var(--text); font-weight:600">Device Ownership</h3>
-                        <div class="chart-wrapper"><canvas id="deviceChart"></canvas></div>
+                    <div class="chart-card" style="flex: 2; min-width: 500px;">
+                        <h3 style="margin-top:0; color:var(--text); font-weight:600">Sales Funnel</h3>
+                        <div class="chart-wrapper"><canvas id="funnelChart"></canvas></div>
                     </div>
                     <div class="chart-card">
-                        <h3 style="margin-top:0; color:var(--text); font-weight:600">Call Outcomes (Actionable)</h3>
-                        <div class="chart-wrapper"><canvas id="statusChart"></canvas></div>
-                    </div>
-                    <div class="chart-card">
-                        <h3 style="margin-top:0; color:var(--text); font-weight:600">Satisfaction Overview</h3>
+                        <h3 style="margin-top:0; color:var(--text); font-weight:600">Satisfaction</h3>
                         <div class="chart-wrapper"><canvas id="satChart"></canvas></div>
                     </div>
                 </div>
             </div>
 
             <div id="exportView" class="hidden" style="text-align: center; padding-top: 40px;">
-                <div class="chart-card" style="max-width: 450px; margin: 0 auto; padding: 50px;">
-                    <div style="background: #fff8e6; width: 80px; height: 80px; border-radius: 50%; display: flex; align-items: center; justify-content: center; margin: 0 auto 25px;">
-                        <i class="fa-solid fa-file-csv" style="font-size: 32px; color: var(--accent);"></i>
+                <div class="chart-card" style="max-width: 700px; margin: 0 auto; padding: 40px;">
+                    <div style="background: #fff8e6; width: 60px; height: 60px; border-radius: 50%; display: flex; align-items: center; justify-content: center; margin: 0 auto 20px;">
+                        <i class="fa-solid fa-file-export" style="font-size: 24px; color: var(--accent);"></i>
                     </div>
-                    <h2 style="margin: 0 0 10px 0;">Export Database</h2>
-                    <p style="color: var(--text-light); margin-bottom: 30px; line-height: 1.5;">Download the complete dataset in CSV format, including all hospital records and contact details.</p>
-                    <button onclick="downloadCSV()" class="btn-save" style="margin:0"><i class="fa-solid fa-download" style="margin-right:8px"></i> Download Full CSV</button>
-                    <button onclick="window.print()" class="btn-action" style="margin-top: 15px; width: 100%;"><i class="fa-solid fa-print" style="margin-right:8px"></i> Print Current View</button>
+                    <h2 style="margin: 0 0 10px 0;">Custom Data Export</h2>
+                    <p style="color: var(--text-light); margin-bottom: 25px;">Select the columns you wish to include in your report.</p>
+                    
+                    <div id="columnPicker" class="checkbox-grid"></div>
+
+                    <div class="flex gap-4" style="justify-content: center;">
+                        <button onclick="downloadCSV()" class="btn-save" style="margin:0; width: auto; padding: 12px 25px;"><i class="fa-solid fa-file-csv" style="margin-right:8px"></i> Download CSV</button>
+                        <button onclick="window.print()" class="btn-action" style="margin:0; background: white;"><i class="fa-solid fa-print" style="margin-right:8px"></i> Print PDF</button>
+                    </div>
                 </div>
             </div>
         </div>
 
         <div class="footer-credit">
-            Rowad Calls Dashboard v1.0 • Developed by Faisal Alzougbi
+            Rowad Calls Dashboard v1.1 • Developed by Faisal Alzougbi
             <span class="footer-disclaimer">Disclaimer: This dashboard is an independently developed tool for internal workflow optimization. It is not an official asset of, nor maintained by, Rowad Medical Services.</span>
         </div>
     </div>
@@ -327,25 +333,13 @@
         const SESSION_DURATION = 9 * 60 * 60 * 1000; 
 
         const priorityMap = {
-            "Quote Requested": 1,
-            "Call Later": 2,
-            "No Answer": 3,
-            "Pending": 4,
-            "Renewed": 5,
-            "Satisfied": 5,
-            "Active Contract": 6,
-            "Not Interested": 7,
-            "Unsatisfied": 7
+            "Quote Requested": 1, "Call Later": 2, "No Answer": 3, "Pending": 4,
+            "Renewed": 5, "Satisfied": 5, "Active Contract": 6, "Not Interested": 7, "Unsatisfied": 7
         };
         
         const escapeHtml = (unsafe) => {
             if (unsafe === null || unsafe === undefined) return '';
-            return String(unsafe)
-                 .replace(/&/g, "&amp;")
-                 .replace(/</g, "&lt;")
-                 .replace(/>/g, "&gt;")
-                 .replace(/"/g, "&quot;")
-                 .replace(/'/g, "&#039;");
+            return String(unsafe).replace(/&/g, "&amp;").replace(/</g, "&lt;").replace(/>/g, "&gt;").replace(/"/g, "&quot;").replace(/'/g, "&#039;");
         };
 
         window.onload = function() {
@@ -368,9 +362,7 @@
                         fetchData(); 
                         return;
                     }
-                } catch (e) {
-                    localStorage.removeItem('rowad_user');
-                }
+                } catch (e) { localStorage.removeItem('rowad_user'); }
             }
             document.getElementById('loginOverlay').style.display = 'flex';
         }
@@ -387,12 +379,7 @@
                 if (json.result === 'success') {
                     currentUser.email = json.email;
                     currentUser.role = json.role; 
-                    
-                    localStorage.setItem('rowad_user', JSON.stringify({
-                        user: currentUser,
-                        timestamp: Date.now()
-                    }));
-
+                    localStorage.setItem('rowad_user', JSON.stringify({ user: currentUser, timestamp: Date.now() }));
                     showDashboard();
                     fetchData();
                 } else {
@@ -403,58 +390,80 @@
 
         function showDashboard() {
             document.getElementById('loginOverlay').style.display = 'none';
-            const dbDiv = document.getElementById('mainDashboard');
-            dbDiv.style.display = 'flex'; 
-            
+            document.getElementById('mainDashboard').style.display = 'flex'; 
             document.getElementById('userNameDisplay').innerText = currentUser.email.split('@')[0];
             const tag = document.getElementById('roleLabel');
             tag.innerText = currentUser.role;
-            
-            if (currentUser.role === 'Rowad') {
-                tag.className = 'role-tag role-rowad';
-            } else if (currentUser.role === 'Admin' || currentUser.role === 'Editor') {
-                tag.className = 'role-tag role-admin';
-            } else {
-                tag.className = 'role-tag';
-            }
+            if (currentUser.role === 'Rowad') tag.className = 'role-tag role-rowad';
+            else if (['Admin', 'Editor'].includes(currentUser.role)) tag.className = 'role-tag role-admin';
+            else tag.className = 'role-tag';
         }
 
-        window.logout = function() {
-            localStorage.removeItem('rowad_user');
-            location.reload();
-        }
+        window.logout = function() { localStorage.removeItem('rowad_user'); location.reload(); }
 
         async function fetchData() {
             try {
                 const res = await fetch(SCRIPT_URL, {
                     method: 'POST',
-                    body: JSON.stringify({ 
-                        action: 'fetch_data', 
-                        token: currentUser.token 
-                    })
+                    body: JSON.stringify({ action: 'fetch_data', token: currentUser.token })
                 });
                 const json = await res.json();
                 
-                if (json.result === 'error') {
-                   logout();
-                   return;
-                }
+                if (json.result === 'error') { logout(); return; }
 
                 db = json.data; 
                 
-                const dirs = [...new Set(db.map(r => r.Direction))].filter(Boolean).sort();
-                const s = document.getElementById('filterDirection');
-                s.innerHTML = '<option value="All">All Directions</option>';
-                dirs.forEach(d => s.add(new Option(d, d)));
+                // NEW: Initialize Cascading Filters & Export Options
+                populateFilters();
+                renderExportOptions();
 
                 document.getElementById('loading').style.display = 'none';
                 document.getElementById('tableView').classList.remove('hidden');
                 render();
             } catch(e) { 
-                // FIXED: UI Feedback for connection failure
                 console.error(e);
                 document.getElementById('loading').innerHTML = '<span style="color:var(--text-light)">Connection Failed. <a href="javascript:location.reload()" style="color:var(--accent)">Retry</a></span>';
             }
+        }
+
+        // NEW: Cascading Filter Logic
+        function populateFilters() {
+            const regions = [...new Set(db.map(r => r.Region))].filter(Boolean).sort();
+            const rSelect = document.getElementById('filterRegion');
+            rSelect.innerHTML = '<option value="All">All Regions</option>';
+            regions.forEach(r => rSelect.add(new Option(r, r)));
+            
+            // Initial City Populate
+            handleRegionChange();
+        }
+
+        window.handleRegionChange = function() {
+            const selectedRegion = document.getElementById('filterRegion').value;
+            const cSelect = document.getElementById('filterCity');
+            
+            const relevantCities = db.filter(r => selectedRegion === 'All' || r.Region === selectedRegion)
+                                     .map(r => r.City)
+                                     .filter(Boolean);
+            
+            const uniqueCities = [...new Set(relevantCities)].sort();
+            
+            cSelect.innerHTML = '<option value="All">All Cities</option>';
+            uniqueCities.forEach(c => cSelect.add(new Option(c, c)));
+            
+            debouncedRender();
+        }
+
+        // NEW: Generate Export Checkboxes
+        function renderExportOptions() {
+            if(!db.length) return;
+            const headers = Object.keys(db[0]).filter(k => k !== '_rowIndex' && k !== 'Last Editor');
+            const container = document.getElementById('columnPicker');
+            
+            container.innerHTML = headers.map(h => `
+                <label class="checkbox-item">
+                    <input type="checkbox" checked value="${h}"> ${h}
+                </label>
+            `).join('');
         }
 
         const debounce = (fn, ms) => { let t; return (...a) => { clearTimeout(t); t=setTimeout(()=>fn(...a), ms); }};
@@ -463,29 +472,23 @@
         function render() {
             const tb = document.getElementById('tableBody');
             const search = document.getElementById('search').value.toLowerCase();
-            const fDir = document.getElementById('filterDirection').value;
+            const fReg = document.getElementById('filterRegion').value;
+            const fCity = document.getElementById('filterCity').value;
             const fStat = document.getElementById('filterStatus').value;
-            const fSat = document.getElementById('filterSat').value;
             const cv = document.getElementById('cardView');
             
             tb.innerHTML = '';
             cv.innerHTML = '';
 
-            db.sort((a, b) => {
-                const sA = a.Status || "Pending";
-                const sB = b.Status || "Pending";
-                const pA = priorityMap[sA] || 5;
-                const pB = priorityMap[sB] || 5;
-                return pA - pB;
-            });
+            db.sort((a, b) => (priorityMap[a.Status||"Pending"]||5) - (priorityMap[b.Status||"Pending"]||5));
 
             const flt = db.filter(i => {
                 const term = (i["Hospital Name"] + " " + (i.Contact||"") + " " + (i.City||"")).toLowerCase();
                 if (!term.includes(search)) return false;
 
-                if(fDir !== 'All' && i.Direction !== fDir) return false;
+                if(fReg !== 'All' && i.Region !== fReg) return false;
+                if(fCity !== 'All' && i.City !== fCity) return false;
                 if(fStat !== 'All' && (i.Status || 'Pending') !== fStat) return false;
-                if(fSat !== 'All' && (i.Satisfaction || '') !== fSat) return false;
 
                 return true;
             });
@@ -529,9 +532,7 @@
                 </div>
             `}).join('');
             
-            if(!document.getElementById('chartsView').classList.contains('hidden')) {
-                renderCharts(flt);
-            }
+            if(!document.getElementById('chartsView').classList.contains('hidden')) renderCharts(flt);
         }
 
         function getTextColor(s) {
@@ -546,49 +547,48 @@
         }
 
         function renderCharts(data) {
-            const statusCounts = {};
             const satCounts = { 'Satisfied': 0, 'Unsatisfied': 0, 'Neutral': 0 };
-            let surfCount = 0;
-            let accuCount = 0;
+            
+            // Funnel Metrics
+            let total = data.length;
+            let contacted = 0, quotes = 0, success = 0;
 
             data.forEach(i => {
                 const s = i.Status || 'Pending';
-                if (s !== 'Pending' && s !== 'Active Contract') {
-                    statusCounts[s] = (statusCounts[s] || 0) + 1;
-                }
+                
+                // Funnel Logic
+                if (s !== 'Pending') contacted++;
+                if (s === 'Quote Requested') quotes++;
+                if (s === 'Renewed' || s === 'Active Contract') success++;
+
+                // Sat Logic
                 const sat = i.Satisfaction;
                 if(sat === 'Satisfied') satCounts['Satisfied']++;
                 else if(sat === 'Unsatisfied') satCounts['Unsatisfied']++;
                 else if(sat === 'Neutral') satCounts['Neutral']++;
-
-                const d = (i.Device || '').toLowerCase();
-                if(d.includes('surfacide') || d.includes('both')) surfCount++;
-                if(d.includes('accufit') || d.includes('both')) accuCount++;
             });
 
-            if(chartInstances.status) chartInstances.status.destroy();
+            if(chartInstances.funnel) chartInstances.funnel.destroy();
             if(chartInstances.sat) chartInstances.sat.destroy();
-            if(chartInstances.dev) chartInstances.dev.destroy();
 
-            const ctxStatus = document.getElementById('statusChart').getContext('2d');
-            const statusColors = Object.keys(statusCounts).map(k => getTextColor(k));
-            
-            chartInstances.status = new Chart(ctxStatus, {
+            // NEW: Funnel Chart
+            const ctxFunnel = document.getElementById('funnelChart').getContext('2d');
+            chartInstances.funnel = new Chart(ctxFunnel, {
                 type: 'bar',
+                indexAxis: 'y',
                 data: {
-                    labels: Object.keys(statusCounts),
+                    labels: ['Total Hospitals', 'Contacted', 'Quote Sent', 'Contract Active'],
                     datasets: [{
-                        label: 'Hospitals',
-                        data: Object.values(statusCounts),
-                        backgroundColor: statusColors,
+                        label: 'Funnel',
+                        data: [total, contacted, quotes, success],
+                        backgroundColor: ['#e9ecef', '#bfa15f', '#a3884d', '#2d2d2d'],
                         borderRadius: 4
                     }]
                 },
                 options: { 
-                    responsive: true, 
-                    maintainAspectRatio: false,
+                    responsive: true, maintainAspectRatio: false,
                     plugins: { legend: { display: false } },
-                    scales: { y: { beginAtZero: true, grid: { color: '#f1f3f5' } }, x: { grid: { display: false } } }
+                    scales: { x: { grid: { display: false } } }
                 }
             });
 
@@ -603,38 +603,19 @@
                         borderWidth: 0
                     }]
                 },
-                options: { 
-                    responsive: true, 
-                    maintainAspectRatio: false,
-                    plugins: { legend: { position: 'right' } }
-                }
-            });
-
-            const ctxDev = document.getElementById('deviceChart').getContext('2d');
-            chartInstances.dev = new Chart(ctxDev, {
-                type: 'bar',
-                data: {
-                    labels: ['Surfacide', 'AccuFIT'],
-                    datasets: [{
-                        label: 'Installations',
-                        data: [surfCount, accuCount],
-                        backgroundColor: ['#bfa15f', '#2d2d2d'], 
-                        borderRadius: 4,
-                        barThickness: 40
-                    }]
-                },
-                options: { 
-                    responsive: true, 
-                    maintainAspectRatio: false,
-                    plugins: { legend: { display: false } },
-                    scales: { y: { beginAtZero: true, grid: { color: '#f1f3f5' } }, x: { grid: { display: false } } }
-                }
+                options: { responsive: true, maintainAspectRatio: false, plugins: { legend: { position: 'right' } } }
             });
         }
 
         function downloadCSV() {
             if (!db || !db.length) return alert("No data to export");
-            const headers = Object.keys(db[0]).filter(k => k !== '_rowIndex' && k !== 'Last Editor'); 
+            
+            // NEW: Get checked headers
+            const checkboxes = document.querySelectorAll('#columnPicker input:checked');
+            const headers = Array.from(checkboxes).map(cb => cb.value);
+            
+            if(!headers.length) return alert("Please select at least one column.");
+
             const csvRows = [headers.join(',')];
             
             for (const row of db) {
@@ -650,7 +631,7 @@
             const a = document.createElement('a');
             a.setAttribute('hidden', '');
             a.setAttribute('href', url);
-            a.setAttribute('download', 'hospital_db_full.csv');
+            a.setAttribute('download', 'hospital_db_custom.csv');
             document.body.appendChild(a);
             a.click();
             document.body.removeChild(a);
@@ -700,11 +681,8 @@
                 } else {
                     wa.classList.add('hidden'); 
                 }
-                
                 display.innerHTML = mobile; 
-            } else {
-                wa.classList.add('hidden');
-            }
+            } else { wa.classList.add('hidden'); }
 
             const canEdit = currentUser.role === 'Admin' || currentUser.role === 'Editor';
             
@@ -753,37 +731,19 @@
                     method: 'POST', 
                     body: JSON.stringify({
                         action: 'save',
-                        token: currentUser.token, 
-                        userEmail: currentUser.email,
-                        data: updates
+                        token: currentUser.token, userEmail: currentUser.email, data: updates
                     }) 
                 });
                 const res = await r.json();
                 if(res.result === "success") {
                     const localItem = db.find(i => i._rowIndex === currentEditIndex);
-                    if(localItem) {
-                        Object.assign(localItem, updates);
-                    }
-                    
+                    if(localItem) Object.assign(localItem, updates);
                     render();
-                    
                     btn.classList.add('success');
                     btn.innerHTML = '<i class="fa-solid fa-check"></i> Saved';
-                    
-                    setTimeout(() => {
-                        btn.classList.remove('success');
-                        btn.innerText = originalText;
-                    }, 2000);
-
-                } else {
-                    alert("Error: " + res.message);
-                    btn.innerText = originalText;
-                }
-            } catch(e) { 
-                alert("Save failed. Check console."); 
-                console.error(e); 
-                btn.innerText = originalText;
-            }
+                    setTimeout(() => { btn.classList.remove('success'); btn.innerText = originalText; }, 2000);
+                } else { alert("Error: " + res.message); btn.innerText = originalText; }
+            } catch(e) { alert("Save failed. Check console."); console.error(e); btn.innerText = originalText; }
         };
 
         window.closeModal = function() { document.getElementById('editModal').style.display = 'none'; };
@@ -793,9 +753,7 @@
             document.getElementById('cardView').classList.toggle('hidden', v!=='card');
             document.getElementById('chartsView').classList.toggle('hidden', v!=='charts');
             document.getElementById('exportView').classList.toggle('hidden', v!=='export');
-            
             document.querySelectorAll('.view-btn').forEach(b => b.classList.toggle('active', b.dataset.view===v));
-            
             if(v === 'charts') render();
         };
     </script>
