@@ -9,7 +9,7 @@
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
     <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
     <style>
-        /* --- DESIGN: RESTORED v1.5 LAYOUT --- */
+        /* --- CSS VARIABLES (The Theme Engine) --- */
         :root {
             --primary: #2d2d2d; 
             --accent: #A88B4D; 
@@ -17,10 +17,19 @@
             --bg: #f0f2f5; --surface: #ffffff; --text: #2d2d2d; --text-light: #6c757d;
             --border: #e9ecef; 
             --active-contract: #5DADE2;
+            
+            /* Font Sizes (Editable via Admin) */
+            --fs-xs: 10px;
+            --fs-sm: 12px;
+            --fs-base: 14px;
+            --fs-lg: 16px;
+            --fs-xl: 20px;
         }
         
-        /* Typography & Utils */
-        .text-sm { font-size: 12px; } .text-xs { font-size: 10px; } .text-muted { color: #adb5bd; } .text-dark { color: var(--text); }
+        /* Typography */
+        .text-xs { font-size: var(--fs-xs); } .text-sm { font-size: var(--fs-sm); } 
+        .text-base { font-size: var(--fs-base); } .text-lg { font-size: var(--fs-lg); } .text-xl { font-size: var(--fs-xl); }
+        .text-muted { color: #adb5bd; } .text-dark { color: var(--text); }
         .font-bold { font-weight: 700; } .font-semibold { font-weight: 600; }
         .mb-1 { margin-bottom: 4px; } .mb-2 { margin-bottom: 8px; } .mb-4 { margin-bottom: 16px; }
         .mt-1 { margin-top: 4px; } .mt-2 { margin-top: 8px; } .mt-4 { margin-top: 16px; } .mr-2 { margin-right: 8px; }
@@ -39,7 +48,7 @@
         /* Navigation */
         .top-bar { background: var(--surface); padding: 15px 30px; box-shadow: 0 4px 20px rgba(0,0,0,0.05); border-bottom: 3px solid var(--accent); position: sticky; top: 0; z-index: 100; flex-wrap: wrap; gap: 15px; }
         .logo-img { height: 45px; width: auto; } 
-        .page-title { font-size: 20px; font-weight: 700; padding-left: 20px; border-left: 2px solid #eee; margin-left: 20px; letter-spacing: -0.5px; white-space: nowrap; }
+        .page-title { font-size: var(--fs-xl); font-weight: 700; padding-left: 20px; border-left: 2px solid #eee; margin-left: 20px; letter-spacing: -0.5px; white-space: nowrap; }
         .vertical-divider { width: 1px; height: 24px; background: #dee2e6; margin: 0 10px; }
 
         .user-badge { background: #f1f3f5; padding: 6px 14px; border-radius: 30px; font-size: 13px; font-weight: 600; display: flex; align-items: center; gap: 10px; border: 1px solid var(--border); cursor: pointer; transition: 0.2s; }
@@ -52,15 +61,16 @@
         .view-btn:hover { color: var(--text); background: #f1f3f5; }
         .view-btn.active { background: #fff8e6; color: var(--accent-dark); border: 1px solid #ffe8cc; font-weight: bold; }
         
-        /* Inputs & Controls */
+        /* Inputs */
         input, select, textarea { padding: 12px 16px; border: 1px solid var(--border); border-radius: 8px; width: 100%; box-sizing: border-box; outline: none; background: #fff; font-family: inherit; transition: 0.2s; }
         input:focus, select:focus, textarea:focus { border-color: var(--accent); box-shadow: 0 0 0 3px rgba(168, 139, 77, 0.1); }
         
+        /* Components */
         .container { max-width: 1400px; margin: 30px auto; padding: 0 20px; flex: 1; width: 100%; box-sizing: border-box; }
         .controls { display: flex; gap: 10px; margin-bottom: 20px; align-items: center; }
         .search-box { flex: 1; }
         .filter-toggle-btn { background: var(--surface); border: 1px solid var(--border); color: var(--text-light); width: 45px; height: 45px; border-radius: 8px; cursor: pointer; display: flex; align-items: center; justify-content: center; font-size: 18px; transition: 0.2s; }
-        .filter-toggle-btn:hover, .filter-toggle-btn.active { background: var(--accent); color: white; border-color: var(--accent); }
+        .filter-toggle-btn.active { background: var(--accent); color: white; border-color: var(--accent); }
         
         .filter-panel { display: none; grid-template-columns: repeat(auto-fit, minmax(180px, 1fr)); gap: 15px; background: var(--surface); padding: 20px; border-radius: 12px; border: 1px solid var(--border); margin-bottom: 25px; box-shadow: 0 4px 15px rgba(0,0,0,0.03); animation: slideDown 0.3s ease-out; }
         .filter-panel.show { display: grid; }
@@ -68,7 +78,7 @@
 
         /* Tables & Cards */
         .data-table { width: 100%; border-collapse: separate; border-spacing: 0; background: var(--surface); border-radius: 12px; overflow: hidden; box-shadow: 0 4px 15px rgba(0,0,0,0.05); border: 1px solid var(--border); }
-        .data-table th { text-align: left; padding: 20px; background: #fafafa; color: #8898aa; font-weight: 700; font-size: 12px; letter-spacing: 0.8px; text-transform: uppercase; border-bottom: 1px solid var(--border); }
+        .data-table th { text-align: left; padding: 20px; background: #fafafa; color: #8898aa; font-weight: 700; font-size: var(--fs-sm); letter-spacing: 0.8px; text-transform: uppercase; border-bottom: 1px solid var(--border); }
         .data-table td { padding: 18px 20px; border-bottom: 1px solid var(--border); vertical-align: middle; }
         .data-table tr:hover td { background-color: #fcfcfc; }
         
@@ -82,6 +92,15 @@
         .card[data-active="true"]::before { background: var(--active-contract) !important; }
         .grid-view { display: grid; grid-template-columns: repeat(auto-fill, minmax(300px, 1fr)); gap: 20px; }
 
+        /* Admin Panel Styles */
+        .admin-section-title { font-size: 16px; font-weight: 700; margin-bottom: 15px; color: var(--primary); display: flex; align-items: center; gap: 10px; }
+        .admin-card { background: #f8f9fa; padding: 20px; border-radius: 12px; border: 1px solid var(--border); height: 100%; box-sizing: border-box; }
+        .range-slider { width: 100%; margin: 10px 0; }
+        .audit-log-item { padding: 10px; border-bottom: 1px solid #eee; font-size: 12px; }
+        .audit-log-item:last-child { border-bottom: none; }
+        .audit-time { color: #aaa; font-size: 10px; }
+        .audit-change span { font-weight: 600; color: var(--primary); }
+
         /* Modal */
         .modal-overlay { position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.5); display: none; justify-content: center; align-items: center; z-index: 1000; backdrop-filter: blur(4px); }
         .modal-card { background: var(--surface); width: 100%; max-width: 650px; padding: 0; border-radius: 16px; box-shadow: 0 20px 50px rgba(0,0,0,0.1); max-height: 90vh; overflow-y: auto; overflow-x: hidden; }
@@ -89,32 +108,32 @@
         .modal-body { padding: 30px; }
 
         .info-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 20px; margin-bottom: 25px; background: #f8f9fa; padding: 20px; border-radius: 12px; border: 1px solid var(--border); }
-        .info-item label { display: block; font-size: 12px; text-transform: uppercase; color: #999; margin-bottom: 4px; letter-spacing: 0.5px; font-weight: 600; }
-        .info-item div { font-weight: 600; font-size: 14px; color: #333; }
+        .info-item label { display: block; font-size: var(--fs-sm); text-transform: uppercase; color: #999; margin-bottom: 4px; letter-spacing: 0.5px; font-weight: 600; }
+        .info-item div { font-weight: 600; font-size: var(--fs-base); color: #333; }
+        
         .input-grid-2 { display: grid; grid-template-columns: 1fr 1fr; gap: 20px; margin-bottom: 20px; }
         .contact-box { background: #fff; border: 1px solid var(--border); padding: 15px; border-radius: 10px; transition: 0.2s; height: 100%; box-sizing: border-box; }
-        
         .secure-input:disabled { background: transparent; border: none; padding: 0; color: #2d2d2d; font-weight: 600; cursor: text; opacity: 1; -webkit-text-fill-color: #2d2d2d; }
-        .wa-btn { background: #25D366; color: white; border: none; border-radius: 50%; width: 36px; height: 36px; display: flex; align-items: center; justify-content: center; cursor: pointer; text-decoration: none; font-size: 18px; margin-left: auto; transition: 0.2s; }
         
         .btn-save { width: 100%; padding: 16px; margin-top: 10px; background: var(--accent); color: white; border: none; border-radius: 10px; cursor: pointer; font-size: 15px; font-weight: 600; letter-spacing: 0.5px; transition: 0.2s; }
         .btn-save:hover { background: var(--accent-dark); transform: translateY(-1px); }
         .btn-save:disabled { background: #e9ecef; color: #adb5bd; cursor: not-allowed; transform: none; }
         .btn-save.success { background: #27ae60; pointer-events: none; }
-
-        .loading-container { text-align: center; padding: 80px 0; color: var(--text-light); }
-        .spinner { width: 40px; height: 40px; border: 3px solid #e9ecef; border-top-color: var(--accent); border-radius: 50%; animation: spin 0.8s linear infinite; margin: 0 auto 20px; }
-        @keyframes spin { to { transform: rotate(360deg); } }
+        
         .tag-pill { font-size: 11px; background: #f1f3f5; padding: 3px 8px; border-radius: 12px; color: #495057; display: inline-block; margin-right: 4px; border: 1px solid #dee2e6; font-weight: 600; margin-bottom: 2px; }
-
         .chart-wrapper { position: relative; height: 300px; width: 100%; }
         .chart-card { background: var(--surface); padding: 30px; border-radius: 16px; border: 1px solid var(--border); flex: 1; box-shadow: 0 4px 12px rgba(0,0,0,0.02); min-width: 300px; }
         
-        label.block { color: #adb5bd; font-size: 11px; text-transform: uppercase; font-weight: 700; margin-bottom: 8px; display: block; letter-spacing: 0.5px; }
+        label.block { color: #adb5bd; font-size: var(--fs-xs); text-transform: uppercase; font-weight: 700; margin-bottom: 8px; display: block; letter-spacing: 0.5px; }
         .footer-credit { text-align: center; font-size: 11px; color: #adb5bd; padding: 20px; margin-top: auto; font-weight: 500; letter-spacing: 0.5px; }
         .dashboard-container { display: none; flex-direction: column; flex: 1; }
         .checkbox-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(180px, 1fr)); gap: 15px; text-align: left; margin: 25px 0; }
         
+        .wa-btn { background: #25D366; color: white; border: none; border-radius: 50%; width: 36px; height: 36px; display: flex; align-items: center; justify-content: center; cursor: pointer; text-decoration: none; font-size: 18px; margin-left: auto; transition: 0.2s; }
+        .loading-container { text-align: center; padding: 80px 0; color: var(--text-light); }
+        .spinner { width: 40px; height: 40px; border: 3px solid #e9ecef; border-top-color: var(--accent); border-radius: 50%; animation: spin 0.8s linear infinite; margin: 0 auto 20px; }
+        @keyframes spin { to { transform: rotate(360deg); } }
+
         @media (max-width: 768px) { 
             .data-table, .vertical-divider { display: none; } 
             .grid-view { display: grid !important; grid-template-columns: 1fr; }
@@ -134,8 +153,15 @@
             <div class="g_id_signin" data-type="standard" data-shape="pill" data-theme="outline" data-size="large" data-logo_alignment="left" style="display:flex; justify-content:center;"></div>
             <div id="loginError" class="login-error"></div>
         </div>
-        <div class="footer-credit" style="position: absolute; bottom: 0; width: 100%;">Rowad Calls Dashboard v1.9 • Developed by Faisal Alzougbi</div>
+        <div class="footer-credit">
+            Rowad Calls Dashboard v2.0 • Developed by Faisal Alzougbi
+            <span style="display:block; margin-top:5px; font-style:italic; opacity:0.7;">
+                Disclaimer: This dashboard is an independently developed tool for internal workflow optimization. It is not an official asset of, nor maintained by, Rowad Medical Services.
+            </span>
+        </div>
     </div>
+
+    <div id="announcementBanner" style="background:#fff3cd; color:#856404; padding:10px; text-align:center; font-size:13px; font-weight:600; display:none; border-bottom:1px solid #ffeeba;"></div>
 
     <div id="mainDashboard" class="dashboard-container">
         <div class="top-bar flex items-center justify-between no-print">
@@ -155,6 +181,7 @@
                     <button class="view-btn" data-view="card"><i class="fa-solid fa-th-large"></i></button>
                     <button class="view-btn" data-view="charts"><i class="fa-solid fa-chart-pie"></i></button>
                     <button class="view-btn" data-view="export"><i class="fa-solid fa-file-export"></i></button>
+                    <button class="view-btn hidden" id="adminBtn" data-view="admin"><i class="fa-solid fa-cog"></i></button>
                 </div>
             </div>
         </div>
@@ -168,7 +195,6 @@
             </div>
 
             <div id="filterPanel" class="filter-panel no-print"></div>
-
             <div id="loading" class="loading-container"><div class="spinner"></div><span>Loading Database...</span></div>
 
             <table class="data-table hidden" id="tableView">
@@ -186,7 +212,7 @@
                     <div class="chart-card"><h3 class="text-dark font-semibold mt-1">Sales Funnel</h3><div class="chart-wrapper"><canvas id="funnelChart"></canvas></div></div>
                     <div class="chart-card"><h3 class="text-dark font-semibold mt-1">Call Outcomes</h3><div class="chart-wrapper"><canvas id="statusChart"></canvas></div></div>
                 </div>
-                <h3 class="text-dark font-bold mb-4" style="font-size: 18px; margin-top: 30px;">Team Performance (History Based)</h3>
+                <h3 class="text-dark font-bold mb-4" style="font-size: 18px; margin-top: 30px;">Team Performance</h3>
                 <div class="input-grid-2">
                      <div class="chart-card"><h3 class="text-dark font-semibold mt-1">Total Activities (Calls/Edits)</h3><div class="chart-wrapper"><canvas id="activityChart"></canvas></div></div>
                      <div class="chart-card"><h3 class="text-dark font-semibold mt-1">Quotations Generated</h3><div class="chart-wrapper"><canvas id="quoteChart"></canvas></div></div>
@@ -207,10 +233,42 @@
                     </div>
                 </div>
             </div>
+
+            <div id="adminView" class="hidden" style="padding-top: 20px;">
+                <div class="input-grid-2">
+                    <div class="admin-card">
+                        <div class="admin-section-title"><i class="fa-solid fa-globe"></i> Global Config (Affects Everyone)</div>
+                        <label class="block">Announcement Banner</label>
+                        <input type="text" id="adminBanner" placeholder="e.g. System Maintenance at 10 PM" class="mb-4">
+                        
+                        <label class="block">Monthly Call Target</label>
+                        <input type="number" id="adminTarget" placeholder="500" class="mb-4">
+                        
+                        <button class="btn-save" onclick="saveGlobalSettings()">Save to Database</button>
+                    </div>
+                    
+                    <div class="admin-card">
+                        <div class="admin-section-title"><i class="fa-solid fa-palette"></i> Theme Studio (Session Only)</div>
+                        <label class="block">Accent Color</label>
+                        <input type="color" id="adminColor" value="#A88B4D" class="mb-4" onchange="previewTheme()">
+                        
+                        <label class="block">Font Size (Base)</label>
+                        <input type="range" id="adminFs" min="12" max="18" value="14" class="range-slider" oninput="previewTheme()">
+                        
+                        <button class="btn-action" onclick="location.reload()" style="width:100%; margin-top:10px;">Reset Theme</button>
+                    </div>
+                </div>
+                
+                <div class="admin-card" style="height: auto; margin-top: 20px;">
+                    <div class="admin-section-title"><i class="fa-solid fa-history"></i> Audit Logs</div>
+                    <div style="max-height: 400px; overflow-y: auto;" id="auditLogContainer">
+                        </div>
+                </div>
+            </div>
         </div>
 
         <div class="footer-credit">
-            Rowad Calls Dashboard v1.9 • Developed by Faisal Alzougbi
+            Rowad Calls Dashboard v2.0 • Developed by Faisal Alzougbi
             <span style="display:block; margin-top:5px; font-style:italic; opacity:0.7;">
                 Disclaimer: This dashboard is an independently developed tool for internal workflow optimization. It is not an official asset of, nor maintained by, Rowad Medical Services.
             </span>
@@ -247,6 +305,7 @@
                             <button id="editPhoneBtn" onclick="promptPhoneUpdate()" class="hidden" style="margin-top:8px; color:var(--accent); border:none; background:none; cursor:pointer; font-size:12px; font-weight:600; padding:0;">Change Number</button>
                         </div>
                     </div>
+                    
                     <div style="display: flex; flex-direction: column; gap: 15px;">
                         <div>
                             <label class="block">Status</label>
@@ -265,7 +324,14 @@
                         <div><label class="block">Tags</label><input type="text" id="editTags" class="secure-input" disabled placeholder="VIP, New..."></div>
                     </div>
                 </div>
+
                 <div class="mb-4"><label class="block">Notes</label><textarea id="editNotes" class="secure-input" disabled style="resize:vertical; min-height:80px; line-height:1.5;" placeholder="Add notes..."></textarea></div>
+                
+                <div id="adminOverride" class="hidden mb-4" style="background:#fff3cd; padding:10px; border-radius:8px;">
+                    <label class="block" style="color:#856404">Admin Override: Last Editor</label>
+                    <input type="text" id="editLastEditor" style="background:transparent; border:none; font-weight:bold; width:100%;">
+                </div>
+
                 <button class="btn-save" id="saveBtn" onclick="saveChanges()" disabled>Login to Edit</button>
                 <div id="loginPrompt" class="text-center text-muted text-sm mt-2 hidden"><i class="fa-solid fa-lock mr-2"></i> Only Editors can save changes</div>
             </div>
@@ -276,7 +342,7 @@
         const $ = d => document.getElementById(d);
         const API = "https://script.google.com/macros/s/AKfycbwaush-5NL-MH3OXm7mqXdj4Gy9M9Wlv8qh8Pe7UmlaH5k7jcb4T218DDpHfD4r4B3asA/exec";
         let db=[], historyDB=[], userMap={}, charts={}, currentIdx=-1, timeout;
-        let user = { email: null, role: 'Public', token: null };
+        let user = { email: null, role: 'Public', token: null, id: null };
         const priority = { "Quote Requested":1, "Call Later":2, "No Answer":3, "Pending":4, "Renewed":5, "Satisfied":5, "Active Contract":6 };
         
         const CHART_OPTS = (idx='x') => ({ responsive:true, maintainAspectRatio:false, plugins:{legend:{display:false}}, scales:{[idx]:{grid:{display:false}}} });
@@ -294,51 +360,68 @@
         }
 
         async function checkSession() {
-            try { const s=JSON.parse(localStorage.getItem('rowad_u')); if(s && Date.now()-s.ts < 32400000) { user=s.u; initUser(); fetchData(); return; } } catch(e){}
+            try { 
+                const s=JSON.parse(localStorage.getItem('rowad_u')); 
+                if(s && Date.now()-s.ts < 32400000) { 
+                    user=s.u; 
+                    initUser(); 
+                    $('loginOverlay').style.display='none'; // Instant unlock
+                    $('mainDashboard').style.display='flex';
+                    fetchData(); 
+                    return; 
+                } 
+            } catch(e){}
             $('loginOverlay').style.display = 'flex';
         }
 
         window.handleCredentialResponse = async (res) => {
             user.token = res.credential;
-            const errBox = $('loginError');
-            errBox.style.display = 'none';
-            
             const r = await api('login');
             if(r.result==='success') { 
-                user={email:r.email, role:r.role, token:res.credential}; 
+                // VIP Badge Logic: Save ID immediately
+                user={email:r.email, role:r.role, id:r.id, token:res.credential}; 
                 localStorage.setItem('rowad_u', JSON.stringify({u:user, ts:Date.now()})); 
                 $('loginOverlay').style.display='none'; 
                 initUser(); 
                 fetchData(); 
             } else {
-                errBox.innerText = "Login Failed: " + (r.message || "Unknown Error");
-                errBox.style.display = 'block';
+                $('loginError').innerText = "Login Failed: " + (r.message || "Unknown");
+                $('loginError').style.display = 'block';
             }
         };
 
         function initUser() { 
-            $('userNameDisplay').innerText = user.email.split('@')[0]; 
+            // Instant Display of Name Tag
+            $('userNameDisplay').innerText = user.id || user.email.split('@')[0]; 
             $('roleLabel').innerText = user.role; 
             $('mainDashboard').style.display='flex'; 
-            $('roleLabel').className=`role-tag ${user.role==='Rowad'?'role-rowad':['Admin','Editor'].includes(user.role)?'role-admin':''}`; 
+            $('roleLabel').className=`role-tag ${user.role==='Rowad'?'role-rowad':['Admin','Editor'].includes(user.role)?'role-admin':''}`;
+            
+            // Show Admin Button if authorized
+            if(user.role === 'Admin') $('adminBtn').classList.remove('hidden');
         }
 
         function logout() { localStorage.removeItem('rowad_u'); location.reload(); }
 
         async function fetchData() {
             const r = await api('fetch_data');
+            if(r.result==='error') { $('loading').innerHTML = '<div style="color:#d35400">Failed to load. <button onclick="location.reload()">Retry</button></div>'; return; }
             
-            // v1.9 FIX: Don't logout on error, show feedback
-            if(r.result==='error') { 
-                $('loading').innerHTML = '<div style="color:#d35400; font-weight:bold">Failed to load data.</div><button onclick="location.reload()" class="btn-action" style="margin-top:10px">Retry</button>'; 
-                return; 
+            db = r.data; 
+            historyDB = r.history || []; 
+            (r.permissions||[]).forEach(p => userMap[p.Email] = p.ID);
+            
+            // Apply Global Settings
+            if(r.settings) {
+                if(r.settings.Announcement) {
+                    $('announcementBanner').innerText = r.settings.Announcement;
+                    $('announcementBanner').style.display = 'block';
+                    $('adminBanner').value = r.settings.Announcement;
+                }
+                if(r.settings.Target) $('adminTarget').value = r.settings.Target;
             }
-            
-            db = r.data; historyDB = r.history || []; (r.permissions||[]).forEach(p => userMap[p.Email] = p.ID);
-            
-            // v1.9 FIX: Update Badge with ID now that we have the map
-            if(userMap[user.email]) $('userNameDisplay').innerText = userMap[user.email];
 
+            // Populate Filters
             const mkSel = (id, lbl, opts) => `<div class="filter-box" style="margin-bottom:0"><select id="${id}" onchange="${id==='filterRegion'?'handleRegion()':'debouncedRender()'}"><option value="All">All ${lbl}</option>${opts.map(o=>`<option>${o}</option>`).join('')}</select></div>`;
             const dataOpts = k => [...new Set(db.map(r=>r[k]).filter(Boolean))].sort();
             
@@ -347,8 +430,36 @@
                 mkSel('filterSat','Satisfaction',['Satisfied','Unsatisfied','Neutral']);
 
             $('columnPicker').innerHTML = Object.keys(db[0]).filter(k=>!k.startsWith('_')).map(k=>`<label class="checkbox-item"><input type="checkbox" checked value="${k}"> ${k}</label>`).join('');
+            
+            // Build Audit Log
+            renderHistory();
+
             $('loading').style.display = 'none'; $('tableView').classList.remove('hidden'); render();
         }
+
+        function renderHistory() {
+            const el = $('auditLogContainer');
+            // Sort by latest
+            const logs = historyDB.slice().reverse(); 
+            el.innerHTML = logs.map(l => {
+                const time = new Date(l.Timestamp).toLocaleString();
+                const uName = userMap[l.User] || l.User.split('@')[0];
+                return `<div class="audit-log-item"><div class="audit-time">${time} • ${uName}</div><div class="audit-change">Updated <span>${l['Hospital Name']}</span>: Changed ${l['Field Changed']} from "${l['Old Value']}" to "<span>${l['New Value']}</span>"</div></div>`;
+            }).join('');
+        }
+
+        window.previewTheme = () => {
+            const r = document.documentElement.style;
+            r.setProperty('--accent', $('adminColor').value);
+            r.setProperty('--fs-base', $('adminFs').value + 'px');
+            r.setProperty('--fs-sm', ($('adminFs').value - 2) + 'px');
+        };
+
+        window.saveGlobalSettings = async () => {
+            const s = { 'Announcement': $('adminBanner').value, 'Target': $('adminTarget').value };
+            await api('save_settings', { userEmail: user.email, settings: s });
+            alert("Settings Saved!");
+        };
 
         window.debouncedRender = () => { clearTimeout(timeout); timeout=setTimeout(render, 300); };
         window.handleRegion = () => {
@@ -421,24 +532,54 @@
             $('dispAccuSN').innerText=r["AccuFIT SN"]||'-'; $('dispSurfUser').innerText=r["Surfacide Username"]||'-';
             $('editContactName').value=r.Contact||''; $('editContactMobile').value=r['Contact Mobile Number']||'';
             $('editStatus').value=r.Status||''; $('editSat').value=r.Satisfaction||''; $('editTags').value=r.Tags||''; $('editNotes').value=r.Notes||'';
+            $('editLastEditor').value = r["Last Editor"] || ""; // Override Input
+            
             const m = r['Contact Mobile Number'], hasM = m && m.length > 5;
             $('displayPhone').innerText = m || "No Number"; $('waLink').href = hasM ? `https://wa.me/966${m.match(/\d+/)?.[0].slice(-9)}` : '#'; $('waLink').classList.toggle('hidden', !hasM);
+            
             const can = ['Admin','Editor'].includes(user.role);
+            const isAdmin = user.role === 'Admin';
+            
             document.querySelectorAll('.secure-input').forEach(e => e.disabled = !can);
-            $('saveBtn').disabled = !can; $('saveBtn').innerText = can ? "Save Updates" : "Login to Edit"; $('editPhoneBtn').classList.toggle('hidden', !can); $('loginPrompt').classList.toggle('hidden', can);
+            $('saveBtn').disabled = !can; $('saveBtn').innerText = can ? "Save Updates" : "Login to Edit"; 
+            $('editPhoneBtn').classList.toggle('hidden', !can); 
+            $('loginPrompt').classList.toggle('hidden', can);
+            $('adminOverride').classList.toggle('hidden', !isAdmin); // Only show override to Admin
+            
             $('editModal').style.display = 'flex';
         };
 
         window.promptPhoneUpdate = () => { const n = prompt("New Number:", $('editContactMobile').value); if(n) { $('editContactMobile').value=n; $('displayPhone').innerText=n; } };
         window.closeModal = () => $('editModal').style.display = 'none';
-        window.switchView = (v) => { ['table','card','charts','export'].forEach(k => $(k+'View').classList.toggle('hidden', v!==k)); document.querySelectorAll('.view-btn').forEach(b => b.classList.toggle('active', b.dataset.view===v)); if(v==='charts') render(); };
+        
+        window.switchView = (v) => {
+            ['table','card','charts','export','admin'].forEach(k => $(k+'View').classList.toggle('hidden', v!==k));
+            document.querySelectorAll('.view-btn').forEach(b => b.classList.toggle('active', b.dataset.view===v));
+            if(v==='charts') render();
+        };
+
         window.saveChanges = async () => {
             const btn = $('saveBtn'); btn.innerText = "Saving...";
-            const data = { _rowIndex: currentIdx, "Last Editor": `${user.email} on ${new Date().toLocaleDateString('en-GB')}`, "Contact": $('editContactName').value, "Contact Mobile Number": $('editContactMobile').value, "Status": $('editStatus').value, "Satisfaction": $('editSat').value, "Tags": $('editTags').value, "Notes": $('editNotes').value };
+            
+            // Allow Admin to overwrite "Last Editor"
+            let editorStr = `${user.email} on ${new Date().toLocaleDateString('en-GB')}`;
+            if(user.role === 'Admin' && $('editLastEditor').value) editorStr = $('editLastEditor').value;
+
+            const data = { 
+                _rowIndex: currentIdx, 
+                "Last Editor": editorStr, 
+                "Contact": $('editContactName').value, 
+                "Contact Mobile Number": $('editContactMobile').value, 
+                "Status": $('editStatus').value, 
+                "Satisfaction": $('editSat').value, 
+                "Tags": $('editTags').value, 
+                "Notes": $('editNotes').value 
+            };
             const res = await api('save', { userEmail: user.email, data });
             if(res.result === 'success') { Object.assign(db.find(r => r._rowIndex === currentIdx), data); render(); btn.classList.add('success'); btn.innerHTML = '<i class="fa-solid fa-check"></i> Saved'; setTimeout(() => { $('editModal').style.display = 'none'; }, 1000); } 
             else { alert("Error"); btn.innerText = "Save Updates"; }
         };
+
         window.downloadCSV = () => {
             const cols = [...document.querySelectorAll('#columnPicker input:checked')].map(c=>c.value);
             const csv = [cols.join(',')].concat(db.map(r => cols.map(c => `"${(r[c]||'').toString().replace(/"/g, '""')}"`).join(','))).join('\n');
