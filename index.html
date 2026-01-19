@@ -9,7 +9,7 @@
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
     <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
     <style>
-        /* --- RESTORED v1.5 CSS --- */
+        /* --- DESIGN: RESTORED v1.5 LAYOUT --- */
         :root {
             --primary: #2d2d2d; 
             --accent: #A88B4D; 
@@ -19,6 +19,7 @@
             --active-contract: #5DADE2;
         }
         
+        /* Typography & Utils */
         .text-sm { font-size: 12px; } .text-xs { font-size: 10px; } .text-muted { color: #adb5bd; } .text-dark { color: var(--text); }
         .font-bold { font-weight: 700; } .font-semibold { font-weight: 600; }
         .mb-1 { margin-bottom: 4px; } .mb-2 { margin-bottom: 8px; } .mb-4 { margin-bottom: 16px; }
@@ -30,9 +31,12 @@
         .gap-2 { gap: 8px; } .gap-4 { gap: 16px; } .hidden { display: none !important; }
         .p-4 { padding: 16px; } .rounded { border-radius: 8px; } .text-center { text-align: center; }
 
+        /* Login */
         #loginOverlay { position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: var(--bg); z-index: 2000; display: flex; justify-content: center; align-items: center; flex-direction: column; }
         .login-card { background: white; padding: 40px; border-radius: 20px; box-shadow: 0 10px 40px rgba(0,0,0,0.05); text-align: center; width: 300px; border-top: 4px solid var(--accent); display: flex; flex-direction: column; align-items: center; margin-bottom: 20px; }
+        .login-error { color: #d35400; background: #fdf2e9; padding: 10px; border-radius: 8px; font-size: 12px; margin-top: 15px; width: 100%; display: none; border: 1px solid #fadbd8; }
 
+        /* Navigation */
         .top-bar { background: var(--surface); padding: 15px 30px; box-shadow: 0 4px 20px rgba(0,0,0,0.05); border-bottom: 3px solid var(--accent); position: sticky; top: 0; z-index: 100; flex-wrap: wrap; gap: 15px; }
         .logo-img { height: 45px; width: auto; } 
         .page-title { font-size: 20px; font-weight: 700; padding-left: 20px; border-left: 2px solid #eee; margin-left: 20px; letter-spacing: -0.5px; white-space: nowrap; }
@@ -48,6 +52,7 @@
         .view-btn:hover { color: var(--text); background: #f1f3f5; }
         .view-btn.active { background: #fff8e6; color: var(--accent-dark); border: 1px solid #ffe8cc; font-weight: bold; }
         
+        /* Inputs & Controls */
         input, select, textarea { padding: 12px 16px; border: 1px solid var(--border); border-radius: 8px; width: 100%; box-sizing: border-box; outline: none; background: #fff; font-family: inherit; transition: 0.2s; }
         input:focus, select:focus, textarea:focus { border-color: var(--accent); box-shadow: 0 0 0 3px rgba(168, 139, 77, 0.1); }
         
@@ -61,15 +66,23 @@
         .filter-panel.show { display: grid; }
         @keyframes slideDown { from { opacity: 0; transform: translateY(-10px); } to { opacity: 1; transform: translateY(0); } }
 
+        /* Tables & Cards */
         .data-table { width: 100%; border-collapse: separate; border-spacing: 0; background: var(--surface); border-radius: 12px; overflow: hidden; box-shadow: 0 4px 15px rgba(0,0,0,0.05); border: 1px solid var(--border); }
         .data-table th { text-align: left; padding: 20px; background: #fafafa; color: #8898aa; font-weight: 700; font-size: 12px; letter-spacing: 0.8px; text-transform: uppercase; border-bottom: 1px solid var(--border); }
         .data-table td { padding: 18px 20px; border-bottom: 1px solid var(--border); vertical-align: middle; }
-        .data-table tr:last-child td { border-bottom: none; }
         .data-table tr:hover td { background-color: #fcfcfc; }
         
         .btn-action { background: #f8f9fa; color: var(--text-light); border: 1px solid var(--border); padding: 8px 12px; border-radius: 6px; cursor: pointer; transition: 0.2s; }
         .btn-action:hover { background: var(--accent); color: white; border-color: var(--accent); }
-        
+
+        .card { background: var(--surface); padding: 25px; border-radius: 12px; border: 1px solid transparent; box-shadow: 0 4px 15px rgba(0,0,0,0.03); transition: all 0.2s; cursor: pointer; position: relative; overflow: hidden; }
+        .card:hover { transform: translateY(-3px); box-shadow: 0 12px 30px rgba(0,0,0,0.08); border-color: transparent; }
+        .card::before { content: ''; position: absolute; left: 0; top: 0; bottom: 0; width: 4px; background: #e9ecef; transition: 0.2s; }
+        .card.interacted::before { background: var(--accent); } 
+        .card[data-active="true"]::before { background: var(--active-contract) !important; }
+        .grid-view { display: grid; grid-template-columns: repeat(auto-fill, minmax(300px, 1fr)); gap: 20px; }
+
+        /* Modal */
         .modal-overlay { position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.5); display: none; justify-content: center; align-items: center; z-index: 1000; backdrop-filter: blur(4px); }
         .modal-card { background: var(--surface); width: 100%; max-width: 650px; padding: 0; border-radius: 16px; box-shadow: 0 20px 50px rgba(0,0,0,0.1); max-height: 90vh; overflow-y: auto; overflow-x: hidden; }
         .modal-header { padding: 20px 30px; border-bottom: 1px solid var(--border); display: flex; justify-content: space-between; align-items: center; background: #fcfcfc; }
@@ -78,32 +91,21 @@
         .info-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 20px; margin-bottom: 25px; background: #f8f9fa; padding: 20px; border-radius: 12px; border: 1px solid var(--border); }
         .info-item label { display: block; font-size: 12px; text-transform: uppercase; color: #999; margin-bottom: 4px; letter-spacing: 0.5px; font-weight: 600; }
         .info-item div { font-weight: 600; font-size: 14px; color: #333; }
-        
         .input-grid-2 { display: grid; grid-template-columns: 1fr 1fr; gap: 20px; margin-bottom: 20px; }
-        .secure-input:disabled { background: transparent; border: none; padding: 0; color: #2d2d2d; font-weight: 600; cursor: text; opacity: 1; -webkit-text-fill-color: #2d2d2d; }
-        
         .contact-box { background: #fff; border: 1px solid var(--border); padding: 15px; border-radius: 10px; transition: 0.2s; height: 100%; box-sizing: border-box; }
-        .contact-box:focus-within { border-color: var(--accent); box-shadow: 0 4px 12px rgba(0,0,0,0.03); }
-
+        
+        .secure-input:disabled { background: transparent; border: none; padding: 0; color: #2d2d2d; font-weight: 600; cursor: text; opacity: 1; -webkit-text-fill-color: #2d2d2d; }
         .wa-btn { background: #25D366; color: white; border: none; border-radius: 50%; width: 36px; height: 36px; display: flex; align-items: center; justify-content: center; cursor: pointer; text-decoration: none; font-size: 18px; margin-left: auto; transition: 0.2s; }
-        .wa-btn:hover { transform: scale(1.1); box-shadow: 0 4px 10px rgba(37, 211, 102, 0.3); }
         
         .btn-save { width: 100%; padding: 16px; margin-top: 10px; background: var(--accent); color: white; border: none; border-radius: 10px; cursor: pointer; font-size: 15px; font-weight: 600; letter-spacing: 0.5px; transition: 0.2s; }
-        .btn-save:hover { background: var(--accent-dark); transform: translateY(-1px); box-shadow: 0 4px 12px rgba(168, 139, 77, 0.3); }
-        .btn-save:disabled { background: #e9ecef; color: #adb5bd; cursor: not-allowed; box-shadow: none; transform: none; }
+        .btn-save:hover { background: var(--accent-dark); transform: translateY(-1px); }
+        .btn-save:disabled { background: #e9ecef; color: #adb5bd; cursor: not-allowed; transform: none; }
         .btn-save.success { background: #27ae60; pointer-events: none; }
 
         .loading-container { text-align: center; padding: 80px 0; color: var(--text-light); }
         .spinner { width: 40px; height: 40px; border: 3px solid #e9ecef; border-top-color: var(--accent); border-radius: 50%; animation: spin 0.8s linear infinite; margin: 0 auto 20px; }
         @keyframes spin { to { transform: rotate(360deg); } }
         .tag-pill { font-size: 11px; background: #f1f3f5; padding: 3px 8px; border-radius: 12px; color: #495057; display: inline-block; margin-right: 4px; border: 1px solid #dee2e6; font-weight: 600; margin-bottom: 2px; }
-
-        .grid-view { display: grid; grid-template-columns: repeat(auto-fill, minmax(300px, 1fr)); gap: 20px; }
-        .card { background: var(--surface); padding: 25px; border-radius: 12px; border: 1px solid transparent; box-shadow: 0 4px 15px rgba(0,0,0,0.03); transition: all 0.2s; cursor: pointer; position: relative; overflow: hidden; }
-        .card:hover { transform: translateY(-3px); box-shadow: 0 12px 30px rgba(0,0,0,0.08); border-color: transparent; }
-        .card::before { content: ''; position: absolute; left: 0; top: 0; bottom: 0; width: 4px; background: #e9ecef; transition: 0.2s; }
-        .card.interacted::before { background: var(--accent); } 
-        .card[data-active="true"]::before { background: var(--active-contract) !important; }
 
         .chart-wrapper { position: relative; height: 300px; width: 100%; }
         .chart-card { background: var(--surface); padding: 30px; border-radius: 16px; border: 1px solid var(--border); flex: 1; box-shadow: 0 4px 12px rgba(0,0,0,0.02); min-width: 300px; }
@@ -114,20 +116,12 @@
         .checkbox-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(180px, 1fr)); gap: 15px; text-align: left; margin: 25px 0; }
         
         @media (max-width: 768px) { 
-            .data-table { display: none; } 
+            .data-table, .vertical-divider { display: none; } 
             .grid-view { display: grid !important; grid-template-columns: 1fr; }
-            .top-bar { justify-content: center; padding: 15px 20px; position: relative; } 
-            .top-bar > div { width: 100%; justify-content: center; flex-direction: column; align-items: center; gap: 10px; }
-            .page-title { border: none; margin: 0; padding: 0; font-size: 18px; }
-            .vertical-divider { display: none; }
-            .modal-card { width: 95%; margin: 10px; max-height: 85vh; }
-            .chart-card { min-width: 100% !important; }
-            .input-grid-2 { grid-template-columns: 1fr; }
+            .top-bar { justify-content: center; } .top-bar > div { width: 100%; justify-content: center; }
+            .modal-card { width: 95%; margin: 10px; } .input-grid-2 { grid-template-columns: 1fr; }
         }
-        @media print {
-            .no-print, .top-bar, .controls { display: none !important; }
-            .data-table { display: table !important; }
-        }
+        @media print { .no-print, .top-bar, .controls { display: none !important; } .data-table { display: table !important; } }
     </style>
 </head>
 <body>
@@ -138,8 +132,9 @@
             <p class="text-muted mb-4" style="font-size: 13px;">Internal Services Dashboard</p>
             <div id="g_id_onload" data-client_id="174253379694-95msalgnm4kbpjlftil4vm8o26c7h7cc.apps.googleusercontent.com" data-callback="handleCredentialResponse" data-auto_prompt="false"></div>
             <div class="g_id_signin" data-type="standard" data-shape="pill" data-theme="outline" data-size="large" data-logo_alignment="left" style="display:flex; justify-content:center;"></div>
+            <div id="loginError" class="login-error"></div>
         </div>
-        <div class="footer-credit" style="position: absolute; bottom: 0; width: 100%;">Rowad Calls Dashboard v1.8 • Developed by Faisal Alzougbi</div>
+        <div class="footer-credit" style="position: absolute; bottom: 0; width: 100%;">Rowad Calls Dashboard v1.9 • Developed by Faisal Alzougbi</div>
     </div>
 
     <div id="mainDashboard" class="dashboard-container">
@@ -172,8 +167,7 @@
                 <button class="filter-toggle-btn" onclick="toggleFilters()"><i class="fa-solid fa-filter"></i></button>
             </div>
 
-            <div id="filterPanel" class="filter-panel no-print">
-                </div>
+            <div id="filterPanel" class="filter-panel no-print"></div>
 
             <div id="loading" class="loading-container"><div class="spinner"></div><span>Loading Database...</span></div>
 
@@ -215,7 +209,7 @@
             </div>
         </div>
 
-        <div class="footer-credit">Rowad Calls Dashboard v1.8 • Developed by Faisal Alzougbi</div>
+        <div class="footer-credit">Rowad Calls Dashboard v1.9 • Developed by Faisal Alzougbi</div>
     </div>
 
     <div class="modal-overlay" id="editModal">
@@ -248,7 +242,6 @@
                             <button id="editPhoneBtn" onclick="promptPhoneUpdate()" class="hidden" style="margin-top:8px; color:var(--accent); border:none; background:none; cursor:pointer; font-size:12px; font-weight:600; padding:0;">Change Number</button>
                         </div>
                     </div>
-                    
                     <div style="display: flex; flex-direction: column; gap: 15px;">
                         <div>
                             <label class="block">Status</label>
@@ -267,7 +260,6 @@
                         <div><label class="block">Tags</label><input type="text" id="editTags" class="secure-input" disabled placeholder="VIP, New..."></div>
                     </div>
                 </div>
-
                 <div class="mb-4"><label class="block">Notes</label><textarea id="editNotes" class="secure-input" disabled style="resize:vertical; min-height:80px; line-height:1.5;" placeholder="Add notes..."></textarea></div>
                 <button class="btn-save" id="saveBtn" onclick="saveChanges()" disabled>Login to Edit</button>
                 <div id="loginPrompt" class="text-center text-muted text-sm mt-2 hidden"><i class="fa-solid fa-lock mr-2"></i> Only Editors can save changes</div>
@@ -282,7 +274,6 @@
         let user = { email: null, role: 'Public', token: null };
         const priority = { "Quote Requested":1, "Call Later":2, "No Answer":3, "Pending":4, "Renewed":5, "Satisfied":5, "Active Contract":6 };
         
-        // --- CONFIG & UTILS ---
         const CHART_OPTS = (idx='x') => ({ responsive:true, maintainAspectRatio:false, plugins:{legend:{display:false}}, scales:{[idx]:{grid:{display:false}}} });
         const COL = (s) => (s||'').match(/Renew|Satis/) ? '#27ae60' : (s||'').match(/Quote|Call/) ? '#2980b9' : (s||'').match(/Active/) ? '#5DADE2' : (s||'').match(/No|Not|Un/) ? '#d35400' : '#666';
         const ESC = (t) => (t||'').toString().replace(/&/g, "&amp;").replace(/</g, "&lt;");
@@ -294,7 +285,7 @@
 
         async function api(act, pl={}) {
             try { return await (await fetch(API, { method:'POST', body:JSON.stringify({action:act, token:user.token, ...pl}) })).json(); }
-            catch(e) { return { result:'error' }; }
+            catch(e) { return { result:'error', message: 'Connection Error' }; }
         }
 
         async function checkSession() {
@@ -304,27 +295,45 @@
 
         window.handleCredentialResponse = async (res) => {
             user.token = res.credential;
+            const errBox = $('loginError');
+            errBox.style.display = 'none';
+            
             const r = await api('login');
-            if(r.result==='success') { user={email:r.email,role:r.role,token:res.credential}; localStorage.setItem('rowad_u', JSON.stringify({u:user, ts:Date.now()})); $('loginOverlay').style.display='none'; initUser(); fetchData(); } 
-            else alert(r.message);
+            if(r.result==='success') { 
+                user={email:r.email, role:r.role, token:res.credential}; 
+                localStorage.setItem('rowad_u', JSON.stringify({u:user, ts:Date.now()})); 
+                $('loginOverlay').style.display='none'; 
+                initUser(); 
+                fetchData(); 
+            } else {
+                errBox.innerText = "Login Failed: " + (r.message || "Unknown Error");
+                errBox.style.display = 'block';
+            }
         };
 
-        function initUser() { $('userNameDisplay').innerText = user.email.split('@')[0]; $('roleLabel').innerText = user.role; $('mainDashboard').style.display='flex'; $('roleLabel').className=`role-tag ${user.role==='Rowad'?'role-rowad':['Admin','Editor'].includes(user.role)?'role-admin':''}`; }
+        function initUser() { 
+            $('userNameDisplay').innerText = user.email.split('@')[0]; 
+            $('roleLabel').innerText = user.role; 
+            $('mainDashboard').style.display='flex'; 
+            $('roleLabel').className=`role-tag ${user.role==='Rowad'?'role-rowad':['Admin','Editor'].includes(user.role)?'role-admin':''}`; 
+        }
+
         function logout() { localStorage.removeItem('rowad_u'); location.reload(); }
 
         async function fetchData() {
             const r = await api('fetch_data');
-            if(r.result==='error') return logout();
-            db = r.data; historyDB = r.history || []; (r.permissions||[]).forEach(p => userMap[p.Email] = p.ID);
-    
-            // --- FIX: Refresh Badge now that we have the ID Map ---
-            if(userMap[user.email]) $('userNameDisplay').innerText = userMap[user.email];
-    
-            // Build Filters
-            const mkSel = (id, lbl, opts) => `<div class="filter-box" style="margin-bottom:0"><select id="${id}" onchange="${id==='filterRegion'?'handleRegion()':'debouncedRender()'}"><option value="All">All ${lbl}</option>${opts.map(o=>`<option>${o}</option>`).join('')}</select></div>`;
-            // ... rest of the function remains the same ...
             
-            // Build Filters
+            // v1.9 FIX: Don't logout on error, show feedback
+            if(r.result==='error') { 
+                $('loading').innerHTML = '<div style="color:#d35400; font-weight:bold">Failed to load data.</div><button onclick="location.reload()" class="btn-action" style="margin-top:10px">Retry</button>'; 
+                return; 
+            }
+            
+            db = r.data; historyDB = r.history || []; (r.permissions||[]).forEach(p => userMap[p.Email] = p.ID);
+            
+            // v1.9 FIX: Update Badge with ID now that we have the map
+            if(userMap[user.email]) $('userNameDisplay').innerText = userMap[user.email];
+
             const mkSel = (id, lbl, opts) => `<div class="filter-box" style="margin-bottom:0"><select id="${id}" onchange="${id==='filterRegion'?'handleRegion()':'debouncedRender()'}"><option value="All">All ${lbl}</option>${opts.map(o=>`<option>${o}</option>`).join('')}</select></div>`;
             const dataOpts = k => [...new Set(db.map(r=>r[k]).filter(Boolean))].sort();
             
@@ -348,7 +357,6 @@
             const s = $('search').value.toLowerCase();
             const flt = { Direction:$('filterDirection').value, Region:$('filterRegion').value, City:$('filterCity').value, Status:$('filterStatus').value, Satisfaction:$('filterSat').value };
             db.sort((a,b) => (priority[a.Status]||9) - (priority[b.Status]||9));
-            
             const data = db.filter(r => Object.keys(flt).every(k => flt[k]==='All' || (r[k]||'Pending')===flt[k]) && (r["Hospital Name"]+r.Contact+r.City).toLowerCase().includes(s));
             
             $('tableBody').innerHTML = data.map(r => `
@@ -378,7 +386,6 @@
         function renderCharts(data) {
             const tally = (src, key, cond) => src.reduce((acc, r) => { if(!cond || cond(r)) { const k = userMap[r[key]] || r[key] || 'Unknown'; acc[k] = (acc[k]||0)+1; } return acc; }, {});
             const sort = (o) => Object.entries(o).sort((a,b)=>b[1]-a[1]);
-            
             const dev={Surfacide:0,AccuFIT:0}, funnel={Total:data.length,Contacted:0,Quotes:0,Active:0}, sat={}, stat={};
             data.forEach(r => {
                 const s = r.Status||'Pending', d=(r.Device||'').toLowerCase();
@@ -387,14 +394,12 @@
                 if(r.Satisfaction) sat[r.Satisfaction] = (sat[r.Satisfaction]||0)+1;
                 if(!['Pending','Active Contract'].includes(s)) stat[s] = (stat[s]||0)+1;
             });
-
             const act=tally(historyDB,'User'), quo=tally(historyDB,'User',r=>r["Field Changed"]==='Status'&&r["New Value"]==='Quote Requested');
             const sets = {
                 deviceChart: [Object.keys(dev), Object.values(dev), ['#A88B4D','#2d2d2d']], satChart: [Object.keys(sat), Object.values(sat), ['#27ae60','#d35400','#95a5a6'], 'doughnut'],
                 funnelChart: [Object.keys(funnel), Object.values(funnel), ['#e9ecef','#C4B27D','#A88B4D','#2d2d2d'], 'bar', 'y'], statusChart: [Object.keys(stat), Object.values(stat), '#666'],
                 activityChart: [sort(act).map(x=>x[0]), sort(act).map(x=>x[1]), '#2d2d2d', 'bar', 'y'], quoteChart: [sort(quo).map(x=>x[0]), sort(quo).map(x=>x[1]), '#27ae60', 'bar', 'y']
             };
-
             Object.keys(sets).forEach(id => {
                 const [lbl, val, col, type='bar', idx='x'] = sets[id];
                 if(charts[id]) { charts[id].data.labels=lbl; charts[id].data.datasets[0].data=val; charts[id].update(); }
@@ -409,13 +414,10 @@
             $('modalSubtitle').innerText = `Updated: ${raw.includes('@') ? (userMap[raw.split(' on ')[0]] || raw.split('@')[0]) : raw}`;
             $('dispRegion').innerText=r.Region||'-'; $('dispCity').innerText=r.City||'-'; $('dispDevice').innerText=r.Device||'-'; $('dispSurfSN').innerText=r["Surfacide SN"]||'-';
             $('dispAccuSN').innerText=r["AccuFIT SN"]||'-'; $('dispSurfUser').innerText=r["Surfacide Username"]||'-';
-            
             $('editContactName').value=r.Contact||''; $('editContactMobile').value=r['Contact Mobile Number']||'';
             $('editStatus').value=r.Status||''; $('editSat').value=r.Satisfaction||''; $('editTags').value=r.Tags||''; $('editNotes').value=r.Notes||'';
-            
             const m = r['Contact Mobile Number'], hasM = m && m.length > 5;
             $('displayPhone').innerText = m || "No Number"; $('waLink').href = hasM ? `https://wa.me/966${m.match(/\d+/)?.[0].slice(-9)}` : '#'; $('waLink').classList.toggle('hidden', !hasM);
-            
             const can = ['Admin','Editor'].includes(user.role);
             document.querySelectorAll('.secure-input').forEach(e => e.disabled = !can);
             $('saveBtn').disabled = !can; $('saveBtn').innerText = can ? "Save Updates" : "Login to Edit"; $('editPhoneBtn').classList.toggle('hidden', !can); $('loginPrompt').classList.toggle('hidden', can);
@@ -424,11 +426,7 @@
 
         window.promptPhoneUpdate = () => { const n = prompt("New Number:", $('editContactMobile').value); if(n) { $('editContactMobile').value=n; $('displayPhone').innerText=n; } };
         window.closeModal = () => $('editModal').style.display = 'none';
-        window.switchView = (v) => {
-            ['table','card','charts','export'].forEach(k => $(k+'View').classList.toggle('hidden', v!==k));
-            document.querySelectorAll('.view-btn').forEach(b => b.classList.toggle('active', b.dataset.view===v));
-            if(v==='charts') render();
-        };
+        window.switchView = (v) => { ['table','card','charts','export'].forEach(k => $(k+'View').classList.toggle('hidden', v!==k)); document.querySelectorAll('.view-btn').forEach(b => b.classList.toggle('active', b.dataset.view===v)); if(v==='charts') render(); };
         window.saveChanges = async () => {
             const btn = $('saveBtn'); btn.innerText = "Saving...";
             const data = { _rowIndex: currentIdx, "Last Editor": `${user.email} on ${new Date().toLocaleDateString('en-GB')}`, "Contact": $('editContactName').value, "Contact Mobile Number": $('editContactMobile').value, "Status": $('editStatus').value, "Satisfaction": $('editSat').value, "Tags": $('editTags').value, "Notes": $('editNotes').value };
