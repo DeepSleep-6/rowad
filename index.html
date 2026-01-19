@@ -316,6 +316,13 @@
             const r = await api('fetch_data');
             if(r.result==='error') return logout();
             db = r.data; historyDB = r.history || []; (r.permissions||[]).forEach(p => userMap[p.Email] = p.ID);
+    
+            // --- FIX: Refresh Badge now that we have the ID Map ---
+            if(userMap[user.email]) $('userNameDisplay').innerText = userMap[user.email];
+    
+            // Build Filters
+            const mkSel = (id, lbl, opts) => `<div class="filter-box" style="margin-bottom:0"><select id="${id}" onchange="${id==='filterRegion'?'handleRegion()':'debouncedRender()'}"><option value="All">All ${lbl}</option>${opts.map(o=>`<option>${o}</option>`).join('')}</select></div>`;
+            // ... rest of the function remains the same ...
             
             // Build Filters
             const mkSel = (id, lbl, opts) => `<div class="filter-box" style="margin-bottom:0"><select id="${id}" onchange="${id==='filterRegion'?'handleRegion()':'debouncedRender()'}"><option value="All">All ${lbl}</option>${opts.map(o=>`<option>${o}</option>`).join('')}</select></div>`;
