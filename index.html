@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Rowad Calls Dashboard v1.3</title>
+    <title>Rowad Calls Dashboard v1.5</title>
     <link rel="icon" href="https://alrowad-ksa.com/wp-content/themes/cosgrove/assets/images/favicon.ico">
     <script src="https://accounts.google.com/gsi/client" async defer></script>
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
@@ -11,7 +11,6 @@
     <style>
         :root {
             --primary: #2d2d2d; 
-            /* v1.3 UPDATE: Darkened accent color for better readability/contrast */
             --accent: #A88B4D; 
             --accent-dark: #8c7335;
             --bg: #f0f2f5; --surface: #ffffff; --text: #2d2d2d; --text-light: #6c757d;
@@ -19,7 +18,6 @@
             --active-contract: #5DADE2;
         }
         
-        /* v1.3 UPDATE: Extracted utility classes to remove inline styles */
         .text-sm { font-size: 12px; }
         .text-xs { font-size: 10px; }
         .text-muted { color: #adb5bd; }
@@ -61,7 +59,7 @@
         .view-btn.active { background: #fff8e6; color: var(--accent-dark); border: 1px solid #ffe8cc; font-weight: bold; }
         
         input, select, textarea { padding: 12px 16px; border: 1px solid var(--border); border-radius: 8px; width: 100%; box-sizing: border-box; outline: none; background: #fff; font-family: inherit; transition: 0.2s; }
-        input:focus, select:focus, textarea:focus { border-color: var(--accent); box-shadow: 0 0 0 3px rgba(168, 139, 77, 0.1); } /* Updated focus color */
+        input:focus, select:focus, textarea:focus { border-color: var(--accent); box-shadow: 0 0 0 3px rgba(168, 139, 77, 0.1); }
         
         .container { max-width: 1400px; margin: 30px auto; padding: 0 20px; flex: 1; width: 100%; box-sizing: border-box; }
         
@@ -85,7 +83,6 @@
         
         .modal-overlay { position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.5); display: none; justify-content: center; align-items: center; z-index: 1000; backdrop-filter: blur(4px); }
         
-        /* v1.3 UPDATE: Adjusted modal width and padding for better fit */
         .modal-card { background: var(--surface); width: 100%; max-width: 650px; padding: 0; border-radius: 16px; box-shadow: 0 20px 50px rgba(0,0,0,0.1); max-height: 90vh; overflow-y: auto; overflow-x: hidden; }
         .modal-header { padding: 20px 30px; border-bottom: 1px solid var(--border); display: flex; justify-content: space-between; align-items: center; background: #fcfcfc; }
         .modal-body { padding: 30px; }
@@ -94,7 +91,6 @@
         .info-item label { display: block; font-size: 12px; text-transform: uppercase; color: #999; margin-bottom: 4px; letter-spacing: 0.5px; font-weight: 600; }
         .info-item div { font-weight: 600; font-size: 14px; color: #333; }
         
-        /* v1.3 UPDATE: New Grid Utility for Modal Inputs */
         .input-grid-2 { display: grid; grid-template-columns: 1fr 1fr; gap: 20px; margin-bottom: 20px; }
 
         .secure-input:disabled { background: transparent; border: none; padding: 0; color: #2d2d2d; font-weight: 600; cursor: text; opacity: 1; -webkit-text-fill-color: #2d2d2d; }
@@ -126,7 +122,7 @@
             .vertical-divider { display: none; }
             .modal-card { width: 95%; margin: 10px; max-height: 85vh; }
             .chart-card { min-width: 100% !important; }
-            .input-grid-2 { grid-template-columns: 1fr; } /* Stack inputs on mobile */
+            .input-grid-2 { grid-template-columns: 1fr; } 
         }
 
         @media print {
@@ -164,7 +160,6 @@
         .checkbox-item:hover { border-color: var(--accent); background: #fff; }
         .checkbox-item input { width: auto; margin: 0; }
         
-        /* v1.3 UPDATE: Center helper */
         .text-center { text-align: center; }
         .flex-center { display: flex; justify-content: center; }
     </style>
@@ -184,7 +179,7 @@
             <div class="g_id_signin" data-type="standard" data-shape="pill" data-theme="outline" data-text="signin_with" data-size="large" data-logo_alignment="left" style="display:flex; justify-content:center;"></div>
         </div>
         <div class="footer-credit" style="position: absolute; bottom: 0; width: 100%;">
-            Rowad Calls Dashboard v1.3 • Developed by Faisal Alzougbi
+            Rowad Calls Dashboard v1.5 • Developed by Faisal Alzougbi
             <span class="footer-disclaimer">Disclaimer: This dashboard is an independently developed tool for internal workflow optimization. It is not an official asset of, nor maintained by, Rowad Medical Services.</span>
         </div>
     </div>
@@ -267,7 +262,8 @@
             <div class="grid-view hidden" id="cardView"></div>
 
             <div id="chartsView" class="hidden">
-                <div class="flex gap-4" style="flex-wrap: wrap;">
+                <h3 class="text-dark font-bold mb-4" style="font-size: 18px; margin-top: 0;">Overview</h3>
+                <div class="flex gap-4 mb-4" style="flex-wrap: wrap;">
                     <div class="chart-card">
                         <h3 class="text-dark font-semibold mt-1">Device Ownership</h3>
                         <div class="chart-wrapper"><canvas id="deviceChart"></canvas></div>
@@ -283,6 +279,18 @@
                     <div class="chart-card">
                         <h3 class="text-dark font-semibold mt-1">Call Outcomes</h3>
                         <div class="chart-wrapper"><canvas id="statusChart"></canvas></div>
+                    </div>
+                </div>
+
+                <h3 class="text-dark font-bold mb-4" style="font-size: 18px; margin-top: 30px;">Team Performance (History Based)</h3>
+                <div class="input-grid-2">
+                     <div class="chart-card">
+                        <h3 class="text-dark font-semibold mt-1">Total Activities (Calls/Edits)</h3>
+                        <div class="chart-wrapper"><canvas id="activityChart"></canvas></div>
+                    </div>
+                    <div class="chart-card">
+                        <h3 class="text-dark font-semibold mt-1">Quotations Generated</h3>
+                        <div class="chart-wrapper"><canvas id="quoteChart"></canvas></div>
                     </div>
                 </div>
             </div>
@@ -304,7 +312,7 @@
         </div>
 
         <div class="footer-credit">
-            Rowad Calls Dashboard v1.3 • Developed by Faisal Alzougbi
+            Rowad Calls Dashboard v1.5 • Developed by Faisal Alzougbi
             <span class="footer-disclaimer">Disclaimer: This dashboard is an independently developed tool for internal workflow optimization. It is not an official asset of, nor maintained by, Rowad Medical Services.</span>
         </div>
     </div>
@@ -386,7 +394,8 @@
     <script>
         const SCRIPT_URL = "https://script.google.com/macros/s/AKfycbwaush-5NL-MH3OXm7mqXdj4Gy9M9Wlv8qh8Pe7UmlaH5k7jcb4T218DDpHfD4r4B3asA/exec"; 
         
-        let db = [], currentEditIndex = -1;
+        // v1.5 UPDATE: Added userMap and historyDB to state
+        let db = [], historyDB = [], userMap = {}, currentEditIndex = -1;
         let currentUser = { email: null, token: null, role: 'Public' };
         let chartInstances = {};
         const SESSION_DURATION = 9 * 60 * 60 * 1000; 
@@ -400,6 +409,18 @@
             if (unsafe === null || unsafe === undefined) return '';
             return String(unsafe).replace(/&/g, "&amp;").replace(/</g, "&lt;").replace(/>/g, "&gt;").replace(/"/g, "&quot;").replace(/'/g, "&#039;");
         };
+
+        // v1.5 UPDATE: Resolve ID function to convert emails to names
+        function resolveID(emailStr) {
+            if (!emailStr) return "Unknown";
+            // Clean up if it's "email on date" format
+            let cleanEmail = emailStr;
+            if (emailStr.includes(' on ')) cleanEmail = emailStr.split(' on ')[0];
+            
+            // Lookup in userMap
+            const mappedName = userMap[cleanEmail];
+            return mappedName ? mappedName : cleanEmail; // Fallback to email if no name found
+        }
 
         window.onload = function() {
             checkSession();
@@ -479,6 +500,21 @@
 
                 db = json.data; 
                 
+                // v1.5 UPDATE: Process Permissions and History
+                if (json.permissions) {
+                    json.permissions.forEach(p => {
+                        userMap[p.Email] = p.ID;
+                    });
+                }
+                if (json.history) {
+                    historyDB = json.history;
+                }
+
+                // Update User Badge with Name if possible
+                if (userMap[currentUser.email]) {
+                    document.getElementById('userNameDisplay').innerText = userMap[currentUser.email];
+                }
+
                 populateFilters();
                 renderExportOptions();
 
@@ -586,7 +622,6 @@
                 </tr>
             `).join('');
 
-            // v1.3 UPDATE: Enriched Card Data (Added Device and Region)
             cv.innerHTML = flt.map(i => {
                 const s = (i.Status || 'Pending');
                 const isInteracted = s !== 'Pending' && s !== '';
@@ -594,11 +629,9 @@
                 return `
                 <div class="card ${isInteracted ? 'interacted' : ''}" data-active="${isActive}" onclick="openEdit(${i._rowIndex})">
                     <h3 class="mb-2" style="margin-top:0; font-size:16px;">${escapeHtml(i["Hospital Name"])}</h3>
-                    
                     <div class="text-xs text-muted mb-2 font-bold" style="letter-spacing:0.5px">
                         ${escapeHtml(i.Device || 'No Device')} • ${escapeHtml(i.Region)}
                     </div>
-
                     <p style="font-size:12px; color:#666; margin:0 0 15px 0;">
                         <i class="fa-solid fa-location-dot mr-2" style="color:#adb5bd"></i> ${escapeHtml(i.City)}
                     </p>
@@ -628,7 +661,6 @@
             const statusCounts = {};
             let surfCount = 0;
             let accuCount = 0;
-            
             let total = data.length;
             let contacted = 0, quotes = 0, success = 0;
 
@@ -652,23 +684,35 @@
                 if(d.includes('accufit') || d.includes('both')) accuCount++;
             });
 
-            if(chartInstances.funnel) chartInstances.funnel.destroy();
-            if(chartInstances.sat) chartInstances.sat.destroy();
-            if(chartInstances.dev) chartInstances.dev.destroy();
-            if(chartInstances.stat) chartInstances.stat.destroy();
+            // v1.5 UPDATE: Calculate History Metrics
+            const teamActivity = {};
+            const teamQuotes = {};
 
-            // v1.3 UPDATE: Colors adjusted to match new accent
+            if (historyDB && historyDB.length > 0) {
+                historyDB.forEach(h => {
+                    const user = resolveID(h.User);
+                    // Total Activity Count
+                    teamActivity[user] = (teamActivity[user] || 0) + 1;
+                    
+                    // Quote Count
+                    if (h["Field Changed"] === "Status" && h["New Value"] === "Quote Requested") {
+                        teamQuotes[user] = (teamQuotes[user] || 0) + 1;
+                    }
+                });
+            }
+
+            // Cleanup old charts
+            ['funnel', 'sat', 'dev', 'stat', 'act', 'quo'].forEach(k => {
+                if(chartInstances[k]) chartInstances[k].destroy();
+            });
+
+            // Standard Charts (Device, Sat, Funnel, Status) - No Logic Changes, just rendering
             const ctxDev = document.getElementById('deviceChart').getContext('2d');
             chartInstances.dev = new Chart(ctxDev, {
                 type: 'bar',
                 data: {
                     labels: ['Surfacide', 'AccuFIT'],
-                    datasets: [{
-                        label: 'Installations',
-                        data: [surfCount, accuCount],
-                        backgroundColor: ['#A88B4D', '#2d2d2d'], // Updated Gold
-                        borderRadius: 4, barThickness: 40
-                    }]
+                    datasets: [{ label: 'Installations', data: [surfCount, accuCount], backgroundColor: ['#A88B4D', '#2d2d2d'], borderRadius: 4, barThickness: 40 }]
                 },
                 options: { responsive: true, maintainAspectRatio: false, plugins: { legend: { display: false } } }
             });
@@ -678,11 +722,7 @@
                 type: 'doughnut',
                 data: {
                     labels: Object.keys(satCounts),
-                    datasets: [{
-                        data: Object.values(satCounts),
-                        backgroundColor: ['#27ae60', '#d35400', '#95a5a6'],
-                        borderWidth: 0
-                    }]
+                    datasets: [{ data: Object.values(satCounts), backgroundColor: ['#27ae60', '#d35400', '#95a5a6'], borderWidth: 0 }]
                 },
                 options: { responsive: true, maintainAspectRatio: false, plugins: { legend: { position: 'right' } } }
             });
@@ -693,12 +733,7 @@
                 indexAxis: 'y',
                 data: {
                     labels: ['Total Hospitals', 'Contacted', 'Quote Sent', 'Contract Active'],
-                    datasets: [{
-                        label: 'Funnel',
-                        data: [total, contacted, quotes, success],
-                        backgroundColor: ['#e9ecef', '#C4B27D', '#A88B4D', '#2d2d2d'], // Updated Gradient
-                        borderRadius: 4
-                    }]
+                    datasets: [{ label: 'Funnel', data: [total, contacted, quotes, success], backgroundColor: ['#e9ecef', '#C4B27D', '#A88B4D', '#2d2d2d'], borderRadius: 4 }]
                 },
                 options: { responsive: true, maintainAspectRatio: false, plugins: { legend: { display: false } }, scales: { x: { grid: { display: false } } } }
             });
@@ -708,14 +743,48 @@
                 type: 'bar',
                 data: {
                     labels: Object.keys(statusCounts),
-                    datasets: [{
-                        label: 'Hospitals',
-                        data: Object.values(statusCounts),
-                        backgroundColor: Object.keys(statusCounts).map(k => getTextColor(k)),
-                        borderRadius: 4
-                    }]
+                    datasets: [{ label: 'Hospitals', data: Object.values(statusCounts), backgroundColor: Object.keys(statusCounts).map(k => getTextColor(k)), borderRadius: 4 }]
                 },
                 options: { responsive: true, maintainAspectRatio: false, plugins: { legend: { display: false } } }
+            });
+
+            // v1.5 UPDATE: Render Leaderboard Charts
+            
+            // Helper to sort object by value
+            const sortObj = (obj) => Object.entries(obj).sort(([,a],[,b]) => b-a).reduce((r, [k, v]) => ({ ...r, [k]: v }), {});
+            const sortedActivity = sortObj(teamActivity);
+            const sortedQuotes = sortObj(teamQuotes);
+
+            const ctxAct = document.getElementById('activityChart').getContext('2d');
+            chartInstances.act = new Chart(ctxAct, {
+                type: 'bar',
+                indexAxis: 'y',
+                data: {
+                    labels: Object.keys(sortedActivity),
+                    datasets: [{ 
+                        label: 'Total Actions', 
+                        data: Object.values(sortedActivity), 
+                        backgroundColor: '#2d2d2d', 
+                        borderRadius: 4, barThickness: 20
+                    }]
+                },
+                options: { responsive: true, maintainAspectRatio: false, plugins: { legend: { display: false } }, scales: { x: { grid: { display: false } } } }
+            });
+
+            const ctxQuo = document.getElementById('quoteChart').getContext('2d');
+            chartInstances.quo = new Chart(ctxQuo, {
+                type: 'bar',
+                indexAxis: 'y',
+                data: {
+                    labels: Object.keys(sortedQuotes),
+                    datasets: [{ 
+                        label: 'Quotes Generated', 
+                        data: Object.values(sortedQuotes), 
+                        backgroundColor: '#27ae60', 
+                        borderRadius: 4, barThickness: 20
+                    }]
+                },
+                options: { responsive: true, maintainAspectRatio: false, plugins: { legend: { display: false } }, scales: { x: { grid: { display: false } } } }
             });
         }
 
@@ -753,9 +822,21 @@
             const item = db.find(r => r._rowIndex === rowIndex);
             if (!item) return;
 
-            const lastEditor = item["Last Editor"] || "Unknown";
+            // v1.5 UPDATE: Use resolveID to display human name
+            const rawEditor = item["Last Editor"] || "Unknown";
+            let editorName = rawEditor;
+            let datePart = "";
+            
+            if (rawEditor.includes(' on ')) {
+                const parts = rawEditor.split(' on ');
+                editorName = resolveID(parts[0]);
+                datePart = " on " + parts[1];
+            } else {
+                editorName = resolveID(rawEditor);
+            }
+
             document.getElementById('modalTitle').innerText = item["Hospital Name"];
-            document.getElementById('modalSubtitle').innerText = `Last updated by: ${lastEditor}`;
+            document.getElementById('modalSubtitle').innerText = `Last updated by: ${editorName}${datePart}`;
             
             document.getElementById('dispRegion').innerText = item.Region || '-';
             document.getElementById('dispCity').innerText = item.City || '-';
