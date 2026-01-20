@@ -154,7 +154,7 @@
             <div id="loginError" class="login-error"></div>
         </div>
         <div class="footer-credit">
-            Rowad Calls Dashboard v2.0 • Developed by Faisal Alzougbi
+            Rowad Calls Dashboard v2.1 • Developed by Faisal Alzougbi
             <span style="display:block; margin-top:5px; font-style:italic; opacity:0.7;">
                 Disclaimer: This dashboard is an independently developed tool for internal workflow optimization. It is not an official asset of, nor maintained by, Rowad Medical Services.
             </span>
@@ -311,6 +311,7 @@
                             <label class="block">Status</label>
                             <select id="editStatus" class="secure-input" disabled>
                                 <option value="">-</option><option value="No Answer">No Answer</option><option value="Call Later">Call Later</option>
+                                <option value="Interested">Interested</option>
                                 <option value="Quote Requested">Quote Requested</option><option value="Not Interested">Not Interested</option>
                                 <option value="Renewed">Renewed</option><option value="Active Contract">Active Contract</option>
                             </select>
@@ -343,10 +344,10 @@
         const API = "https://script.google.com/macros/s/AKfycbwaush-5NL-MH3OXm7mqXdj4Gy9M9Wlv8qh8Pe7UmlaH5k7jcb4T218DDpHfD4r4B3asA/exec";
         let db=[], historyDB=[], userMap={}, charts={}, currentIdx=-1, timeout;
         let user = { email: null, role: 'Public', token: null, id: null };
-        const priority = { "Quote Requested":1, "Call Later":2, "No Answer":3, "Pending":4, "Renewed":5, "Satisfied":5, "Active Contract":6 };
+        const priority = { "Quote Requested":1, "Interested":1, "Call Later":2, "No Answer":3, "Pending":4, "Renewed":5, "Satisfied":5, "Active Contract":6 };
         
         const CHART_OPTS = (idx='x') => ({ responsive:true, maintainAspectRatio:false, plugins:{legend:{display:false}}, scales:{[idx]:{grid:{display:false}}} });
-        const COL = (s) => (s||'').match(/Renew|Satis/) ? '#27ae60' : (s||'').match(/Quote|Call/) ? '#2980b9' : (s||'').match(/Active/) ? '#5DADE2' : (s||'').match(/No|Not|Un/) ? '#d35400' : '#666';
+        const COL = (s) => (s||'').match(/Renew|Satis/) ? '#27ae60' : (s||'').match(/Quote|Call|Interest/) ? '#2980b9' : (s||'').match(/Active/) ? '#5DADE2' : (s||'').match(/No|Not|Un/) ? '#d35400' : '#666';
         const ESC = (t) => (t||'').toString().replace(/&/g, "&amp;").replace(/</g, "&lt;");
         
         window.onload = () => {
@@ -362,7 +363,7 @@
         async function checkSession() {
             try { 
                 const s=JSON.parse(localStorage.getItem('rowad_u')); 
-                if(s && Date.now()-s.ts < 32400000) { 
+                if(s && s.u && Date.now()-s.ts < 32400000) { 
                     user=s.u; 
                     initUser(); 
                     $('loginOverlay').style.display='none'; // Instant unlock
@@ -426,7 +427,7 @@
             const dataOpts = k => [...new Set(db.map(r=>r[k]).filter(Boolean))].sort();
             
             $('filterPanel').innerHTML = mkSel('filterDirection','Directions',dataOpts('Direction')) + mkSel('filterRegion','Regions',dataOpts('Region')) + mkSel('filterCity','Cities',dataOpts('City')) +
-                mkSel('filterStatus','Statuses',['Pending','Quote Requested','Call Later','No Answer','Renewed','Active Contract','Not Interested']) +
+                mkSel('filterStatus','Statuses',['Pending','Interested','Quote Requested','Call Later','No Answer','Renewed','Active Contract','Not Interested']) +
                 mkSel('filterSat','Satisfaction',['Satisfied','Unsatisfied','Neutral']);
 
             $('columnPicker').innerHTML = Object.keys(db[0]).filter(k=>!k.startsWith('_')).map(k=>`<label class="checkbox-item"><input type="checkbox" checked value="${k}"> ${k}</label>`).join('');
@@ -525,6 +526,9 @@
 
         window.openModal = (idx) => {
             currentIdx = idx; const r = db.find(i => i._rowIndex === idx); if(!r) return;
+            // FIX: Reset Button State on Open
+            $('saveBtn').classList.remove('success');
+            
             const raw = r["Last Editor"] || "Unknown";
             $('modalTitle').innerText = r["Hospital Name"];
             $('modalSubtitle').innerText = `Updated: ${raw.includes('@') ? (userMap[raw.split(' on ')[0]] || raw.split('@')[0]) : raw}`;
