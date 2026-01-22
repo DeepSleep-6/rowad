@@ -38,6 +38,10 @@
             --fs-base: 14px;
             --fs-lg: 16px;
             --fs-xl: 20px;
+            
+            /* Spacing (Dynamic for Compact Mode) */
+            --sp-card: 25px;
+            --sp-cell: 20px;
         }
 
         /* Dark Mode Overrides */
@@ -49,6 +53,17 @@
             --text-light: #a0a0a0;
             --border: #333333;
             --input-bg: #2d2d2d;
+        }
+
+        /* Compact Mode Overrides */
+        body.compact-mode {
+            --fs-xs: 11px;
+            --fs-sm: 12px;
+            --fs-base: 13px;
+            --fs-lg: 15px;
+            --fs-xl: 18px;
+            --sp-card: 15px;
+            --sp-cell: 10px;
         }
 
         /* --- GLOBAL RESET & TYPOGRAPHY --- */
@@ -90,6 +105,7 @@
         .w-full { width: 100%; }
         .h-full { height: 100%; }
         .flex { display: flex; }
+        .flex-col { flex-direction: column; }
         .items-center { align-items: center; }
         .justify-between { justify-content: space-between; }
         .justify-center { justify-content: center; }
@@ -211,7 +227,7 @@
             letter-spacing: 0.8px; text-transform: uppercase; border-bottom: 1px solid var(--border);
         }
         .data-table td {
-            padding: 18px 20px; border-bottom: 1px solid var(--border); vertical-align: middle;
+            padding: var(--sp-cell) 20px; border-bottom: 1px solid var(--border); vertical-align: middle;
             color: var(--text);
         }
         .data-table tr:hover td { background-color: rgba(0,0,0,0.02); }
@@ -245,7 +261,7 @@
             display: grid; grid-template-columns: repeat(auto-fill, minmax(300px, 1fr)); gap: 20px;
         }
         .card {
-            background: var(--surface); padding: 25px; border-radius: 12px;
+            background: var(--surface); padding: var(--sp-card); border-radius: 12px;
             border: 1px solid transparent; box-shadow: 0 4px 15px rgba(0,0,0,0.03);
             transition: all 0.2s; cursor: pointer; position: relative; overflow: hidden;
         }
@@ -269,7 +285,6 @@
             background: var(--bg); padding: 20px; border-radius: 12px;
             border: 1px solid var(--border); height: 100%; box-sizing: border-box;
         }
-        /* Vertical Stack for Settings */
         .settings-stack { display: flex; flex-direction: column; gap: 20px; }
 
         /* Logs in Settings */
@@ -344,16 +359,13 @@
             font-weight: 700; margin-bottom: 8px; display: block; letter-spacing: 0.5px;
         }
         
-        /* Footer Logic Fixed: Natural flow for dashboard, Absolute for Login */
         .footer-credit {
             text-align: center; font-size: 11px; color: var(--text-light);
             padding: 20px; margin-top: auto; font-weight: 500; letter-spacing: 0.5px;
             width: 100%; box-sizing: border-box;
         }
         
-        #loginOverlay .footer-credit {
-            position: absolute; bottom: 20px;
-        }
+        #loginOverlay .footer-credit { position: absolute; bottom: 20px; }
 
         .version-display { font-weight: bold; }
         
@@ -408,7 +420,7 @@
             <div id="loginError" class="login-error"></div>
         </div>
         <div class="footer-credit">
-            Rowad Calls Dashboard <span class="version-display">v2.11</span> • Developed by Faisal Alzougbi
+            Rowad Calls Dashboard <span class="version-display">v2.12</span> • Developed by Faisal Alzougbi
             <span style="display:block;margin-top:5px;font-style:italic;opacity:0.7">
                 Disclaimer: This dashboard is an independently developed tool for internal workflow optimization. It is not an official asset of, nor maintained by, Rowad Medical Services.
             </span>
@@ -445,6 +457,16 @@
                 <div class="search-box">
                     <input type="text" id="search" placeholder="Search Hospital, Contact..." onkeyup="debouncedRender()">
                 </div>
+                
+                <div class="filter-box" style="margin-bottom:0; width: 150px;">
+                    <select id="sortBy" onchange="renderDashboard()">
+                        <option value="Priority">Sort: Priority</option>
+                        <option value="Alphabetical">Sort: A-Z</option>
+                        <option value="Location">Sort: City</option>
+                        <option value="Device">Sort: Device</option>
+                    </select>
+                </div>
+
                 <button class="filter-toggle-btn" onclick="toggleFilters()">
                     <i class="fa-solid fa-filter"></i>
                 </button>
@@ -528,25 +550,31 @@
                     
                     <div class="chart-card" style="height: auto;">
                         <h3 class="admin-section-title"><i class="fa-solid fa-palette"></i> Theme Customizer</h3>
-                        <p class="text-muted text-xs mb-4">Personalize your viewing experience (Local Only).</p>
+                        <p class="text-muted text-xs mb-4">Personalize your viewing experience (Saved Locally).</p>
                         
                         <div class="input-grid-2">
                             <div class="flex items-center gap-4 p-4 rounded" style="background: var(--bg);">
                                 <input type="color" id="adminColor" value="#A88B4D" style="width: 50px; height: 40px; padding: 2px;" onchange="updateTheme()">
-                                <div class="flex flex-column">
+                                <div class="flex flex-col">
                                     <span class="text-sm font-semibold">Accent Color</span>
                                     <span class="text-xs text-muted">Primary brand color</span>
                                 </div>
                             </div>
 
                             <div class="flex items-center gap-4 p-4 rounded" style="background: var(--bg);">
-                                <label class="switch" style="display: flex; align-items: center; cursor: pointer;">
-                                    <input type="checkbox" id="darkModeToggle" onchange="toggleDarkMode()" style="margin-right: 10px; width: auto;">
-                                    <div class="flex flex-column">
-                                        <span class="text-sm font-semibold">Night Mode</span>
-                                        <span class="text-xs text-muted">Toggle dark theme</span>
-                                    </div>
-                                </label>
+                                <input type="checkbox" id="darkModeToggle" onchange="toggleDarkMode()" style="margin-right: 10px; width: 20px; height: 20px;">
+                                <div class="flex flex-col">
+                                    <span class="text-sm font-semibold">Night Mode</span>
+                                    <span class="text-xs text-muted">Toggle dark theme</span>
+                                </div>
+                            </div>
+
+                            <div class="flex items-center gap-4 p-4 rounded" style="background: var(--bg);">
+                                <input type="checkbox" id="compactModeToggle" onchange="toggleCompactMode()" style="margin-right: 10px; width: 20px; height: 20px;">
+                                <div class="flex flex-col">
+                                    <span class="text-sm font-semibold">Compact Mode</span>
+                                    <span class="text-xs text-muted">Fit more data on screen</span>
+                                </div>
                             </div>
 
                             <div class="p-4 rounded" style="background: var(--bg);">
@@ -558,6 +586,12 @@
                                 </select>
                             </div>
                         </div>
+                    </div>
+
+                    <div class="chart-card" style="height: auto;">
+                        <h3 class="admin-section-title"><i class="fa-solid fa-trophy"></i> Your Impact</h3>
+                        <div id="impactWidget" class="flex items-center justify-between">
+                            </div>
                     </div>
 
                     <div class="chart-card" style="height: auto;">
@@ -589,7 +623,7 @@
         </div>
 
         <div class="footer-credit">
-            Rowad Calls Dashboard <span class="version-display">v2.11</span> • Developed by Faisal Alzougbi
+            Rowad Calls Dashboard <span class="version-display">v2.12</span> • Developed by Faisal Alzougbi
             <span style="display:block;margin-top:5px;font-style:italic;opacity:0.7">
                 Disclaimer: This dashboard is an independently developed tool for internal workflow optimization. It is not an official asset of, nor maintained by, Rowad Medical Services.
             </span>
@@ -705,21 +739,16 @@ const AI_PROTOCOL = `
    - The code must be physically removed from the file.
 `;
 
-const APP_VERSION = "2.11";
+const APP_VERSION = "2.12";
 
 // Mutable Changelog to support Admin Edits
 let systemChangelog = [
+    { v: "2.12", d: "22/01/2026", t: "Added Persistent Theme Settings (LocalStorage), Data Editing History with City lookup, Sorting Options, Compact Mode, and Personal Impact Widget." },
     { v: "2.11", d: "22/01/2026", t: "Added Night Mode, Font Chooser, and Colored Outcomes Chart. Fixed Footer positioning." },
     { v: "2.10", d: "22/01/2026", t: "Fixed login centering, refined chart logic to count unique visits, reorganized settings page vertically, added Admin Changelog editing." },
     { v: "2.9", d: "22/01/2026", t: "Fixed footer version color, standard date formatting (DD/MM/YYYY), and hard deletion of legacy admin config." },
     { v: "2.8", d: "22/01/2026", t: "Standardized fonts, removed Theme Studio, moved Version History to Settings, added Data Audit Log to Settings, cleaned up Edit Modal." },
-    { v: "2.7", d: "22/01/2026", t: "Complete Code Refactor: De-minified source, standardized fonts, global settings page, and fixed version link logic." },
-    { v: "2.6", d: "22/01/2026", t: "Hardened Protocol as JS Constant" },
-    { v: "2.5", d: "22/01/2026", t: "Relocated System Protocol to HEAD tag for persistence" },
-    { v: "2.4", d: "22/01/2026", t: "Implemented Version History System & Protocols" },
-    { v: "2.3", d: "22/01/2026", t: "Fixed Syntax Error in Toggle Filter" },
-    { v: "2.2", d: "21/01/2026", t: "Minified Codebase" },
-    { v: "2.1", d: "20/01/2026", t: "Added Login & Auth" }
+    { v: "2.7", d: "22/01/2026", t: "Complete Code Refactor: De-minified source, standardized fonts, global settings page, and fixed version link logic." }
 ];
 
 /* --- CONSTANTS --- */
@@ -750,7 +779,6 @@ const getById = (id) => document.getElementById(id);
 
 const formatDate = (date) => {
     if (!date) return '-';
-    // Forces DD/MM/YYYY format
     return new Date(date).toLocaleDateString('en-GB'); 
 };
 
@@ -776,6 +804,7 @@ const escapeHtml = (text) => {
 
 /* --- INITIALIZATION --- */
 window.onload = () => {
+    loadLocalPrefs(); // Load saved theme settings immediately
     initApp();
     getById('viewControls').onclick = (e) => {
         const btn = e.target.closest('button');
@@ -785,7 +814,6 @@ window.onload = () => {
 };
 
 function updateVersionDisplay() {
-    // Finds all elements with class 'version-display' and sets them to the single source of truth
     const versionElements = document.querySelectorAll('.version-display');
     versionElements.forEach(el => {
         el.innerText = `v${APP_VERSION}`;
@@ -807,7 +835,6 @@ async function callApi(action, payload = {}) {
 async function initApp() {
     try {
         const session = JSON.parse(localStorage.getItem('rowad_u'));
-        // 9 hours session validity
         if (session && session.user && Date.now() - session.timestamp < 32400000) {
             currentUser = session.user;
             initUserUI();
@@ -816,10 +843,43 @@ async function initApp() {
             fetchDashboardData();
             return;
         }
-    } catch (e) {
-        // Local storage parse error, ignore
-    }
+    } catch (e) { }
     getById('loginOverlay').style.display = 'flex';
+}
+
+/* --- PERSISTENCE LAYER --- */
+function saveLocalPrefs() {
+    const prefs = {
+        accent: getById('adminColor').value,
+        dark: getById('darkModeToggle').checked,
+        compact: getById('compactModeToggle').checked,
+        font: getById('fontSelector').value
+    };
+    localStorage.setItem('rowad_prefs', JSON.stringify(prefs));
+}
+
+function loadLocalPrefs() {
+    try {
+        const prefs = JSON.parse(localStorage.getItem('rowad_prefs'));
+        if (prefs) {
+            if (prefs.accent) {
+                getById('adminColor').value = prefs.accent;
+                document.documentElement.style.setProperty('--accent', prefs.accent);
+            }
+            if (prefs.dark) {
+                getById('darkModeToggle').checked = true;
+                document.body.classList.add('dark-theme');
+            }
+            if (prefs.compact) {
+                getById('compactModeToggle').checked = true;
+                document.body.classList.add('compact-mode');
+            }
+            if (prefs.font) {
+                getById('fontSelector').value = prefs.font;
+                document.documentElement.style.setProperty('--font-stack', prefs.font);
+            }
+        }
+    } catch (e) { }
 }
 
 /* --- AUTHENTICATION --- */
@@ -851,13 +911,11 @@ function initUserUI() {
     roleLabel.innerText = currentUser.role;
     getById('mainDashboard').style.display = 'flex';
     
-    // Set Role Badge Color
     let roleClass = '';
     if (currentUser.role === 'Rowad') roleClass = 'role-rowad';
     else if (['Admin', 'Editor'].includes(currentUser.role)) roleClass = 'role-admin';
     roleLabel.className = `role-tag ${roleClass}`;
 
-    // Admin Features
     if (currentUser.role === 'Admin') {
         getById('addVerBtn').classList.remove('hidden');
     }
@@ -879,18 +937,14 @@ async function fetchDashboardData() {
 
     callsDatabase = response.data;
     auditHistory = response.history || [];
-    
-    // Map emails to names
     (response.permissions || []).forEach(p => userMapping[p.Email] = p.ID);
 
-    // Apply Global Settings
     if (response.settings) {
         if (response.settings.Announcement) {
             const banner = getById('announcementBanner');
             banner.innerText = response.settings.Announcement;
             banner.style.display = 'block';
         }
-        // Load saved changelog if exists
         if (response.settings.Changelog) {
             try {
                 const savedLog = JSON.parse(response.settings.Changelog);
@@ -901,8 +955,6 @@ async function fetchDashboardData() {
 
     populateFilters();
     populateColumnPicker();
-    
-    // Hide Loader and Show Table
     getById('loading').style.display = 'none';
     getById('tableView').classList.remove('hidden');
     renderDashboard();
@@ -959,6 +1011,7 @@ window.toggleFilters = () => {
 /* --- RENDERING ENGINE --- */
 function renderDashboard() {
     const searchTerm = getById('search').value.toLowerCase();
+    const sortMode = getById('sortBy').value;
     
     const filters = {
         Direction: getById('filterDirection').value,
@@ -968,19 +1021,22 @@ function renderDashboard() {
         Satisfaction: getById('filterSat').value
     };
 
-    // Sorting logic based on custom priority
-    callsDatabase.sort((a, b) => (STATUS_PRIORITY[a.Status] || 9) - (STATUS_PRIORITY[b.Status] || 9));
+    // Sorting Logic
+    const sortStrategies = {
+        'Priority': (a, b) => (STATUS_PRIORITY[a.Status] || 9) - (STATUS_PRIORITY[b.Status] || 9),
+        'Alphabetical': (a, b) => a["Hospital Name"].localeCompare(b["Hospital Name"]),
+        'Location': (a, b) => (a.City || '').localeCompare(b.City || ''),
+        'Device': (a, b) => (a.Device || '').localeCompare(b.Device || '')
+    };
+
+    callsDatabase.sort(sortStrategies[sortMode] || sortStrategies['Priority']);
 
     const filteredData = callsDatabase.filter(row => {
-        // Check all dropdown filters
         const matchesFilters = Object.keys(filters).every(key => 
             filters[key] === 'All' || (row[key] || 'Pending') === filters[key]
         );
-        
-        // Check search term
         const searchString = (row["Hospital Name"] + row.Contact + row.City).toLowerCase();
         const matchesSearch = searchString.includes(searchTerm);
-
         return matchesFilters && matchesSearch;
     });
 
@@ -1031,10 +1087,7 @@ function renderDashboard() {
         </div>
     `).join('');
 
-    // Render Charts if visible
-    if (!getById('chartsView').classList.contains('hidden')) {
-        renderCharts(filteredData);
-    }
+    if (!getById('chartsView').classList.contains('hidden')) renderCharts(filteredData);
 }
 
 function renderCharts(data) {
@@ -1091,7 +1144,6 @@ function renderCharts(data) {
         deviceChart: [Object.keys(stats.devices), Object.values(stats.devices), ['#A88B4D', '#2d2d2d']],
         satChart: [Object.keys(stats.satisfaction), Object.values(stats.satisfaction), ['#27ae60', '#d35400', '#95a5a6'], 'doughnut'],
         funnelChart: [Object.keys(stats.funnel), Object.values(stats.funnel), ['#e9ecef', '#C4B27D', '#A88B4D', '#2d2d2d'], 'bar', 'y'],
-        // Dynamic colors for Call Outcomes
         statusChart: [Object.keys(stats.status), Object.values(stats.status), Object.keys(stats.status).map(s => getStatusColor(s))],
         activityChart: [activitySorted.map(x => x[0]), activitySorted.map(x => x[1]), '#2d2d2d', 'bar', 'y'],
         quoteChart: [sortObj(quotes).map(x => x[0]), sortObj(quotes).map(x => x[1]), '#27ae60', 'bar', 'y']
@@ -1130,15 +1182,12 @@ window.openEditModal = (index) => {
     const row = callsDatabase.find(x => x._rowIndex === index);
     if (!row) return;
 
-    // Reset button
     getById('saveBtn').classList.remove('success');
 
-    // Parse Last Editor
     const editorRaw = row["Last Editor"] || "Unknown";
     getById('modalTitle').innerText = row["Hospital Name"];
     getById('modalSubtitle').innerText = `Updated: ${editorRaw.includes('@') ? (userMapping[editorRaw.split(' on ')[0]] || editorRaw.split('@')[0]) : editorRaw}`;
 
-    // Populate Read-Only Fields
     getById('dispRegion').innerText = row.Region || '-';
     getById('dispCity').innerText = row.City || '-';
     getById('dispDevice').innerText = row.Device || '-';
@@ -1146,7 +1195,6 @@ window.openEditModal = (index) => {
     getById('dispAccuSN').innerText = row["AccuFIT SN"] || '-';
     getById('dispSurfUser').innerText = row["Surfacide Username"] || '-';
 
-    // Populate Inputs
     getById('editContactName').value = row.Contact || '';
     getById('editContactMobile').value = row['Contact Mobile Number'] || '';
     getById('editStatus').value = row.Status || '';
@@ -1154,7 +1202,6 @@ window.openEditModal = (index) => {
     getById('editTags').value = row.Tags || '';
     getById('editNotes').value = row.Notes || '';
 
-    // Handle Phone Link
     const mobile = row['Contact Mobile Number'];
     const hasMobile = mobile && mobile.length > 5;
     getById('displayPhone').innerText = mobile || "No Number";
@@ -1162,11 +1209,8 @@ window.openEditModal = (index) => {
     waLink.href = hasMobile ? `https://wa.me/966${mobile.match(/\d+/)?.[0].slice(-9)}` : '#';
     waLink.classList.toggle('hidden', !hasMobile);
 
-    // Permission Check
     const canEdit = ['Admin', 'Editor'].includes(currentUser.role);
-
     document.querySelectorAll('.secure-input').forEach(e => e.disabled = !canEdit);
-    
     const saveBtn = getById('saveBtn');
     saveBtn.disabled = !canEdit;
     saveBtn.innerText = canEdit ? "Save Updates" : "Login to Edit";
@@ -1202,15 +1246,14 @@ window.switchView = (viewName) => {
 
 window.renderSettings = () => {
     // Populate Changelog
-    const logContainer = getById('changelogContainer');
-    logContainer.innerHTML = systemChangelog.map(entry => `
+    getById('changelogContainer').innerHTML = systemChangelog.map(entry => `
         <div style="border-left:2px solid var(--accent);padding-left:10px;margin-bottom:15px">
             <div class="text-xs text-muted">${entry.d} • v${entry.v}</div>
             <div class="font-semibold">${entry.t}</div>
         </div>
     `).join('');
 
-    // Populate Audit Log
+    // Populate Audit Log with CITY lookup
     const auditContainer = getById('auditLogContainer');
     const recentHistory = auditHistory.slice().reverse().slice(0, 50);
     
@@ -1220,11 +1263,15 @@ window.renderSettings = () => {
         auditContainer.innerHTML = recentHistory.map(log => {
             const time = new Date(log.Timestamp).toLocaleString('en-GB'); 
             const userName = userMapping[log.User] || log.User.split('@')[0];
+            // Lookup City
+            const hospitalRow = callsDatabase.find(r => r["Hospital Name"] === log["Hospital Name"]);
+            const locationStr = hospitalRow ? `(${hospitalRow.City})` : '';
+            
             return `
                 <div class="audit-log-item">
                     <div class="audit-time">${time} • ${userName}</div>
                     <div class="audit-change">
-                        Updated <span>${log['Hospital Name']}</span>: 
+                        Updated <span>${log['Hospital Name']}</span> <span class="text-muted text-xs">${locationStr}</span>: 
                         Changed ${log['Field Changed']} from 
                         "<span class="old-val">${log['Old Value']}</span>" to 
                         "<span class="new-val">${log['New Value']}</span>"
@@ -1232,6 +1279,24 @@ window.renderSettings = () => {
                 </div>`;
         }).join('');
     }
+
+    // Populate Personal Impact
+    const myEdits = auditHistory.filter(h => h.User === currentUser.email).length;
+    let rank = "Novice";
+    if (myEdits > 10) rank = "Contributor";
+    if (myEdits > 50) rank = "Specialist";
+    if (myEdits > 100) rank = "Master";
+
+    getById('impactWidget').innerHTML = `
+        <div>
+            <div class="text-xs text-muted text-uppercase">Total Contributions</div>
+            <div style="font-size: 24px; font-weight: 800; color: var(--accent);">${myEdits}</div>
+        </div>
+        <div class="text-right">
+            <div class="text-xs text-muted text-uppercase">Rank</div>
+            <div style="font-size: 18px; font-weight: 600;">${rank}</div>
+        </div>
+    `;
 };
 
 window.saveChanges = async () => {
@@ -1259,7 +1324,6 @@ window.saveChanges = async () => {
         
         btn.classList.add('success');
         btn.innerHTML = '<i class="fa-solid fa-check"></i> Saved';
-        
         setTimeout(() => { getById('editModal').style.display = 'none'; }, 1000);
     } else {
         alert("Error");
@@ -1277,22 +1341,17 @@ window.submitVersionEntry = async () => {
 
     if (!ver || !date || !desc) return alert("All fields are required");
 
-    // Add to local array
     const newEntry = { v: ver, d: date, t: desc };
     systemChangelog.unshift(newEntry);
     
-    // Save to backend via settings
     await callApi('save_settings', {
         userEmail: currentUser.email,
-        settings: {
-            'Changelog': JSON.stringify(systemChangelog)
-        }
+        settings: { 'Changelog': JSON.stringify(systemChangelog) }
     });
 
     alert("Version History Updated!");
     renderSettings();
     getById('addVersionForm').classList.add('hidden');
-    // clear inputs
     getById('newVerNum').value = '';
     getById('newVerDate').value = '';
     getById('newVerDesc').value = '';
@@ -1302,20 +1361,27 @@ window.submitVersionEntry = async () => {
 window.updateTheme = () => {
     const r = document.documentElement.style;
     r.setProperty('--accent', getById('adminColor').value);
+    saveLocalPrefs();
 };
 
 window.toggleDarkMode = () => {
     document.body.classList.toggle('dark-theme');
+    saveLocalPrefs();
+};
+
+window.toggleCompactMode = () => {
+    document.body.classList.toggle('compact-mode');
+    saveLocalPrefs();
 };
 
 window.updateFont = () => {
     const r = document.documentElement.style;
     r.setProperty('--font-stack', getById('fontSelector').value);
+    saveLocalPrefs();
 };
 
 window.downloadCSV = () => {
     const selectedColumns = [...document.querySelectorAll('#columnPicker input:checked')].map(c => c.value);
-    
     const csvContent = [
         selectedColumns.join(','),
         ...callsDatabase.map(row => 
