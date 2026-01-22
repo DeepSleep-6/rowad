@@ -30,7 +30,7 @@
             --warning: #f1c40f;
             --danger: #e74c3c;
 
-            /* Typography settings - STANDARDIZED SIZES */
+            /* Typography settings */
             --font-stack: 'Segoe UI', system-ui, -apple-system, sans-serif;
             --fs-xs: 12px;
             --fs-sm: 13px;
@@ -51,10 +51,7 @@
             min-height: 100vh;
         }
 
-        /* Ensure form elements inherit the font stack */
-        input, button, select, textarea {
-            font-family: var(--font-stack);
-        }
+        input, button, select, textarea { font-family: var(--font-stack); }
 
         /* Utility Classes */
         .text-xs { font-size: var(--fs-xs); }
@@ -254,7 +251,8 @@
             background: #f8f9fa; padding: 20px; border-radius: 12px;
             border: 1px solid var(--border); height: 100%; box-sizing: border-box;
         }
-        .range-slider { width: 100%; margin: 10px 0; }
+        /* Vertical Stack for Settings */
+        .settings-stack { display: flex; flex-direction: column; gap: 20px; }
 
         /* Logs in Settings */
         .audit-log-item {
@@ -330,6 +328,7 @@
         .footer-credit {
             text-align: center; font-size: 11px; color: #adb5bd;
             padding: 20px; margin-top: auto; font-weight: 500; letter-spacing: 0.5px;
+            position: absolute; bottom: 20px; width: 100%; box-sizing: border-box;
         }
         .version-display { font-weight: bold; }
         
@@ -368,7 +367,6 @@
     <div id="loginOverlay">
         <div class="login-card">
             <h2 class="text-dark mb-1" style="font-size: 22px">Rowad Calls Dashboard</h2>
-            <p class="text-muted mb-4" style="font-size: 13px">Internal Services Dashboard</p>
             <div id="g_id_onload" 
                  data-client_id="174253379694-95msalgnm4kbpjlftil4vm8o26c7h7cc.apps.googleusercontent.com" 
                  data-callback="handleCredentialResponse" 
@@ -380,12 +378,12 @@
                  data-theme="outline" 
                  data-size="large" 
                  data-logo_alignment="left" 
-                 style="display:flex;justify-content:center">
+                 style="display:flex;justify-content:center; margin-top: 20px;">
             </div>
             <div id="loginError" class="login-error"></div>
         </div>
         <div class="footer-credit">
-            Rowad Calls Dashboard <span class="version-display">v2.9</span> • Developed by Faisal Alzougbi
+            Rowad Calls Dashboard <span class="version-display">v2.10</span> • Developed by Faisal Alzougbi
             <span style="display:block;margin-top:5px;font-style:italic;opacity:0.7">
                 Disclaimer: This dashboard is an independently developed tool for internal workflow optimization. It is not an official asset of, nor maintained by, Rowad Medical Services.
             </span>
@@ -471,7 +469,7 @@
                 <h3 class="text-dark font-bold mb-4" style="font-size:18px;margin-top:30px">Team Performance</h3>
                 <div class="input-grid-2">
                     <div class="chart-card">
-                        <h3 class="text-dark font-semibold mt-1">Total Activities (Calls/Edits)</h3>
+                        <h3 class="text-dark font-semibold mt-1">Total Activities (Unique Visits)</h3>
                         <div class="chart-wrapper"><canvas id="activityChart"></canvas></div>
                     </div>
                     <div class="chart-card">
@@ -501,23 +499,48 @@
             </div>
 
             <div id="settingsView" class="hidden" style="padding-top:20px">
-                <div class="input-grid-2">
-                    <div class="chart-card" style="height: auto;">
-                        <h3 class="admin-section-title"><i class="fa-solid fa-code-branch"></i> System Version History</h3>
-                        <div id="changelogContainer" style="max-height: 400px; overflow-y: auto;"></div>
-                    </div>
+                <div class="settings-stack">
                     
+                    <div class="chart-card" style="height: auto;">
+                        <h3 class="admin-section-title"><i class="fa-solid fa-palette"></i> Theme Customizer</h3>
+                        <p class="text-muted text-xs mb-4">Personalize your color scheme (Local Only).</p>
+                        <div class="flex items-center gap-4">
+                            <input type="color" id="adminColor" value="#A88B4D" style="width: 50px; height: 40px; padding: 2px;" onchange="previewTheme()">
+                            <span class="text-sm font-semibold">Accent Color</span>
+                            <button class="btn-action" onclick="location.reload()" style="margin-left: auto;">Reset Default</button>
+                        </div>
+                    </div>
+
                     <div class="chart-card" style="height: auto;">
                         <h3 class="admin-section-title"><i class="fa-solid fa-history"></i> Data Editing History</h3>
                         <p class="text-muted text-xs mb-4">Showing last 50 edits.</p>
                         <div id="auditLogContainer" style="max-height: 400px; overflow-y: auto;"></div>
                     </div>
+
+                    <div class="chart-card" style="height: auto;">
+                        <div class="flex justify-between items-center mb-4">
+                            <h3 class="admin-section-title" style="margin:0"><i class="fa-solid fa-code-branch"></i> System Version History</h3>
+                            <button id="addVerBtn" class="btn-action hidden" onclick="toggleAddVersion()">+ Add Entry</button>
+                        </div>
+                        
+                        <div id="addVersionForm" class="hidden mb-4 p-4" style="background: #f8f9fa; border-radius: 8px;">
+                            <div class="input-grid-2">
+                                <input type="text" id="newVerNum" placeholder="Version (e.g. 2.11)">
+                                <input type="text" id="newVerDate" placeholder="Date (DD/MM/YYYY)">
+                            </div>
+                            <textarea id="newVerDesc" placeholder="Description of changes..." style="min-height: 60px; margin-bottom: 10px;"></textarea>
+                            <button class="btn-save" onclick="submitVersionEntry()">Save Entry</button>
+                        </div>
+
+                        <div id="changelogContainer" style="max-height: 400px; overflow-y: auto;"></div>
+                    </div>
+
                 </div>
             </div>
         </div>
 
         <div class="footer-credit">
-            Rowad Calls Dashboard <span class="version-display">v2.9</span> • Developed by Faisal Alzougbi
+            Rowad Calls Dashboard <span class="version-display">v2.10</span> • Developed by Faisal Alzougbi
             <span style="display:block;margin-top:5px;font-style:italic;opacity:0.7">
                 Disclaimer: This dashboard is an independently developed tool for internal workflow optimization. It is not an official asset of, nor maintained by, Rowad Medical Services.
             </span>
@@ -633,9 +656,11 @@ const AI_PROTOCOL = `
    - The code must be physically removed from the file.
 `;
 
-const APP_VERSION = "2.9";
+const APP_VERSION = "2.10";
 
-const CHANGELOG = [
+// Mutable Changelog to support Admin Edits
+let systemChangelog = [
+    { v: "2.10", d: "22/01/2026", t: "Fixed login centering, refined chart logic to count unique visits, reorganized settings page vertically, added Admin Changelog editing." },
     { v: "2.9", d: "22/01/2026", t: "Fixed footer version color, standard date formatting (DD/MM/YYYY), and hard deletion of legacy admin config." },
     { v: "2.8", d: "22/01/2026", t: "Standardized fonts, removed Theme Studio, moved Version History to Settings, added Data Audit Log to Settings, cleaned up Edit Modal." },
     { v: "2.7", d: "22/01/2026", t: "Complete Code Refactor: De-minified source, standardized fonts, global settings page, and fixed version link logic." },
@@ -781,6 +806,11 @@ function initUserUI() {
     if (currentUser.role === 'Rowad') roleClass = 'role-rowad';
     else if (['Admin', 'Editor'].includes(currentUser.role)) roleClass = 'role-admin';
     roleLabel.className = `role-tag ${roleClass}`;
+
+    // Admin Features
+    if (currentUser.role === 'Admin') {
+        getById('addVerBtn').classList.remove('hidden');
+    }
 }
 
 function logout() {
@@ -809,6 +839,13 @@ async function fetchDashboardData() {
             const banner = getById('announcementBanner');
             banner.innerText = response.settings.Announcement;
             banner.style.display = 'block';
+        }
+        // Load saved changelog if exists
+        if (response.settings.Changelog) {
+            try {
+                const savedLog = JSON.parse(response.settings.Changelog);
+                if (Array.isArray(savedLog)) systemChangelog = savedLog;
+            } catch(e) {}
         }
     }
 
@@ -983,7 +1020,25 @@ function renderCharts(data) {
         if (!['Pending', 'Active Contract'].includes(status)) stats.status[status] = (stats.status[status] || 0) + 1;
     });
 
-    const activity = tally(auditHistory, 'User');
+    // --- REFINED ACTIVITY LOGIC (Unique Visits) ---
+    // Counts unique Hospital visits per User per Day
+    const uniqueVisits = new Set();
+    auditHistory.forEach(log => {
+        const date = new Date(log.Timestamp).toLocaleDateString();
+        // Create a unique key: User + Hospital + Date
+        const key = `${log.User}_${log['Hospital Name']}_${date}`;
+        uniqueVisits.add(key);
+    });
+
+    const activityCounts = {};
+    uniqueVisits.forEach(key => {
+        const userEmail = key.split('_')[0];
+        const userName = userMapping[userEmail] || userEmail.split('@')[0];
+        activityCounts[userName] = (activityCounts[userName] || 0) + 1;
+    });
+    const activitySorted = sortObj(activityCounts);
+    // ------------------------------------------------
+
     const quotes = tally(auditHistory, 'User', r => r["Field Changed"] === 'Status' && r["New Value"] === 'Quote Requested');
 
     const chartConfigs = {
@@ -991,7 +1046,7 @@ function renderCharts(data) {
         satChart: [Object.keys(stats.satisfaction), Object.values(stats.satisfaction), ['#27ae60', '#d35400', '#95a5a6'], 'doughnut'],
         funnelChart: [Object.keys(stats.funnel), Object.values(stats.funnel), ['#e9ecef', '#C4B27D', '#A88B4D', '#2d2d2d'], 'bar', 'y'],
         statusChart: [Object.keys(stats.status), Object.values(stats.status), '#666'],
-        activityChart: [sortObj(activity).map(x => x[0]), sortObj(activity).map(x => x[1]), '#2d2d2d', 'bar', 'y'],
+        activityChart: [activitySorted.map(x => x[0]), activitySorted.map(x => x[1]), '#2d2d2d', 'bar', 'y'],
         quoteChart: [sortObj(quotes).map(x => x[0]), sortObj(quotes).map(x => x[1]), '#27ae60', 'bar', 'y']
     };
 
@@ -1100,7 +1155,7 @@ window.switchView = (viewName) => {
 window.renderSettings = () => {
     // Populate Changelog
     const logContainer = getById('changelogContainer');
-    logContainer.innerHTML = CHANGELOG.map(entry => `
+    logContainer.innerHTML = systemChangelog.map(entry => `
         <div style="border-left:2px solid var(--accent);padding-left:10px;margin-bottom:15px">
             <div class="text-xs text-muted">${entry.d} • v${entry.v}</div>
             <div class="font-semibold">${entry.t}</div>
@@ -1109,14 +1164,12 @@ window.renderSettings = () => {
 
     // Populate Audit Log
     const auditContainer = getById('auditLogContainer');
-    // Slice to show only last 50 edits for performance
     const recentHistory = auditHistory.slice().reverse().slice(0, 50);
     
     if (recentHistory.length === 0) {
         auditContainer.innerHTML = '<div class="text-muted text-center p-4">No recent edits found.</div>';
     } else {
         auditContainer.innerHTML = recentHistory.map(log => {
-            // FORCE DD/MM/YYYY FORMAT
             const time = new Date(log.Timestamp).toLocaleString('en-GB'); 
             const userName = userMapping[log.User] || log.User.split('@')[0];
             return `
@@ -1137,7 +1190,6 @@ window.saveChanges = async () => {
     const btn = getById('saveBtn');
     btn.innerText = "Saving...";
 
-    // FORCE DD/MM/YYYY FORMAT
     let editorString = `${currentUser.email} on ${formatDate(new Date())}`;
     
     const dataPayload = {
@@ -1165,6 +1217,42 @@ window.saveChanges = async () => {
         alert("Error");
         btn.innerText = "Save Updates";
     }
+};
+
+/* --- ADMIN CHANGELOG EDITING --- */
+window.toggleAddVersion = () => getById('addVersionForm').classList.toggle('hidden');
+
+window.submitVersionEntry = async () => {
+    const ver = getById('newVerNum').value;
+    const date = getById('newVerDate').value;
+    const desc = getById('newVerDesc').value;
+
+    if (!ver || !date || !desc) return alert("All fields are required");
+
+    // Add to local array
+    const newEntry = { v: ver, d: date, t: desc };
+    systemChangelog.unshift(newEntry);
+    
+    // Save to backend via settings
+    await callApi('save_settings', {
+        userEmail: currentUser.email,
+        settings: {
+            'Changelog': JSON.stringify(systemChangelog)
+        }
+    });
+
+    alert("Version History Updated!");
+    renderSettings();
+    getById('addVersionForm').classList.add('hidden');
+    // clear inputs
+    getById('newVerNum').value = '';
+    getById('newVerDate').value = '';
+    getById('newVerDesc').value = '';
+};
+
+window.previewTheme = () => {
+    const r = document.documentElement.style;
+    r.setProperty('--accent', getById('adminColor').value);
 };
 
 window.downloadCSV = () => {
