@@ -32,8 +32,8 @@
 
             /* Typography settings - STANDARDIZED SIZES */
             --font-stack: 'Segoe UI', system-ui, -apple-system, sans-serif;
-            --fs-xs: 12px;  /* Increased from 10px */
-            --fs-sm: 13px;  /* Increased from 12px */
+            --fs-xs: 12px;
+            --fs-sm: 13px;
             --fs-base: 14px;
             --fs-lg: 16px;
             --fs-xl: 20px;
@@ -331,7 +331,7 @@
             text-align: center; font-size: 11px; color: #adb5bd;
             padding: 20px; margin-top: auto; font-weight: 500; letter-spacing: 0.5px;
         }
-        .version-display { color: var(--accent); font-weight: bold; }
+        .version-display { font-weight: bold; }
         
         .dashboard-container { display: none; flex-direction: column; flex: 1; }
         .checkbox-grid {
@@ -385,7 +385,7 @@
             <div id="loginError" class="login-error"></div>
         </div>
         <div class="footer-credit">
-            Rowad Calls Dashboard <span class="version-display">v2.8</span> • Developed by Faisal Alzougbi
+            Rowad Calls Dashboard <span class="version-display">v2.9</span> • Developed by Faisal Alzougbi
             <span style="display:block;margin-top:5px;font-style:italic;opacity:0.7">
                 Disclaimer: This dashboard is an independently developed tool for internal workflow optimization. It is not an official asset of, nor maintained by, Rowad Medical Services.
             </span>
@@ -513,26 +513,11 @@
                         <div id="auditLogContainer" style="max-height: 400px; overflow-y: auto;"></div>
                     </div>
                 </div>
-                
-                <div id="globalConfigPanel" class="chart-card hidden" style="margin-top: 20px;">
-                    <div class="admin-section-title"><i class="fa-solid fa-globe"></i> Global Configuration (Admin Only)</div>
-                    <div class="input-grid-2">
-                        <div>
-                            <label class="block">Announcement Banner</label>
-                            <input type="text" id="adminBanner" placeholder="e.g. System Maintenance at 10 PM">
-                        </div>
-                        <div>
-                            <label class="block">Monthly Call Target</label>
-                            <input type="number" id="adminTarget" placeholder="500">
-                        </div>
-                    </div>
-                    <button class="btn-save" onclick="saveGlobalSettings()">Save Global Settings</button>
-                </div>
             </div>
         </div>
 
         <div class="footer-credit">
-            Rowad Calls Dashboard <span class="version-display">v2.8</span> • Developed by Faisal Alzougbi
+            Rowad Calls Dashboard <span class="version-display">v2.9</span> • Developed by Faisal Alzougbi
             <span style="display:block;margin-top:5px;font-style:italic;opacity:0.7">
                 Disclaimer: This dashboard is an independently developed tool for internal workflow optimization. It is not an official asset of, nor maintained by, Rowad Medical Services.
             </span>
@@ -641,19 +626,25 @@ const AI_PROTOCOL = `
 3. EXPLICIT CONSENT GATE:
    - Do not output any code until the user gives explicit "Green Light" or confirmation.
    - First, explain your plan. Then wait.
+
+4. ZERO-RETENTION DELETION:
+   - When asked to remove a feature, DELETE the code entirely.
+   - Do not hide it, comment it out, or restrict it to specific roles.
+   - The code must be physically removed from the file.
 `;
 
-const APP_VERSION = "2.8";
+const APP_VERSION = "2.9";
 
 const CHANGELOG = [
-    { v: "2.8", d: "2026-01-22", t: "Standardized fonts, removed Theme Studio, moved Version History to Settings, added Data Audit Log to Settings, cleaned up Edit Modal." },
-    { v: "2.7", d: "2026-01-22", t: "Complete Code Refactor: De-minified source, standardized fonts, global settings page, and fixed version link logic." },
-    { v: "2.6", d: "2026-01-22", t: "Hardened Protocol as JS Constant" },
-    { v: "2.5", d: "2026-01-22", t: "Relocated System Protocol to HEAD tag for persistence" },
-    { v: "2.4", d: "2026-01-22", t: "Implemented Version History System & Protocols" },
-    { v: "2.3", d: "2026-01-22", t: "Fixed Syntax Error in Toggle Filter" },
-    { v: "2.2", d: "2026-01-21", t: "Minified Codebase" },
-    { v: "2.1", d: "2026-01-20", t: "Added Login & Auth" }
+    { v: "2.9", d: "22/01/2026", t: "Fixed footer version color, standard date formatting (DD/MM/YYYY), and hard deletion of legacy admin config." },
+    { v: "2.8", d: "22/01/2026", t: "Standardized fonts, removed Theme Studio, moved Version History to Settings, added Data Audit Log to Settings, cleaned up Edit Modal." },
+    { v: "2.7", d: "22/01/2026", t: "Complete Code Refactor: De-minified source, standardized fonts, global settings page, and fixed version link logic." },
+    { v: "2.6", d: "22/01/2026", t: "Hardened Protocol as JS Constant" },
+    { v: "2.5", d: "22/01/2026", t: "Relocated System Protocol to HEAD tag for persistence" },
+    { v: "2.4", d: "22/01/2026", t: "Implemented Version History System & Protocols" },
+    { v: "2.3", d: "22/01/2026", t: "Fixed Syntax Error in Toggle Filter" },
+    { v: "2.2", d: "21/01/2026", t: "Minified Codebase" },
+    { v: "2.1", d: "20/01/2026", t: "Added Login & Auth" }
 ];
 
 /* --- CONSTANTS --- */
@@ -681,6 +672,12 @@ let currentUser = { email: null, role: 'Public', token: null, id: null };
 
 /* --- HELPER FUNCTIONS --- */
 const getById = (id) => document.getElementById(id);
+
+const formatDate = (date) => {
+    if (!date) return '-';
+    // Forces DD/MM/YYYY format
+    return new Date(date).toLocaleDateString('en-GB'); 
+};
 
 const getChartOptions = (axis = 'x') => ({
     responsive: true,
@@ -784,11 +781,6 @@ function initUserUI() {
     if (currentUser.role === 'Rowad') roleClass = 'role-rowad';
     else if (['Admin', 'Editor'].includes(currentUser.role)) roleClass = 'role-admin';
     roleLabel.className = `role-tag ${roleClass}`;
-
-    // Show Global Config panel only for Admins
-    if (currentUser.role === 'Admin') {
-        getById('globalConfigPanel').classList.remove('hidden');
-    }
 }
 
 function logout() {
@@ -817,10 +809,6 @@ async function fetchDashboardData() {
             const banner = getById('announcementBanner');
             banner.innerText = response.settings.Announcement;
             banner.style.display = 'block';
-            getById('adminBanner').value = response.settings.Announcement;
-        }
-        if (response.settings.Target) {
-            getById('adminTarget').value = response.settings.Target;
         }
     }
 
@@ -861,17 +849,6 @@ function populateColumnPicker() {
         `<label class="checkbox-item"><input type="checkbox" checked value="${k}"> ${k}</label>`
     ).join('');
 }
-
-window.saveGlobalSettings = async () => {
-    await callApi('save_settings', {
-        userEmail: currentUser.email,
-        settings: {
-            'Announcement': getById('adminBanner').value,
-            'Target': getById('adminTarget').value
-        }
-    });
-    alert("Settings Saved!");
-};
 
 /* --- FILTER LOGIC --- */
 window.debouncedRender = () => {
@@ -1139,7 +1116,8 @@ window.renderSettings = () => {
         auditContainer.innerHTML = '<div class="text-muted text-center p-4">No recent edits found.</div>';
     } else {
         auditContainer.innerHTML = recentHistory.map(log => {
-            const time = new Date(log.Timestamp).toLocaleString();
+            // FORCE DD/MM/YYYY FORMAT
+            const time = new Date(log.Timestamp).toLocaleString('en-GB'); 
             const userName = userMapping[log.User] || log.User.split('@')[0];
             return `
                 <div class="audit-log-item">
@@ -1159,7 +1137,8 @@ window.saveChanges = async () => {
     const btn = getById('saveBtn');
     btn.innerText = "Saving...";
 
-    let editorString = `${currentUser.email} on ${new Date().toLocaleDateString('en-GB')}`;
+    // FORCE DD/MM/YYYY FORMAT
+    let editorString = `${currentUser.email} on ${formatDate(new Date())}`;
     
     const dataPayload = {
         _rowIndex: currentRowIndex,
