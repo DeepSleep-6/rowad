@@ -420,7 +420,7 @@
             <div id="loginError" class="login-error"></div>
         </div>
         <div class="footer-credit">
-            Rowad Calls Dashboard <span class="version-display">v2.12</span> • Developed by Faisal Alzougbi
+            Rowad Calls Dashboard <span class="version-display">v2.13</span> • Developed by Faisal Alzougbi
             <span style="display:block;margin-top:5px;font-style:italic;opacity:0.7">
                 Disclaimer: This dashboard is an independently developed tool for internal workflow optimization. It is not an official asset of, nor maintained by, Rowad Medical Services.
             </span>
@@ -623,7 +623,7 @@
         </div>
 
         <div class="footer-credit">
-            Rowad Calls Dashboard <span class="version-display">v2.12</span> • Developed by Faisal Alzougbi
+            Rowad Calls Dashboard <span class="version-display">v2.13</span> • Developed by Faisal Alzougbi
             <span style="display:block;margin-top:5px;font-style:italic;opacity:0.7">
                 Disclaimer: This dashboard is an independently developed tool for internal workflow optimization. It is not an official asset of, nor maintained by, Rowad Medical Services.
             </span>
@@ -739,10 +739,11 @@ const AI_PROTOCOL = `
    - The code must be physically removed from the file.
 `;
 
-const APP_VERSION = "2.12";
+const APP_VERSION = "2.13";
 
 // Mutable Changelog to support Admin Edits
 let systemChangelog = [
+    { v: "2.13", d: "04/02/2026", t: "Security Patch: Sanitized Audit Log rendering to prevent stored XSS vulnerabilities." },
     { v: "2.12", d: "22/01/2026", t: "Added Persistent Theme Settings (LocalStorage), Data Editing History with City lookup, Sorting Options, Compact Mode, and Personal Impact Widget." },
     { v: "2.11", d: "22/01/2026", t: "Added Night Mode, Font Chooser, and Colored Outcomes Chart. Fixed Footer positioning." },
     { v: "2.10", d: "22/01/2026", t: "Fixed login centering, refined chart logic to count unique visits, reorganized settings page vertically, added Admin Changelog editing." },
@@ -1272,9 +1273,9 @@ window.renderSettings = () => {
                     <div class="audit-time">${time} • ${userName}</div>
                     <div class="audit-change">
                         Updated <span>${log['Hospital Name']}</span> <span class="text-muted text-xs">${locationStr}</span>: 
-                        Changed ${log['Field Changed']} from 
-                        "<span class="old-val">${log['Old Value']}</span>" to 
-                        "<span class="new-val">${log['New Value']}</span>"
+                        Changed ${escapeHtml(log['Field Changed'])} from 
+                        "<span class="old-val">${escapeHtml(log['Old Value'])}</span>" to 
+                        "<span class="new-val">${escapeHtml(log['New Value'])}</span>"
                     </div>
                 </div>`;
         }).join('');
